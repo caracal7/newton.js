@@ -562,9 +562,6 @@ const App = function() {
 	function scrollView(dx, dy) {
 		camera.origin.x += dx;
 		camera.origin.y += dy;
-
-		//camera.origin.y = Math.clamp(camera.origin.y, 0, 0);
-
 		// Set dirtyBounds to full screen
 		dirtyBounds.set(canvasToWorld(new vec2(0, domCanvas.height)), canvasToWorld(new vec2(domCanvas.width, 0)));
 		bg.outdated = true;
