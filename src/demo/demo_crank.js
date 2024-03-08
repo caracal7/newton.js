@@ -17,12 +17,12 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import { Body } from './../shape/body.js';
-import { ShapeBox } from "./../shape/shape_poly.js";
-import { ShapeSegment } from "./../shape/shape_segment.js";
+import { Body } from './../shapes/body.js';
+import { ShapeBox } from "./../shapes/shape_poly.js";
+import { ShapeSegment } from "./../shapes/shape_segment.js";
 import { vec2, deg2rad } from './../utils/math.js';
-import { RevoluteJoint } from './../joint/joint_revolute.js';
-import { PrismaticJoint } from './../joint/joint_prismatic.js';
+import { RevoluteJoint } from './../joints/joint_revolute.js';
+import { PrismaticJoint } from './../joints/joint_prismatic.js';
 
 const DemoCrank = function() {
 	var space;

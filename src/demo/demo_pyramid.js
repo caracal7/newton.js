@@ -17,8 +17,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import { Body } from './../shape/body.js';
-import { ShapeBox } from "./../shape/shape_poly.js";
+import { Body } from './../shapes/body.js';
+import { ShapeBox } from "./../shapes/shape_poly.js";
 import { vec2 } from './../utils/math.js';
 
 const DemoPyramid = function() {

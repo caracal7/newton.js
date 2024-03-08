@@ -17,11 +17,11 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import { Body } from './../shape/body.js';
-import { ShapeBox } from "./../shape/shape_poly.js";
+import { Body } from './../shapes/body.js';
+import { ShapeBox } from "./../shapes/shape_poly.js";
 import { vec2 } from './../utils/math.js';
-import { RevoluteJoint } from './../joint/joint_revolute.js';
-import { RopeJoint } from './../joint/joint_rope.js';
+import { RevoluteJoint } from './../joints/joint_revolute.js';
+import { RopeJoint } from './../joints/joint_rope.js';
 
 const DemoRope = function() {
 	var space;

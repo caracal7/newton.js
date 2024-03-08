@@ -18,7 +18,7 @@
 */
 
 import { Contact } from "./contact.js";
-import { Shape } from "./../shape/shape.js";
+import { Shape } from "./../shapes/shape.js";
 import { vec2 } from './math.js';
 
 var collision = {};

@@ -16,13 +16,13 @@
 * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-import { Body } from './../shape/body.js';
-import { ShapeCircle } from './../shape/shape_circle.js';
-import { ShapeTriangle, ShapeBox, ShapePoly } from "./../shape/shape_poly.js";
+import { Body } from './../shapes/body.js';
+import { ShapeCircle } from './../shapes/shape_circle.js';
+import { ShapeTriangle, ShapeBox, ShapePoly } from "./../shapes/shape_poly.js";
 import { vec2 } from './../utils/math.js';
-import { RevoluteJoint } from './../joint/joint_revolute.js';
-import { WheelJoint } from './../joint/joint_wheel.js';
-import { WeldJoint } from './../joint/joint_weld.js';
+import { RevoluteJoint } from './../joints/joint_revolute.js';
+import { WheelJoint } from './../joints/joint_wheel.js';
+import { WeldJoint } from './../joints/joint_weld.js';
 
 const DemoCar = function() {
 	var space;

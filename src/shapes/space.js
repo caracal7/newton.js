@@ -23,7 +23,7 @@ import { ShapeCircle } from './shape_circle.js';
 import { ShapeSegment } from './shape_segment.js';
 import { ShapePoly } from './shape_poly.js';
 import { Body } from './body.js';
-import { Joint } from './../joint/joint.js';
+import { Joint } from './../joints/joint.js';
 import { collision } from "./../utils/collision.js";
 import { ContactSolver } from "./../utils/contactsolver.js";
 import { stats } from "./../utils/stats.js";

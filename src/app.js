@@ -31,20 +31,20 @@ import { DemoRope } from "./demo/demo_rope.js";
 import { DemoWeb } from "./demo/demo_web.js";
 import { DemoBounce } from "./demo/demo_bounce.js";
 
-import { RendererCanvas, ARROW_TYPE_NONE, ARROW_TYPE_NORMAL, ARROW_TYPE_CIRCLE, ARROW_TYPE_BOX } from "./renderer/renderer_canvas.js";
+import { RendererCanvas, ARROW_TYPE_NONE, ARROW_TYPE_NORMAL, ARROW_TYPE_CIRCLE, ARROW_TYPE_BOX } from "./renderers/renderer_canvas.js";
 
 import { Color } from "./lib/color.js";
 import { collision } from "./utils/collision.js";
-import { Shape } from "./shape/shape.js";
-import { ShapeTriangle, ShapeBox, ShapePoly } from "./shape/shape_poly.js";
-import { ShapeCircle } from "./shape/shape_circle.js";
+import { Shape } from "./shapes/shape.js";
+import { ShapeTriangle, ShapeBox, ShapePoly } from "./shapes/shape_poly.js";
+import { ShapeCircle } from "./shapes/shape_circle.js";
 import { createConvexHull } from "./utils/util.js";
 
-import { Space } from "./shape/space.js";
-import { Body } from "./shape/body.js";
+import { Space } from "./shapes/space.js";
+import { Body } from "./shapes/body.js";
 import { stats } from "./utils/stats.js";
 
-import { MouseJoint } from "./joint/joint_mouse.js";
+import { MouseJoint } from "./joints/joint_mouse.js";
 
 
 //var keyDownArr = [];
