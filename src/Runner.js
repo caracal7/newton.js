@@ -48,26 +48,12 @@ function Runner(renderer, app, settings = {}) {
         scroll: new vec2(0, 0)
     };
 
-    // Initialize canvas context
-    this.canvas = document.getElementById("canvas");
-    this.fg = {
-        canvas: this.canvas
-    };
-	this.bg = {
-        canvas: document.createElement("canvas")
-    };
-    this.fg.ctx = this.canvas.getContext("2d");
-    this.bg.ctx = this.bg.canvas.getContext("2d");
-
     this.dirtyBounds = new Bounds; // dirty bounds in world space
 
     this.onResize = () => {
         this.renderer.resize();
-        
-        this.fg.canvas.width = this.bg.canvas.width = this.canvas.width = this.canvas.offsetWidth;
-        this.fg.canvas.height = this.bg.canvas.height = this.canvas.height = this.canvas.offsetHeight;
         // Set dirtyBounds to full screen
-        this.dirtyBounds.set(this.canvasToWorld(new vec2(0, this.canvas.height)), this.canvasToWorld(new vec2(this.canvas.width, 0)));
+        this.dirtyBounds.set(this.canvasToWorld(new vec2(0, this.renderer.height)), this.canvasToWorld(new vec2(this.renderer.width, 0)));
         this.static_outdated = true;
         if(this.pause) this.drawFrame(0);
     }
@@ -115,7 +101,7 @@ Runner.prototype.initFrame = function() {
         timeDelta: 0
     }
     // Set dirtyBounds to full screen
-    this.dirtyBounds.set(this.canvasToWorld(new vec2(0, this.canvas.height)), this.canvasToWorld(new vec2(this.canvas.width, 0)));
+    this.dirtyBounds.set(this.canvasToWorld(new vec2(0, this.renderer.height)), this.canvasToWorld(new vec2(this.renderer.width, 0)));
     this.static_outdated = true;
 }
 
@@ -181,7 +167,7 @@ Runner.prototype.render = function(frameTime) {
 
 Runner.prototype.drawFrame = function(frameTime) {
 	// camera.bounds for culling
-	this.camera.bounds.set(this.canvasToWorld(new vec2(0, this.canvas.height)), this.canvasToWorld(new vec2(this.canvas.width, 0)));
+	this.camera.bounds.set(this.canvasToWorld(new vec2(0, this.renderer.height)), this.canvasToWorld(new vec2(this.renderer.width, 0)));
 
 	// Check the visibility of shapes for all bodies
 	for (var i = 0; i < this.space.bodyArr.length; i++) {
@@ -206,10 +192,7 @@ Runner.prototype.drawFrame = function(frameTime) {
 	// Update whole background canvas if we needed
 	if (this.static_outdated) {
 		this.static_outdated = false;
-		this.bg.ctx.fillStyle = this.settings.backgroundColor;
-		this.bg.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-		this.bg.ctx.setTransform(this.camera.scale * meter2pixel(1), 0, 0, -(this.camera.scale * meter2pixel(1)), this.canvas.width * 0.5 - this.camera.origin.x, this.canvas.height + this.camera.origin.y);
+        this.renderer.clearBackground(this.camera, this.settings.backgroundColor)
 
 		// Draw static bodies
 		for (var i = 0; i < this.space.bodyArr.length; i++) {
@@ -220,10 +203,8 @@ Runner.prototype.drawFrame = function(frameTime) {
                 for (var k = 0; k < body.shapeArr.length; k++) {
         	        var shape = body.shapeArr[k];
         	        if (!shape.visible) continue;
-                    this.renderer.drawShape(this.bg.ctx, shape,  PIXEL_UNIT, "#000", body_color);
+                    this.renderer.drawShape(shape, true,  PIXEL_UNIT, "#000", body_color);
         	    }
-
-
 			}
 		}
 	}
@@ -235,34 +216,27 @@ Runner.prototype.drawFrame = function(frameTime) {
 			var maxs = this.worldToCanvas(this.dirtyBounds.maxs);
 			var x = Math.max(Math.floor(mins.x), 0);
 			var y = Math.max(Math.floor(maxs.y), 0);
-			var w = Math.min(Math.ceil(maxs.x), this.canvas.width) - x;
-			var h = Math.min(Math.ceil(mins.y), this.canvas.height) - y;
+			var w = Math.min(Math.ceil(maxs.x), this.renderer.width) - x;
+			var h = Math.min(Math.ceil(mins.y), this.renderer.height) - y;
 
-			if (w > 0 && h > 0) {
-				this.fg.ctx.drawImage(this.bg.canvas, x, y, w, h, x, y, w, h);
-			}
+			if (w > 0 && h > 0)  this.renderer.copyBackground(x, y, w, h, x, y, w, h);
 		}
 	}
-	else {
-		this.fg.ctx.drawImage(this.bg.canvas, 0, 0);
-	}
+	else this.renderer.copyBackground(0, 0);
 
-	this.fg.ctx.save();
-	this.fg.ctx.setTransform(this.camera.scale * meter2pixel(1), 0, 0, -(this.camera.scale * meter2pixel(1)), this.canvas.width * 0.5 - this.camera.origin.x, this.canvas.height + this.camera.origin.y);
-
-	this.dirtyBounds.clear();
+    this.dirtyBounds.clear();
+	this.renderer.beginDynamic(this.camera);
 
 	// Draw bodies except for static bodies
 	for (var i = 0; i < this.space.bodyArr.length; i++) {
 		var body = this.space.bodyArr[i];
 		if (body && body.visible) {
 			if (!body.isStatic()) {
-
                 var body_color = bodyColor(body);
                 for (var k = 0; k < body.shapeArr.length; k++) {
         	        var shape = body.shapeArr[k];
         	        if (!shape.visible) continue;
-                    this.renderer.drawShape(this.fg.ctx, shape,  PIXEL_UNIT, "#000", body_color);
+                    this.renderer.drawShape(shape, false, PIXEL_UNIT, "#000", body_color);
     	            var expand = PIXEL_UNIT * 3;
     	            var bounds = Bounds.expand(shape.bounds, expand, expand);
     	            this.dirtyBounds.addBounds(bounds);
@@ -275,25 +249,23 @@ Runner.prototype.drawFrame = function(frameTime) {
 	if (this.settings.showJoints) {
 		for (var i = 0; i < this.space.jointArr.length; i++) {
 			if (this.space.jointArr[i]) {
-				drawHelperJointAnchors(this.fg.ctx, this.space.jointArr[i]);
+				drawHelperJointAnchors(this.space.jointArr[i]);
 			}
 		}
 	}
-
-	this.fg.ctx.restore();
+    this.renderer.endDynamic();
 }
-
 
 Runner.prototype.worldToCanvas = function(p) {
     return new vec2(
-        this.canvas.width * 0.5 + (p.x * (this.camera.scale * meter2pixel(1)) - this.camera.origin.x),
-        this.canvas.height - (p.y * (this.camera.scale * meter2pixel(1)) - this.camera.origin.y));
+        this.renderer.width * 0.5 + (p.x * (this.camera.scale * meter2pixel(1)) - this.camera.origin.x),
+        this.renderer.height      - (p.y * (this.camera.scale * meter2pixel(1)) - this.camera.origin.y));
 }
 
 Runner.prototype.canvasToWorld = function(p) {
     return new vec2(
-        (this.camera.origin.x + (p.x - this.canvas.width * 0.5)) / (this.camera.scale * meter2pixel(1)),
-        (this.camera.origin.y - (p.y - this.canvas.height)) / (this.camera.scale * meter2pixel(1)));
+        (this.camera.origin.x + (p.x - this.renderer.width * 0.5)) / (this.camera.scale * meter2pixel(1)),
+        (this.camera.origin.y - (p.y - this.renderer.height))      / (this.camera.scale * meter2pixel(1)));
 }
 
 export {

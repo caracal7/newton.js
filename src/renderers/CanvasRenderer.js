@@ -17,15 +17,13 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import { Bounds, vec2, pixel2meter } from './../utils/math.js';
+import { Bounds, vec2, meter2pixel } from './../utils/math.js';
 import { Shape } from "./../shapes/shape.js";
 
 var ARROW_TYPE_NONE = 0;
 var ARROW_TYPE_NORMAL = 1;
 var ARROW_TYPE_CIRCLE = 2
 var ARROW_TYPE_BOX = 3;
-
-const PIXEL_UNIT = pixel2meter(1);
 
 function scissorRect(ctx, x, y, width, height) {
 	ctx.beginPath();
@@ -333,20 +331,40 @@ function CanvasRenderer(canvas) {
 
 };
 
-CanvasRenderer.prototype.drawShape = function(ctx, shape, lineWidth, outlineColor, fillColor) {
+CanvasRenderer.prototype.drawShape = function(shape, isStatic, lineWidth, outlineColor, fillColor) {
 	switch (shape.type) {
 		case Shape.TYPE_CIRCLE:
-			drawCircle(ctx, shape.tc, shape.r, shape.body.a, lineWidth, outlineColor, fillColor);
+			drawCircle(isStatic ? this.bg.ctx : this.fg.ctx, shape.tc, shape.r, shape.body.a, lineWidth, outlineColor, fillColor);
 			break;
 		case Shape.TYPE_SEGMENT:
-			drawSegment(ctx, shape.ta, shape.tb, shape.r, lineWidth, outlineColor, fillColor);
+			drawSegment(isStatic ? this.bg.ctx : this.fg.ctx, shape.ta, shape.tb, shape.r, lineWidth, outlineColor, fillColor);
 			break;
 		case Shape.TYPE_POLY:
-			if (shape.convexity) drawPolygon(ctx, shape.tverts, lineWidth, outlineColor, fillColor);
-			else drawPolygon(ctx, shape.tverts, lineWidth, outlineColor, fillColor);
+			if (shape.convexity) drawPolygon(isStatic ? this.bg.ctx : this.fg.ctx, shape.tverts, lineWidth, outlineColor, fillColor);
+			else drawPolygon(isStatic ? this.bg.ctx : this.fg.ctx, shape.tverts, lineWidth, outlineColor, fillColor);
 			break;
 	}
 }
+
+CanvasRenderer.prototype.clearBackground = function(camera, backgroundColor) {
+	this.bg.ctx.fillStyle = backgroundColor;
+	this.bg.ctx.fillRect(0, 0, this.width, this.height);
+	this.bg.ctx.setTransform(camera.scale * meter2pixel(1), 0, 0, -(camera.scale * meter2pixel(1)), this.width * 0.5 - camera.origin.x, this.height + camera.origin.y);
+}
+
+CanvasRenderer.prototype.copyBackground = function(x, y, w, h, x1, y1, w1, h1) {
+	this.fg.ctx.drawImage(this.bg.canvas, x, y, w, h, x1, y1, w1, h1);
+};
+
+CanvasRenderer.prototype.beginDynamic = function(camera) {
+	this.fg.ctx.save();
+	this.fg.ctx.setTransform(camera.scale * meter2pixel(1), 0, 0, -(camera.scale * meter2pixel(1)), this.width * 0.5 - camera.origin.x, this.height + camera.origin.y);
+};
+
+CanvasRenderer.prototype.endDynamic = function() {
+	this.fg.ctx.restore();
+};
+
 
 CanvasRenderer.prototype.resize = function() {
 	this.width  = this.fg.canvas.width  = this.bg.canvas.width  = this.canvas.width  = this.canvas.offsetWidth;
