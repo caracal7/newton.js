@@ -15,7 +15,7 @@ import { MouseJoint } from "./joints/joint_mouse.js";
 import { Bounds, pixel2meter, meter2pixel, vec2 } from './utils/math.js';
 
 
-import { Renderer as CanvasRenderer } from "./renderers/canvas.js";
+import { CanvasRenderer } from "./renderers/CanvasRenderer.js";
 
 
 export {

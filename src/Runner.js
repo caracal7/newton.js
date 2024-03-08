@@ -11,6 +11,14 @@ import { Bounds, pixel2meter, meter2pixel, vec2 } from './utils/math.js';
 const HELPER_JOINT_ANCHOR_RADIUS = pixel2meter(2.5);
 const PIXEL_UNIT = pixel2meter(1);
 
+const randomColor = ["#BEB", "#48B", "#CAA", "#8D5", "#6BE", "#98D", "#E78", "#7BC", "#E9E", "#BCD", "#EB6", "#EE7"]; // Random colors for drawing bodies
+
+function bodyColor(body) {
+    if (!body.isDynamic()) return "#777";
+    if (!body.isAwake()) return "#999";
+    return randomColor[(body.id) % randomColor.length];
+}
+
 function Runner(renderer, app, settings = {}) {
     console.log('Runner',this)
 
@@ -54,6 +62,8 @@ function Runner(renderer, app, settings = {}) {
     this.dirtyBounds = new Bounds; // dirty bounds in world space
 
     this.onResize = () => {
+        this.renderer.resize();
+        
         this.fg.canvas.width = this.bg.canvas.width = this.canvas.width = this.canvas.offsetWidth;
         this.fg.canvas.height = this.bg.canvas.height = this.canvas.height = this.canvas.offsetHeight;
         // Set dirtyBounds to full screen
@@ -284,14 +294,6 @@ Runner.prototype.canvasToWorld = function(p) {
     return new vec2(
         (this.camera.origin.x + (p.x - this.canvas.width * 0.5)) / (this.camera.scale * meter2pixel(1)),
         (this.camera.origin.y - (p.y - this.canvas.height)) / (this.camera.scale * meter2pixel(1)));
-}
-
-const randomColor = ["#BEB", "#48B", "#CAA", "#8D5", "#6BE", "#98D", "#E78", "#7BC", "#E9E", "#BCD", "#EB6", "#EE7"]; // Random colors for drawing bodies
-
-function bodyColor(body) {
-    if (!body.isDynamic()) return "#777";
-    if (!body.isAwake()) return "#999";
-    return randomColor[(body.id) % randomColor.length];
 }
 
 export {
