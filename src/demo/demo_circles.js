@@ -23,6 +23,7 @@ import { vec2 } from './../utils/math.js';
 
 const DemoCircles = function() {
 	var space;
+
 	function init(s) {
 		space = s;
 		var staticBody = new Body(Body.STATIC);

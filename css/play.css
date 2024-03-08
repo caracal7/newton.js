@@ -1,9 +1,9 @@
 html, body {
-  margin: 0; 
+  margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
-  font-family: Verdana, times new roman, NanumGothic, sans-serif;    
+  font-family: Verdana, times new roman, NanumGothic, sans-serif;
   text-align: left;
   position: relative;
   -webkit-user-select: none;
@@ -11,10 +11,11 @@ html, body {
   -moz-user-select: none;
   -o-user-select: none;
   user-select: none;
+  box-sizing: border-box;
 }
 select {
   border: 1px solid #222;
-  line-height: 15px;  
+  line-height: 15px;
   color: #333;
   vertical-align: middle;
   -webkit-border-radius: 3px;
@@ -34,7 +35,7 @@ input {
 }
 div#toolbar {
   margin: 0;
-  padding: 10px 8px 10px 8px;  
+  padding: 10px 8px 10px 8px;
   position: relative;
   width: 100%;/*2048px;*/
   height: 26px;
@@ -48,37 +49,37 @@ div#toolbar {
   background: -webkit-gradient(linear, left top, left bottom, from(#3B3937), to(#2B2927));
   -webkit-box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.1), inset -1px -1px 0 rgba(0, 0, 0, 0.1);
   -moz-box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.1), inset -1px -1px 0 rgba(0, 0, 0, 0.1);
-  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.1), inset -1px -1px 0 rgba(0, 0, 0, 0.1); 
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.1), inset -1px -1px 0 rgba(0, 0, 0, 0.1);
 }
 table {
   padding: 0;
-  border: 0;  
-  border-spacing: 0; 
-  border-collapse: collapse;  
+  border: 0;
+  border-spacing: 0;
+  border-collapse: collapse;
   width: 100%;
   height: 100%;
 }
 td#sidebar {
   margin: 0;
-  padding: 4px;  
+  padding: 4px;
   top: 0px;
   left: 0px;
   width: 240px;
-  height: 100%;  
+  height: 100%;
   position: relative;
   vertical-align: top;
   overflow: hidden;
   font-size: 10px;
   color: #ccc;
-  background-color: #3B3937;  
+  background-color: #3B3937;
   -webkit-box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.1), inset -1px -1px 0 rgba(0, 0, 0, 1.1);
   -moz-box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.1), inset -1px -1px 0 rgba(0, 0, 0, 1.1);
   box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.1), inset -1px -1px 0 rgba(0, 0, 0, 1.0);
 }
 td#main_view {
   margin: 0;
-  padding: 0;  
-  vertical-align: top;  
+  padding: 0;
+  vertical-align: top;
   top: 0px;
   left: 0px;
   width: 100%;
@@ -97,7 +98,7 @@ td#main_view {
 }
 #sidebar #editmode_pannel {
   margin: 0;
-  padding: 0;  
+  padding: 0;
   position: relative;
   width: 240px;
   height: 280px;
@@ -123,16 +124,16 @@ td#main_view {
   margin: 5px 0;
 }
 #sidebar .pannel ul li {
-  list-style: none;  
+  list-style: none;
   width: 100%;
-  height: 23px;  
+  height: 23px;
   vertical-align: middle;
   overflow: hidden;
 }
-#sidebar .pannel ul li label {    
+#sidebar .pannel ul li label {
   display: inline-block;
   text-align: right;
-  width: 128px;  
+  width: 128px;
   line-height: 23px;
   vertical-align: middle;
   overflow: hidden;
@@ -153,7 +154,7 @@ td#main_view {
 #sidebar .pannel select {
   margin: 0;
   padding: 0;
-  width: 102px;  
+  width: 102px;
   height: 20px;
 }
 #sidebar .pannel input[readonly] {
@@ -162,7 +163,7 @@ td#main_view {
 }
 div#info {
   display: none;
-  margin: 0px auto; 
+  margin: 0px auto;
   padding: 2px;
   width: 400px;
   height: 60px;
@@ -176,9 +177,9 @@ div#info {
   text-align: left;
   color: black;
   pointer-events:none;
-  cursor: default;  
+  cursor: default;
 }
-div#status {  
+div#status {
   display: none;
   margin: 0;
   padding: 2px;
@@ -188,9 +189,9 @@ div#status {
   bottom: 0px;
   float: left;
   text-align: left;
-  position: absolute;  
+  position: absolute;
   font-family: menlo;
-  font-size: 9pt;    
+  font-size: 9pt;
   color: black;
   pointer-events:none;
   cursor: default;
@@ -201,16 +202,16 @@ div#settings {
   padding: 8px;
   width: 160px;
   left: 0px;
-  top: 0px;  
-  position: absolute;  
+  top: 0px;
+  position: absolute;
   vertical-align: middle;
   text-align: left;
   font-size: 10px;
   color: #ccc;
   background-color: #333;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.5), 1px 1px 2px rgba(0,0,0,0.5); 
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.5), 1px 1px 2px rgba(0,0,0,0.5);
   -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;  
+  -moz-border-radius: 4px;
   border-radius: 4px;
   -moz-box-shadow: 3px 3px 6px black;
   -webkit-box-shadow: 3px 3px 6px black;
@@ -230,10 +231,10 @@ div#help {
   font-family: verdana, sans-serif;
   display: none;
   padding: 12px;
-  border-radius: 6px; 
+  border-radius: 6px;
   background: white;
   color: black;
-  opacity: 0.9;  
+  opacity: 0.9;
   -webkit-box-shadow: 0px 0px 20px 1px rgba(0,0,0,0.5);
   -moz-box-shadow: 0px 0px 20px 1px rgba(0,0,0,0.5);
   box-shadow: 0px 0px 20px 1px rgba(0,0,0,0.5);
