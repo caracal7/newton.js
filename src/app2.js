@@ -655,12 +655,10 @@ const App = function() {
 		ev.preventDefault();
 	}
 
-
-
 	function touchHandler(ev) {
 		if (ev.touches.length <= 1) {
 			var first = ev.changedTouches[0];
-			var type = {touchstart: "mousedown", touchmove: "mousemove", touchend: "mouseup"}[ev.type] || "";
+			var type = { touchstart: "mousedown", touchmove: "mousemove", touchend: "mouseup" }[ev.type] || "";
 			//initMouseEvent(type, canBubble, cancelable, view, clickCount, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget);
 			var simulatedEvent = document.createEvent("MouseEvent");
 			simulatedEvent.initMouseEvent(type, true, true, window, 1, first.screenX, first.screenY, first.clientX, first.clientY, false, false, false, false, 0, null);
@@ -681,11 +679,9 @@ const App = function() {
 			space.removeJoint(mouseJoint);
 			mouseJoint = null;
 		}
-
 		if (ev.touches.length == 2) {
 			touchPosOld[0] = getMousePosition(ev.touches[0]);
 			touchPosOld[1] = getMousePosition(ev.touches[1]);
-
 			ev.preventDefault();
 		}
 	}
@@ -704,20 +700,17 @@ const App = function() {
 			var d2 = v2.length();
 
 			if (d1 > 0 || d2 > 0) {
-				scrollView(-(v1.x + v2.x) * 0.5, (v1.y + v2.y) * 0.5);
-
-				touchScaleCenter = canvasToWorld(vec2.lerp(touchPos[0], touchPos[1], d1 / (d1 + d2)));
+				var touchScaleCenter = canvasToWorld(vec2.lerp(touchPos[0], touchPos[1], d1 / (d1 + d2)));
 
 				var oldScale = camera.scale;
-				camera.scale = Math.clamp(gestureScale, camera.minScale, camera.maxScale);
-				var ds = camera.scale - oldScale;
+				camera.scale  = Math.clamp(gestureScale, camera.minScale, camera.maxScale);
+				var ds = camera.scale  - oldScale;
+				ds *= meter2pixel(1);
 
 				camera.origin.x += touchScaleCenter.x * ds;
 				camera.origin.y += touchScaleCenter.y * ds;
 
-				// Set dirtyBounds to full screen
-				dirtyBounds.set(canvasToWorld(new vec2(0, domCanvas.height)), canvasToWorld(new vec2(domCanvas.width, 0)));
-				bg.outdated = true;
+				scrollView(-(v1.x + v2.x) * 0.5, (v1.y + v2.y) * 0.5);
 			}
 
 			touchPosOld[0] = touchPos[0];

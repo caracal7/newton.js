@@ -3768,7 +3768,7 @@ const App = function() {
 			if (d1 > 0 || d2 > 0) {
 				scrollView(-(v1.x + v2.x) * 0.5, (v1.y + v2.y) * 0.5);
 
-				touchScaleCenter = canvasToWorld(vec2.lerp(touchPos[0], touchPos[1], d1 / (d1 + d2)));
+				var touchScaleCenter = canvasToWorld(vec2.lerp(touchPos[0], touchPos[1], d1 / (d1 + d2)));
 
 				var oldScale = camera.scale;
 				camera.scale = Math.clamp(gestureScale, camera.minScale, camera.maxScale);
