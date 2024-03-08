@@ -17,7 +17,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import { Body } from './../shapes/body.js';
+import { Body } from './../Body.js';
 import { ShapeBox } from "./../shapes/shape_poly.js";
 import { ShapeSegment } from "./../shapes/shape_segment.js";
 import { vec2, deg2rad } from './../utils/math.js';

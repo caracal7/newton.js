@@ -2,7 +2,7 @@ import * as Physics from './index.js';
 
 import { collision } from "./utils/collision.js";
 import { Space } from "./shapes/space.js";
-import { Body } from "./shapes/body.js";
+import { Body } from "./Body.js";
 import { Shape } from "./shapes/shape.js";
 import { stats } from "./utils/stats.js";
 import { MouseJoint } from "./joints/joint_mouse.js";
@@ -64,11 +64,11 @@ function Runner(renderer, app, settings = {}) {
 
     collision.init();
     this.space = new Space();
-
+/*
             this.mouseBody = new Body(Body.KINETIC);
             this.mouseBody.resetMassData();
             this.space.addBody(this.mouseBody);
-
+*/
     this.resetScene();
 
     const update = () => {

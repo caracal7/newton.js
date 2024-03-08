@@ -17,15 +17,15 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import { deg2rad, vec2 } from './../utils/math.js';
 import { Shape } from './shape.js';
 import { ShapeCircle } from './shape_circle.js';
 import { ShapeSegment } from './shape_segment.js';
 import { ShapePoly } from './shape_poly.js';
-import { Body } from './body.js';
+import { Body } from './../Body.js';
 import { Joint } from './../joints/joint.js';
-import { collision } from "./../utils/collision.js";
 import { ContactSolver } from "./../utils/contactsolver.js";
+import { collision } from "./../utils/collision.js";
+import { deg2rad, vec2 } from './../utils/math.js';
 import { stats } from "./../utils/stats.js";
 
 function Space() {

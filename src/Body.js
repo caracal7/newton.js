@@ -17,7 +17,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import { vec2, Transform, Bounds } from './../utils/math.js';
+import { vec2, Transform, Bounds } from './utils/math.js';
 
 const Body = function(type, pos, angle) {
 	if (Body.id_counter == undefined) {

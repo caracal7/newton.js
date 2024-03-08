@@ -38,7 +38,7 @@ import { Shape } from "./shapes/shape.js";
 
 
 import { Space } from "./shapes/space.js";
-import { Body } from "./shapes/body.js";
+import { Body } from "./Body.js";
 import { stats } from "./utils/stats.js";
 
 import { MouseJoint } from "./joints/joint_mouse.js";
