@@ -1,22 +1,23 @@
 /*
 * Copyright (c) 2012 Ju Hyung Lee
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
-* and associated documentation files (the "Software"), to deal in the Software without 
-* restriction, including without limitation the rights to use, copy, modify, merge, publish, 
-* distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the 
+* Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+* and associated documentation files (the "Software"), to deal in the Software without
+* restriction, including without limitation the rights to use, copy, modify, merge, publish,
+* distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
 * Software is furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in all copies or 
+* The above copyright notice and this permission notice shall be included in all copies or
 * substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING 
-* BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
-* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, 
-* DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+* BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+* DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+/*
 (function() {
 	var errorOccurred = false;
 
@@ -26,11 +27,12 @@
 		}
 
 		errorOccurred = true;
-		alert(["There was an error on this page.\n\n", url, " (", line, ") : ", msg].join(""));		
+		alert(["There was an error on this page.\n\n", url, " (", line, ") : ", msg].join(""));
 	}
-})();
+})();*/
 
 function addEvent(obj, name, fn) {
+	//console.warn(obj)
 	if (obj.addEventListener) { // W3C DOM
 		obj.addEventListener(name, fn, false);
 	}
@@ -41,6 +43,8 @@ function addEvent(obj, name, fn) {
 		obj.attachEvent("on" + name, obj[name + fn]);
 	}
 	else { // No much to do
+		console.log(obj, "on" + name, fn);
+		console.trace()
 		obj["on" + name] = fn;
 	}
 }
@@ -53,7 +57,7 @@ var ready = (function () {
 
 		if (ready.timer) {
 			ready.ready.push(f);
-		} 
+		}
 		else {
 			addEvent(window, "load", isDOMReady);
 			ready.ready = [f];
@@ -121,4 +125,13 @@ function httpPostText(uri, async, text, callback) {
 	request.setRequestHeader("Content-length", text.length);
 	request.setRequestHeader("Connection", "close");
 	request.send(text);
+}
+
+export {
+	ready,
+	addEvent,
+	isAppleMobileDevice,
+	isEmptyObject,
+	httpGetText,
+	httpPostText
 }

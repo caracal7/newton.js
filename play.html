@@ -6,56 +6,15 @@
   <meta name="viewport" content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-  <!--<link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon" />-->
   <link rel="apple-touch-icon-precomposed" href="img/apple-touch-icon-precomposed.png" />
-  <!--<link rel="apple-touch-startup-image" href="img/startup-ipad-portrait.png" media="screen and (min-device-width: 481px) and (max-device-width: 1024px)" />
-  <link rel="apple-touch-startup-image" href="img/startup.png" media="screen and (max-device-width: 320px)" />-->
-  <!--<link rel="stylesheet" href="css/bootstrap.css" />-->
   <link rel="stylesheet" href="css/play.css" />
   <link rel="stylesheet" href="css/button.css" />
-  <link rel="stylesheet" href="css/add2home.css" />    
-  <title>PhysicsRus</title>  
-
-  <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>-->   
-  <script src="lib/json2.js"></script>
-  <script src="lib/add2home.js"></script>
-  <script src="lib/color.js"></script>
-  <script src="src/base.js"></script>
-  <script src="src/math.js"></script>
-  <script src="src/util.js"></script>
-  <script src="src/collision.js"></script>
-  <script src="src/body.js"></script>
-  <script src="src/joint.js"></script>
-  <script src="src/joint_angle.js"></script>  
-  <script src="src/joint_revolute.js"></script>
-  <script src="src/joint_weld.js"></script>
-  <script src="src/joint_wheel.js"></script>
-  <script src="src/joint_prismatic.js"></script>
-  <script src="src/joint_distance.js"></script>
-  <script src="src/joint_rope.js"></script>
-  <script src="src/joint_mouse.js"></script>
-  <script src="src/shape.js"></script>
-  <script src="src/shape_circle.js"></script>
-  <script src="src/shape_segment.js"></script>
-  <script src="src/shape_poly.js"></script>
-  <script src="src/contact.js"></script>
-  <script src="src/contactsolver.js"></script>  
-  <script src="src/space.js"></script>  
-  <script src="src/demo_circles.js"></script>
-  <script src="src/demo_car.js"></script>
-  <script src="src/demo_ragdoll.js"></script>
-  <script src="src/demo_seesaw.js"></script>
-  <script src="src/demo_pyramid.js"></script>
-  <script src="src/demo_crank.js"></script>
-  <script src="src/demo_rope.js"></script>
-  <script src="src/demo_web.js"></script>
-  <script src="src/demo_bounce.js"></script>
-  <script src="src/renderer_canvas.js"></script>
-  <script src="src/renderer_webgl.js"></script>
-  <script src="src/app.js"></script>
+  <link rel="stylesheet" href="css/add2home.css" />
+  <title>PhysicsRus</title>
+  <script type="module" src="src/app.js"></script>
 </head>
 
-<body> 
+<body>
   <div id="toolbar">
     <span class="combo">
       <label for="scene">Scene: </label><select id="scene" style="width:140px;"></select>
@@ -68,7 +27,7 @@
     </span>-->
 
     <span class="btn_group" style="margin-left:7px">
-       <button type="button" class="btn blue" id="edit" style="width:52px; font-weight:bold">Edit</button>      
+       <button type="button" class="btn blue" id="edit" style="width:52px; font-weight:bold">Edit</button>
     </span>
 
     <span id="player" class="btn_group" style="margin-left:7px">
@@ -83,9 +42,9 @@
       <button type="button" class="btn segment" name="selectionmode" value="shapes" style="width:60px">Shapes</button>
       <button type="button" class="btn segment" name="selectionmode" value="bodies" style="width:60px">Bodies</button>
       <button type="button" class="btn segment" name="selectionmode" value="joints" style="width:60px">Joints</button>
-    </span>    
+    </span>
 
-    <span class="btn_group" style="margin-left:7px"> 
+    <span class="btn_group" style="margin-left:7px">
       <button type="button" class="btn" id="toggle_snap" style="width:52px">Snap</button>
     </span>
 
@@ -94,12 +53,12 @@
       <button type="button" class="btn" id="toggle_help" style="width:32px;"><i class="icon-white icon-question-sign"></i></button>
     </span>
   </div>
-  
+
   <table>
     <tr><td id="sidebar">
       <div id="editmode_pannel">
         <span style="line-height:18px">Create Body</span>
-        <div class="btn_group">  
+        <div class="btn_group">
           <button type="button" class="btn segment" name="editmode" value="create_circle" style="width:60px; height:30px">Circle</button>
           <!--<button type="button" class="btn segment" name="editmode" value="create_segment" style="width:60px; height:30px">Segment</button>-->
           <button type="button" class="btn segment" name="editmode" value="create_triangle" style="width:60px; height:30px">Triangle</button>
@@ -107,15 +66,15 @@
           <button type="button" class="btn segment" name="editmode" value="create_hexagon" style="width:60px; height:30px">Hexagon</button>
         </div>
         <div style="margin-top:3px"></div>
-        <div class="btn_group">          
+        <div class="btn_group">
           <button type="button" class="btn segment" name="editmode" value="create_brush" style="width:60px; height:30px">Brush</button>
-        </div>      
+        </div>
         <div style="margin-top:5px"></div>
         <span style="line-height:18px">Create Joint</span>
         <div class="btn_group">
           <button type="button" class="btn segment" name="editmode" value="create_angle_joint" style="width:60px; height:30px">Angle</button>
-          <button type="button" class="btn segment" name="editmode" value="create_revolute_joint" style="width:60px; height:30px">Revolute</button>        
-          <button type="button" class="btn segment" name="editmode" value="create_weld_joint" style="width:60px; height:30px">Weld</button>        
+          <button type="button" class="btn segment" name="editmode" value="create_revolute_joint" style="width:60px; height:30px">Revolute</button>
+          <button type="button" class="btn segment" name="editmode" value="create_weld_joint" style="width:60px; height:30px">Weld</button>
         </div>
         <div style="margin-top:3px"></div>
         <div class="btn_group">
@@ -123,7 +82,7 @@
           <button type="button" class="btn segment" name="editmode" value="create_prismatic_joint" style="width:60px; height:30px">Prismatic</button>
           <button type="button" class="btn segment" name="editmode" value="create_distance_joint" style="width:60px; height:30px">Distance</button>
           <button type="button" class="btn segment" name="editmode" value="create_rope_joint" style="width:60px; height:30px">Rope</button>
-        </div>      
+        </div>
         <div style="margin-top:5px"></div>
         <span style="line-height:18px">Transform</span>
         <div class="btn_group">
@@ -170,7 +129,7 @@
           <li><label for="shape_radius">Radius(m)</label> <input type="number" id="shape_radius" min="0.1" step="0.01" /></li>
           <li><label for="shape_density">Density(kg/m²)</label> <input type="number" id="shape_density" min="0.0000001" max="1" step="0.001" /></li>
           <li><label for="shape_restitution">Restitution</label> <input type="number" id="shape_restitution" min="0" max="1" step="0.05" /></li>
-          <li><label for="shape_friction">Friction</label> <input type="number" id="shape_friction" min="0" max="1" step="0.05" /></li>        
+          <li><label for="shape_friction">Friction</label> <input type="number" id="shape_friction" min="0" max="1" step="0.05" /></li>
         </ul>
         </form>
       </div>
@@ -185,7 +144,7 @@
               <option>Dynamic</option>
             </select>
           </li>
-          <li><label for="body_name">Name</label> <input type="text" id="body_name" /></li>        
+          <li><label for="body_name">Name</label> <input type="text" id="body_name" /></li>
           <li><label for="body_position_x">Position X(m)</label> <input type="number" id="body_position_x" step="0.1" /></li>
           <li><label for="body_position_y">Y(m)</label> <input type="number" id="body_position_y" step="0.1" /></li>
           <li><label for="body_angle">Angle(°)</label> <input type="number" id="body_angle" step="10" /></li>
@@ -246,7 +205,7 @@
       <input type="checkbox" id="showDirtyRect" />Show dirty rect<br />
       <input type="checkbox" id="showAxis" />Show axis<br />
       <input type="checkbox" id="showJoints" />Show joints<br />
-      <input type="checkbox" id="showBounds" />Show bounding boxes<br />        
+      <input type="checkbox" id="showBounds" />Show bounding boxes<br />
       <input type="checkbox" id="showContacts" />Show contacts<br />
       <input type="checkbox" id="showStats" />Show statistics<br />
     </div>
@@ -259,7 +218,7 @@
     <ul>
       <li>Ctrl + E : Switch editor/simulator</li>
       <li>Mouse wheel : Zoom in/out</li>
-      <li>Alt + Click move : Translate camera</li>      
+      <li>Alt + Click move : Translate camera</li>
       <li>1 : Vertex selection mode</li>
       <li>2 : Edge selection mode</li>
       <li>3 : Shape selection mode</li>
@@ -270,7 +229,7 @@
       <li>e : Rotate</li>
       <li>r : Scale</li>
     </ul>
-    <div style="text-align:right; position:absolute; right:10px; bottom:10px">Programmed by Lee Ju Hyung (<a href="http://twitter.com/juhlnet">twitter.com/juhlnet</a>)</div>    
+    <div style="text-align:right; position:absolute; right:10px; bottom:10px">Programmed by Lee Ju Hyung (<a href="http://twitter.com/juhlnet">twitter.com/juhlnet</a>)</div>
   </div>
 
 </body>
