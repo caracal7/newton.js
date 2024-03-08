@@ -1,0 +1,130 @@
+.btn {
+  background-color: #111;
+}
+
+.btn {
+  margin: 0;
+  padding: 0px 0px 0px 0px;
+  height: 25px;
+  font-size: 10px;
+  line-height: 12px;
+  
+  position: relative;
+  
+  color: #ddd;
+  cursor: pointer;
+  text-decoration: none;
+  font-style: normal;
+  font: inherit;
+  
+  border-collapse: collapse;
+  border: 1px solid;
+  border-color: black;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+
+  -webkit-box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.1), inset -1px -1px 0 rgba(0, 0, 0, 0.1);
+  -moz-box-shadow:    inset 1px 1px 0 rgba(255, 255, 255, 0.1), inset -1px -1px 0 rgba(0, 0, 0, 0.1);
+  box-shadow:         inset 1px 1px 0 rgba(255, 255, 255, 0.1), inset -1px -1px 0 rgba(0, 0, 0, 0.1);
+    
+  background: #4B4947;
+  background: -moz-linear-gradient(#4B4947, #32302D);
+  background: -webkit-gradient(linear, left top, left bottom, from(#4B4947), to(#32302D));
+  /*background-position: 0 0;*/
+  
+  /* cross browser inline block hack 
+  see http://blog.mozilla.com/webdev/2009/02/20/cross-browser-inline-block/ */
+  display: -moz-inline-stack;
+  display: inline-block;
+  vertical-align: middle;
+  *display: inline !important;
+  
+  /* help IE to calm down a bit */
+  zoom: 1;
+
+  /*disable text selection (Firefox only)*/
+  -moz-user-select: none;
+}
+
+.btn_group {  
+  margin: 0;
+}
+
+.btn.segment {
+  margin-left: -4px;  
+  display: inline-block;  
+  border-right-width: 0;
+  border-radius: 0px;
+  -moz-border-radius: 0px;
+  -webkit-border-radius: 0px;
+}
+
+.btn.segment:first-child {  
+  margin-left: 0px;  
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  -moz-border-top-left-radius: 5px;
+  -webkit-border-top-left-radius: 5px;
+  -moz-border-bottom-left-radius: 5px; 
+  -webkit-border-bottom-left-radius: 5px;
+}
+
+.btn.segment:last-child {
+  border-right-width: 1px;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  -moz-border-top-right-radius: 5px; 
+  -webkit-border-top-right-radius: 5px;
+  -moz-border-bottom-right-radius: 5px; 
+  -webkit-border-bottom-right-radius: 5px;
+}
+
+/* hide selection background color */
+.btn::selection {
+  background: transparent;
+}
+
+.btn:hover {
+  /*background-position: 0 -50px;*/  
+  color: white;  
+}
+
+.btn:active { 
+  position: relative;  
+    
+  box-shadow:         inset 1px 2px 3px rgba(0,0,0,0.5), 0 1px 0 #6B6967;
+  -moz-box-shadow:    inset 1px 2px 3px rgba(0,0,0,0.5), 0 1px 0 #6B6967; 
+  -webkit-box-shadow: inset 1px 2px 3px rgba(0,0,0,0.5), 0 1px 0 #6B6967;
+}
+
+.btn.pushed {
+  color: black;
+  background: #fa0;
+
+  text-shadow: 0px 0px 0px;
+
+  -moz-box-shadow:    inset 1px 2px 3px rgba(0,0,0,0.5), 0 1px 0 #6B6967; 
+  -webkit-box-shadow: inset 1px 2px 3px rgba(0,0,0,0.5), 0 1px 0 #6B6967;
+  box-shadow:         inset 1px 2px 3px rgba(0,0,0,0.5), 0 1px 0 #6B6967;
+}
+
+.btn.pushed:hover {
+  color: black;
+}
+
+.btn.grey   { background: #CCCCBB !important; } .btn.grey.pushed    { color: white; } .btn.grey.pushed:hover   { color: white; }
+.btn.blue   { color: white; 
+  background: #005AFF;
+  background: -moz-linear-gradient(#008AFF, #0050E0);
+  background: -webkit-gradient(linear, left top, left bottom, from(#008AFF), to(#0050E0)); } 
+.btn.blue.pushed    { color: white; } .btn.blue.pushed:hover   { color: white; }
+.btn.red    { color: white;
+  background: #E32100; 
+  background: -moz-linear-gradient(#FF5030, #D02010);
+  background: -webkit-gradient(linear, left top, left bottom, from(#FF5030), to(#D02010)); } 
+.btn.red.pushed     { color: white; } .btn.red.pushed:hover    { color: white; }
+.btn.green  { background: #20A000 !important; } .btn.green.pushed   { color: white; } .btn.green.pushed:hover  { color: white; }
+.btn.yellow { background: #F0A000 !important; } .btn.yellow.pushed  { color: white; } .btn.yellow.pushed:hover { color: white; }
+.btn.orange { background: #F87006 !important; } .btn.orange.pushed  { color: white; } .btn.orange.pushed:hover { color: white; }
+.btn.purple { background: #7D13B6 !important; } .btn.purple.pushed  { color: white; } .btn.purple.pushed:hover { color: white; }
