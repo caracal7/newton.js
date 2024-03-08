@@ -1,4 +1,6 @@
-import { RendererCanvas } from "./renderers/renderer_canvas.js";
+
+import { Runner } from "./Runner.js";
+
 
 import { collision } from "./utils/collision.js";
 
@@ -13,9 +15,11 @@ import { MouseJoint } from "./joints/joint_mouse.js";
 import { Bounds, pixel2meter, meter2pixel, vec2 } from './utils/math.js';
 
 
+import { Renderer as CanvasRenderer } from "./renderers/canvas.js";
+
 
 export {
-    RendererCanvas,
+    Runner,
 
     collision,
 
@@ -31,5 +35,7 @@ export {
 
     pixel2meter,
     meter2pixel,
-    vec2
+    vec2,
+
+    CanvasRenderer
 }
