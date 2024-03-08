@@ -199,18 +199,23 @@ Runner.prototype.drawFrame = function(frameTime) {
 		this.bg.ctx.fillStyle = this.settings.backgroundColor;
 		this.bg.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-		this.bg.ctx.save();
 		this.bg.ctx.setTransform(this.camera.scale * meter2pixel(1), 0, 0, -(this.camera.scale * meter2pixel(1)), this.canvas.width * 0.5 - this.camera.origin.x, this.canvas.height + this.camera.origin.y);
 
 		// Draw static bodies
 		for (var i = 0; i < this.space.bodyArr.length; i++) {
 			var body = this.space.bodyArr[i];
 			if (body && body.isStatic()) {
-				this.drawBody(this.bg.ctx, body, PIXEL_UNIT, "#000", bodyColor(body));
+
+                var body_color = bodyColor(body);
+                for (var k = 0; k < body.shapeArr.length; k++) {
+        	        var shape = body.shapeArr[k];
+        	        if (!shape.visible) continue;
+                    this.renderer.drawShape(this.bg.ctx, shape,  PIXEL_UNIT, "#000", body_color);
+        	    }
+
+
 			}
 		}
-
-		this.bg.ctx.restore();
 	}
 
 	// Transform dirtyBounds world to screen
@@ -242,7 +247,16 @@ Runner.prototype.drawFrame = function(frameTime) {
 		var body = this.space.bodyArr[i];
 		if (body && body.visible) {
 			if (!body.isStatic()) {
-				this.drawBody(this.fg.ctx, body, PIXEL_UNIT, "#000", bodyColor(body));
+
+                var body_color = bodyColor(body);
+                for (var k = 0; k < body.shapeArr.length; k++) {
+        	        var shape = body.shapeArr[k];
+        	        if (!shape.visible) continue;
+                    this.renderer.drawShape(this.fg.ctx, shape,  PIXEL_UNIT, "#000", body_color);
+    	            var expand = PIXEL_UNIT * 3;
+    	            var bounds = Bounds.expand(shape.bounds, expand, expand);
+    	            this.dirtyBounds.addBounds(bounds);
+        	    }
 			}
 		}
 	}
@@ -259,35 +273,6 @@ Runner.prototype.drawFrame = function(frameTime) {
 	this.fg.ctx.restore();
 }
 
-Runner.prototype.drawBody = function(ctx, body, lineWidth, outlineColor, fillColor) {
-    for (var i = 0; i < body.shapeArr.length; i++) {
-        var shape = body.shapeArr[i];
-        if (!shape.visible) continue;
-
-        this.drawBodyShape(ctx, shape, lineWidth, outlineColor, fillColor);
-
-        if (!body.isStatic()) {
-            var expand = PIXEL_UNIT * 3;
-            var bounds = Bounds.expand(shape.bounds, expand, expand);
-            this.dirtyBounds.addBounds(bounds);
-        }
-    }
-}
-
-Runner.prototype.drawBodyShape = function(ctx, shape, lineWidth, outlineColor, fillColor) {
-    switch (shape.type) {
-        case Shape.TYPE_CIRCLE:
-            this.renderer.drawCircle(ctx, shape.tc, shape.r, shape.body.a, lineWidth, outlineColor, fillColor);
-            break;
-        case Shape.TYPE_SEGMENT:
-            this.renderer.drawSegment(ctx, shape.ta, shape.tb, shape.r, lineWidth, outlineColor, fillColor);
-            break;
-        case Shape.TYPE_POLY:
-            if (shape.convexity) this.renderer.drawPolygon(ctx, shape.tverts, lineWidth, outlineColor, fillColor);
-            else this.renderer.drawPolygon(ctx, shape.tverts, lineWidth * 2, "#F00", fillColor);
-            break;
-    }
-}
 
 Runner.prototype.worldToCanvas = function(p) {
     return new vec2(

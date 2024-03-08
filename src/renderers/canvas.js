@@ -17,14 +17,17 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import { vec2 } from './../utils/math.js';
+import { Bounds, vec2, pixel2meter } from './../utils/math.js';
+import { Shape } from "./../shapes/shape.js";
 
 var ARROW_TYPE_NONE = 0;
 var ARROW_TYPE_NORMAL = 1;
 var ARROW_TYPE_CIRCLE = 2
 var ARROW_TYPE_BOX = 3;
 
-const Renderer = function() {
+const PIXEL_UNIT = pixel2meter(1);
+
+function Renderer() {
 	function scissorRect(ctx, x, y, width, height) {
 		ctx.beginPath();
   		ctx.rect(x, y, width, height);
@@ -315,6 +318,40 @@ const Renderer = function() {
 			ctx.stroke();
 		}
 	}
+/*
+	function drawStatic(space, camera) {
+		this.bg.ctx.fillStyle = this.settings.backgroundColor;
+		this.bg.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+		this.bg.ctx.save();
+		this.bg.ctx.setTransform(this.camera.scale * meter2pixel(1), 0, 0, -(this.camera.scale * meter2pixel(1)), this.canvas.width * 0.5 - this.camera.origin.x, this.canvas.height + this.camera.origin.y);
+
+		// Draw static bodies
+		for (var i = 0; i < this.space.bodyArr.length; i++) {
+			var body = this.space.bodyArr[i];
+			if (body && body.isStatic()) {
+				this.drawBody(this.bg.ctx, body, PIXEL_UNIT, "#000", bodyColor(body));
+			}
+		}
+
+		this.bg.ctx.restore();
+	}
+*/
+
+	function drawShape(ctx, shape, lineWidth, outlineColor, fillColor) {
+	    switch (shape.type) {
+	        case Shape.TYPE_CIRCLE:
+	            drawCircle(ctx, shape.tc, shape.r, shape.body.a, lineWidth, outlineColor, fillColor);
+	            break;
+	        case Shape.TYPE_SEGMENT:
+	            drawSegment(ctx, shape.ta, shape.tb, shape.r, lineWidth, outlineColor, fillColor);
+	            break;
+	        case Shape.TYPE_POLY:
+	            if (shape.convexity) drawPolygon(ctx, shape.tverts, lineWidth, outlineColor, fillColor);
+	            else drawPolygon(ctx, shape.tverts, lineWidth * 2, "#F00", fillColor);
+	            break;
+	    }
+	}
 
 	return {
 		scissorRect: scissorRect,
@@ -326,7 +363,12 @@ const Renderer = function() {
 		drawCircle: drawCircle,
 		drawArc: drawArc,
 		drawSegment: drawSegment,
-		drawPolygon: drawPolygon
+		drawPolygon: drawPolygon,
+
+
+		drawShape,
+
+	//	drawStatic
 	}
 };
 
