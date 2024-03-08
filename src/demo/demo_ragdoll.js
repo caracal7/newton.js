@@ -24,16 +24,16 @@ import { vec2, deg2rad } from './../utils/math.js';
 import { RevoluteJoint } from './../joints/joint_revolute.js';
 
 const DemoRagDoll = function() {
-	var space;
+	var world;
 	function init(s) {
-		space = s;
+		world = s;
 		var staticBody = new Body(Body.STATIC);
 		staticBody.addShape(new ShapeBox(0, 0.2, 20.48, 0.4));
 		staticBody.addShape(new ShapeBox(0, 15.16, 20.48, 0.4));
 		staticBody.addShape(new ShapeBox(-10.04, 7.68, 0.4, 14.56));
 		staticBody.addShape(new ShapeBox(10.04, 7.68, 0.4, 14.56));
 		staticBody.resetMassData();
-		space.addBody(staticBody);
+		world.addBody(staticBody);
 
 		// Head
 		var bodyHead = new Body(Body.DYNAMIC, new vec2(0, 7.4));
@@ -43,7 +43,7 @@ const DemoRagDoll = function() {
 		shape.density = 5;
 		bodyHead.addShape(shape);
 		bodyHead.resetMassData();
-		space.addBody(bodyHead);
+		world.addBody(bodyHead);
 
 		// Spine1
 		var bodySpine1 = new Body(Body.DYNAMIC, new vec2(0, 6.4));
@@ -54,7 +54,7 @@ const DemoRagDoll = function() {
 		shape.density = 4;
 		bodySpine1.addShape(shape);
 		bodySpine1.resetMassData();
-		space.addBody(bodySpine1);
+		world.addBody(bodySpine1);
 
 		// Spine2
 		var bodySpine2 = new Body(Body.DYNAMIC, new vec2(0, 5.6));
@@ -64,7 +64,7 @@ const DemoRagDoll = function() {
 		shape.density = 4;
 		bodySpine2.addShape(shape);
 		bodySpine2.resetMassData();
-		space.addBody(bodySpine2);
+		world.addBody(bodySpine2);
 
 		// Pelvis
 		var bodyPelvis = new Body(Body.DYNAMIC, new vec2(0, 4.85));
@@ -74,7 +74,7 @@ const DemoRagDoll = function() {
 		shape.density = 4;
 		bodyPelvis.addShape(shape);
 		bodyPelvis.resetMassData();
-		space.addBody(bodyPelvis);
+		world.addBody(bodyPelvis);
 
 		// Left Arm1
 		var bodyLArm1 = new Body(Body.DYNAMIC, new vec2(-1.25, 6.5));
@@ -84,7 +84,7 @@ const DemoRagDoll = function() {
 		shape.density = 3;
 		bodyLArm1.addShape(shape);
 		bodyLArm1.resetMassData();
-		space.addBody(bodyLArm1);
+		world.addBody(bodyLArm1);
 
 		// Left Arm2
 		var bodyLArm2 = new Body(Body.DYNAMIC, new vec2(-2.4, 6.5));
@@ -94,7 +94,7 @@ const DemoRagDoll = function() {
 		shape.density = 3;
 		bodyLArm2.addShape(shape);
 		bodyLArm2.resetMassData();
-		space.addBody(bodyLArm2);
+		world.addBody(bodyLArm2);
 
 		// Right Arm1
 		var bodyRArm1 = new Body(Body.DYNAMIC, new vec2(1.25, 6.5));
@@ -104,7 +104,7 @@ const DemoRagDoll = function() {
 		shape.density = 3;
 		bodyRArm1.addShape(shape);
 		bodyRArm1.resetMassData();
-		space.addBody(bodyRArm1);
+		world.addBody(bodyRArm1);
 
 		// Right Arm2
 		var bodyRArm2 = new Body(Body.DYNAMIC, new vec2(2.4, 6.5));
@@ -114,7 +114,7 @@ const DemoRagDoll = function() {
 		shape.density = 3;
 		bodyRArm2.addShape(shape);
 		bodyRArm2.resetMassData();
-		space.addBody(bodyRArm2);
+		world.addBody(bodyRArm2);
 
 		// Left Leg1
 		var bodyLLeg1 = new Body(Body.DYNAMIC, new vec2(-0.42, 3.6));
@@ -124,7 +124,7 @@ const DemoRagDoll = function() {
 		shape.density = 3;
 		bodyLLeg1.addShape(shape);
 		bodyLLeg1.resetMassData();
-		space.addBody(bodyLLeg1);
+		world.addBody(bodyLLeg1);
 
 		// Left Leg2
 		var bodyLLeg2 = new Body(Body.DYNAMIC, new vec2(-0.42, 1.9));
@@ -134,7 +134,7 @@ const DemoRagDoll = function() {
 		shape.density = 3;
 		bodyLLeg2.addShape(shape);
 		bodyLLeg2.resetMassData();
-		space.addBody(bodyLLeg2);
+		world.addBody(bodyLLeg2);
 
 		// Right Leg1
 		var bodyRLeg1 = new Body(Body.DYNAMIC, new vec2(0.42, 3.6));
@@ -144,7 +144,7 @@ const DemoRagDoll = function() {
 		shape.density = 3;
 		bodyRLeg1.addShape(shape);
 		bodyRLeg1.resetMassData();
-		space.addBody(bodyRLeg1);
+		world.addBody(bodyRLeg1);
 
 		// Right Leg2
 		var bodyRLeg2 = new Body(Body.DYNAMIC, new vec2(0.42, 1.9));
@@ -154,70 +154,70 @@ const DemoRagDoll = function() {
 		shape.density = 3;
 		bodyRLeg2.addShape(shape);
 		bodyRLeg2.resetMassData();
-		space.addBody(bodyRLeg2);
+		world.addBody(bodyRLeg2);
 
 		var joint = new RevoluteJoint(bodyHead, bodySpine1, new vec2(0, 6.8));
 		joint.enableLimit(true);
 		joint.setLimits(deg2rad(-40), deg2rad(40));
-		space.addJoint(joint);
+		world.addJoint(joint);
 
 		var joint = new RevoluteJoint(bodySpine1, bodySpine2, new vec2(0, 5.8));
 		joint.collideConnected = false;
 		joint.enableLimit(true);
 		joint.setLimits(deg2rad(-5), deg2rad(5));
-		space.addJoint(joint);
+		world.addJoint(joint);
 
 		var joint = new RevoluteJoint(bodySpine2, bodyPelvis, new vec2(0, 5.1));
 		joint.collideConnected = false;
 		joint.enableLimit(true);
 		joint.setLimits(deg2rad(-20), deg2rad(20));
-		space.addJoint(joint);
+		world.addJoint(joint);
 
 		var joint = new RevoluteJoint(bodySpine1, bodyLArm1, new vec2(-0.75, 6.5));
 		joint.enableLimit(true);
 		joint.setLimits(deg2rad(-100), deg2rad(100));
-		space.addJoint(joint);
+		world.addJoint(joint);
 
 		var joint = new RevoluteJoint(bodyLArm1, bodyLArm2, new vec2(-1.8, 6.5));
 		joint.collideConnected = false;
 		joint.enableLimit(true);
 		joint.setLimits(deg2rad(-170), deg2rad(10));
-		space.addJoint(joint);
+		world.addJoint(joint);
 
 		var joint = new RevoluteJoint(bodySpine1, bodyRArm1, new vec2(0.75, 6.5));
 		joint.enableLimit(true);
 		joint.setLimits(deg2rad(-100), deg2rad(100));
-		space.addJoint(joint);
+		world.addJoint(joint);
 
 		var joint = new RevoluteJoint(bodyRArm1, bodyRArm2, new vec2(1.8, 6.5));
 		joint.collideConnected = false;
 		joint.enableLimit(true);
 		joint.setLimits(deg2rad(-10), deg2rad(170));
-		space.addJoint(joint);
+		world.addJoint(joint);
 
 		var joint = new RevoluteJoint(bodyPelvis, bodyLLeg1, new vec2(-0.42, 4.4));
 		joint.collideConnected = false;
 		joint.enableLimit(true);
 		joint.setLimits(deg2rad(-100), deg2rad(50));
-		space.addJoint(joint);
+		world.addJoint(joint);
 
 		var joint = new RevoluteJoint(bodyLLeg1, bodyLLeg2, new vec2(-0.42, 2.75));
 		joint.collideConnected = false;
 		joint.enableLimit(true);
 		joint.setLimits(deg2rad(-15), deg2rad(150));
-		space.addJoint(joint);
+		world.addJoint(joint);
 
 		var joint = new RevoluteJoint(bodyPelvis, bodyRLeg1, new vec2(0.42, 4.4));
 		joint.collideConnected = false;
 		joint.enableLimit(true);
 		joint.setLimits(deg2rad(-50), deg2rad(100));
-		space.addJoint(joint);
+		world.addJoint(joint);
 
 		var joint = new RevoluteJoint(bodyRLeg1, bodyRLeg2, new vec2(0.42, 2.75));
 		joint.collideConnected = false;
 		joint.enableLimit(true);
 		joint.setLimits(deg2rad(-150), deg2rad(15));
-		space.addJoint(joint);
+		world.addJoint(joint);
 
 		bodyHead.applyLinearImpulse(new vec2(120, 0), new vec2(0, 7.34));
 	}

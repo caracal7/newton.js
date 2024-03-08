@@ -22,17 +22,17 @@ import { ShapeCircle } from './../shapes/shape_circle.js';
 import { vec2 } from './../utils/math.js';
 
 const DemoCircles = function() {
-	var space;
+	var world;
 
 	function init(s) {
-		space = s;
+		world = s;
 		var staticBody = new Body(Body.STATIC);
 		staticBody.addShape(new ShapeBox(0, 0.2, 20.48, 0.4));
 		staticBody.addShape(new ShapeBox(0, 15.16, 20.48, 0.4));
 		staticBody.addShape(new ShapeBox(-10.04, 7.68, 0.4, 14.56));
 		staticBody.addShape(new ShapeBox(10.04, 7.68, 0.4, 14.56));
 		staticBody.resetMassData();
-		space.addBody(staticBody);
+		world.addBody(staticBody);
 
 		for (var i = 0; i < 25; i++) {
 			var body = new Body(Body.DYNAMIC, new vec2(Math.random() * 20 - 10, 0.5 + Math.random() * 14));
@@ -42,7 +42,7 @@ const DemoCircles = function() {
 			shape.density = 1;
 			body.addShape(shape);
 			body.resetMassData();
-			space.addBody(body);
+			world.addBody(body);
 		}
 	}
 

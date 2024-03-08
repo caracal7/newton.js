@@ -4,7 +4,7 @@ import { Pointer }  from "./Pointer.js";
 
 import { collision } from "./utils/collision.js";
 
-import { Space } from "./shapes/space.js";
+import { World } from "./World.js";
 import { Body } from "./Body.js";
 import { Shape } from "./shapes/shape.js";
 
@@ -20,7 +20,7 @@ import { CanvasRenderer } from "./renderers/CanvasRenderer.js";
 
 export {
     Runner,
-    Space,
+    World,
     Body,
     Shape,
     MouseJoint,

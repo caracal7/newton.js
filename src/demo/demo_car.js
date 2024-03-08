@@ -25,16 +25,16 @@ import { WheelJoint } from './../joints/joint_wheel.js';
 import { WeldJoint } from './../joints/joint_weld.js';
 
 const DemoCar = function() {
-	var space;
+	var world;
 	function init(s) {
-		space = s;
+		world = s;
 		var staticBody = new Body(Body.STATIC);
 		staticBody.addShape(new ShapeBox(-9.84, 5, 0.8, 2));
 		staticBody.addShape(new ShapeBox(9.84, 5, 0.8, 2));
 		staticBody.addShape(new ShapePoly([new vec2(-10.24, 0), new vec2(-2, 0), new vec2(-2, 1), new vec2(-9.44, 4), new vec2(-10.24, 4)]));
 		staticBody.addShape(new ShapePoly([new vec2(2, 0), new vec2(10.24, 0), new vec2(10.24, 4), new vec2(9.44, 4), new vec2(2, 1)]));
 		staticBody.resetMassData();
-		space.addBody(staticBody);
+		world.addBody(staticBody);
 
 		// Bridge
 		var body_prev;
@@ -46,17 +46,17 @@ const DemoCar = function() {
 			shape.density = 20;
 			body.addShape(shape);
 			body.resetMassData();
-			space.addBody(body);
+			world.addBody(body);
 
 			if (i == 0) {
 				var joint = new RevoluteJoint(staticBody, body, new vec2(-2, 0.9));
 				joint.collideConnected = false;
-				space.addJoint(joint);
+				world.addJoint(joint);
 			}
 			else {
 				var joint = new RevoluteJoint(body_prev, body, new vec2(-2 + i * 0.4, 0.9));
 				joint.collideConnected = false;
-				space.addJoint(joint);
+				world.addJoint(joint);
 			}
 
 			body_prev = body;
@@ -64,7 +64,7 @@ const DemoCar = function() {
 
 		var joint = new RevoluteJoint(body, staticBody, new vec2(2, 0.9));
 		joint.collideConnected = false;
-		space.addJoint(joint);
+		world.addJoint(joint);
 
 		// Car body
 		var carBody = new Body(Body.DYNAMIC, new vec2(-8, 5));
@@ -74,7 +74,7 @@ const DemoCar = function() {
 		shape.density = 6;
 		carBody.addShape(shape);
 		carBody.resetMassData();
-		space.addBody(carBody);
+		world.addBody(carBody);
 
 		// Wheel 1
 		var wheel1Body = new Body(Body.DYNAMIC, new vec2(-8.5, 4.9));
@@ -84,7 +84,7 @@ const DemoCar = function() {
 		shape.density = 0.8;
 		wheel1Body.addShape(shape);
 		wheel1Body.resetMassData();
-		space.addBody(wheel1Body);
+		world.addBody(wheel1Body);
 
 		var joint = new WheelJoint(carBody, wheel1Body, new vec2(-8.5, 5), new vec2(-8.5, 4.9));
 		joint.setSpringFrequencyHz(12);
@@ -93,7 +93,7 @@ const DemoCar = function() {
 		/*joint.enableMotor(true);
 		joint.setMotorSpeed(deg2rad(-2000));
 		joint.setMaxMotorTorque(20000);*/
-		space.addJoint(joint);
+		world.addJoint(joint);
 
 		// Wheel 2
 		var wheel2Body = new Body(Body.DYNAMIC, new vec2(-7.5, 4.9));
@@ -103,7 +103,7 @@ const DemoCar = function() {
 		shape.density = 0.8;
 		wheel2Body.addShape(shape);
 		wheel2Body.resetMassData();
-		space.addBody(wheel2Body);
+		world.addBody(wheel2Body);
 
 		var joint = new WheelJoint(carBody, wheel2Body, new vec2(-7.5, 5), new vec2(-7.5, 4.9));
 		joint.setSpringFrequencyHz(12)
@@ -112,10 +112,10 @@ const DemoCar = function() {
 		joint.setMotorSpeed(deg2rad(-2000));
 		joint.setMaxMotorTorque(30000);*/
 		joint.collideConnected = false;
-		space.addJoint(joint);
+		world.addJoint(joint);
 
 		// Both wheels constrained to be same rotation
-		//space.addJoint(new AngleJoint(wheel1Body, wheel2Body));
+		//world.addJoint(new AngleJoint(wheel1Body, wheel2Body));
 
 		// Car antenna
 		var antennaBodies = [];
@@ -127,21 +127,21 @@ const DemoCar = function() {
 			shape.density = 0.5;
 			antennaBodies[i].addShape(shape);
 			antennaBodies[i].resetMassData();
-			space.addBody(antennaBodies[i]);
+			world.addBody(antennaBodies[i]);
 
 			if (i == 0) {
 				var joint = new WeldJoint(carBody, antennaBodies[0], new vec2(-8.55, 5.84 + 0.2 * i));
 				joint.collideConnected = false;
 				joint.setSpringFrequencyHz(30);
 				joint.setSpringDampingRatio(0.1);
-				space.addJoint(joint);
+				world.addJoint(joint);
 			}
 			else {
 				var joint = new WeldJoint(antennaBodies[i - 1], antennaBodies[i], new vec2(-8.55, 5.84 + 0.2 * i));
 				joint.collideConnected = false;
 				joint.setSpringFrequencyHz(30);
 				joint.setSpringDampingRatio(0.1);
-				space.addJoint(joint);
+				world.addJoint(joint);
 			}
 		}
 	}

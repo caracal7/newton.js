@@ -22,16 +22,16 @@ import { ShapeBox } from "./../shapes/shape_poly.js";
 import { vec2 } from './../utils/math.js';
 
 const DemoPyramid = function() {
-	var space;
+	var world;
 	function init(s) {
-		space = s;
+		world = s;
 		var staticBody = new Body(Body.STATIC);
 		staticBody.addShape(new ShapeBox(0, 0.2, 20.48, 0.4));
 		staticBody.addShape(new ShapeBox(0, 15.16, 20.48, 0.4));
 		staticBody.addShape(new ShapeBox(-10.04, 7.68, 0.4, 14.56));
 		staticBody.addShape(new ShapeBox(10.04, 7.68, 0.4, 14.56));
 		staticBody.resetMassData();
-		space.addBody(staticBody);
+		world.addBody(staticBody);
 
 		for (var i = 0; i < 9; i++) {
 			for (var j = 0; j <= i; j++) {
@@ -42,7 +42,7 @@ const DemoPyramid = function() {
 				shape.density = 1;
 				body.addShape(shape);
 				body.resetMassData();
-				space.addBody(body);
+				world.addBody(body);
 			}
 		}
 		/*
@@ -53,7 +53,7 @@ const DemoPyramid = function() {
 		shape.density = 2;
 		body.addShape(shape);
 		body.resetMassData();
-		space.addBody(body);*/
+		world.addBody(body);*/
 	}
 
 	function runFrame() {

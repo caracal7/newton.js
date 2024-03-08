@@ -17,18 +17,18 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import { Shape } from './shape.js';
-import { ShapeCircle } from './shape_circle.js';
-import { ShapeSegment } from './shape_segment.js';
-import { ShapePoly } from './shape_poly.js';
-import { Body } from './../Body.js';
-import { Joint } from './../joints/joint.js';
-import { ContactSolver } from "./../utils/contactsolver.js";
-import { collision } from "./../utils/collision.js";
-import { deg2rad, vec2 } from './../utils/math.js';
-import { stats } from "./../utils/stats.js";
+import { Shape } 			from './shapes/shape.js';
+import { ShapeCircle } 		from './shapes/shape_circle.js';
+import { ShapeSegment } 	from './shapes/shape_segment.js';
+import { ShapePoly } 		from './shapes/shape_poly.js';
+import { Body } 			from './Body.js';
+import { Joint } 			from './joints/joint.js';
+import { ContactSolver } 	from "./utils/contactsolver.js";
+import { collision } 		from "./utils/collision.js";
+import { deg2rad, vec2 } 	from './utils/math.js';
+import { stats } 			from "./utils/stats.js";
 
-function Space() {
+function World() {
 	this.bodyArr = [];
 	this.bodyHash = {};
 
@@ -44,11 +44,11 @@ function Space() {
 	this.damping = 0;
 }
 
-Space.TIME_TO_SLEEP = 0.5;
-Space.SLEEP_LINEAR_TOLERANCE = 0.5;
-Space.SLEEP_ANGULAR_TOLERANCE = deg2rad(2);
+World.TIME_TO_SLEEP = 0.5;
+World.SLEEP_LINEAR_TOLERANCE = 0.5;
+World.SLEEP_ANGULAR_TOLERANCE = deg2rad(2);
 
-Space.prototype.clear = function() {
+World.prototype.clear = function() {
 	Shape.id_counter = 0;
     Body.id_counter = 0;
     Joint.id_counter = 0;
@@ -70,7 +70,7 @@ Space.prototype.clear = function() {
 	this.stepCount = 0;
 }
 
-Space.prototype.toJSON = function(key) {
+World.prototype.toJSON = function(key) {
 	var o_bodies = [];
 	for (var i = 0; i < this.bodyArr.length; i++) {
 		if (this.bodyArr[i]) {
@@ -91,7 +91,7 @@ Space.prototype.toJSON = function(key) {
 	};
 }
 
-Space.prototype.create = function(text) {
+World.prototype.create = function(text) {
 	var config = JSON.parse(text);
 
 	this.clear();
@@ -178,7 +178,7 @@ Space.prototype.create = function(text) {
 	}
 }
 
-Space.prototype.addBody = function(body) {
+World.prototype.addBody = function(body) {
 	if (this.bodyHash[body.id] != undefined) {
 		return;
 	}
@@ -187,11 +187,11 @@ Space.prototype.addBody = function(body) {
 	this.bodyHash[body.id] = index;
 
 	body.awake(true);
-	body.space = this;
+	body.world = this;
 	body.cacheData();
 }
 
-Space.prototype.removeBody = function(body) {
+World.prototype.removeBody = function(body) {
 	if (this.bodyHash[body.id] == undefined) {
 		return;
 	}
@@ -203,14 +203,14 @@ Space.prototype.removeBody = function(body) {
 		}
 	}
 
-	body.space = null;
+	body.world = null;
 
 	var index = this.bodyHash[body.id];
 	delete this.bodyHash[body.id];
 	delete this.bodyArr[index];
 }
 
-Space.prototype.addJoint = function(joint) {
+World.prototype.addJoint = function(joint) {
 	if (this.jointHash[joint.id] != undefined) {
 		return;
 	}
@@ -228,7 +228,7 @@ Space.prototype.addJoint = function(joint) {
 	joint.body2.jointHash[joint.id] = index;
 }
 
-Space.prototype.removeJoint = function(joint) {
+World.prototype.removeJoint = function(joint) {
 	if (this.jointHash[joint.id] == undefined) {
 		return;
 	}
@@ -249,7 +249,7 @@ Space.prototype.removeJoint = function(joint) {
 	delete this.jointArr[index];
 }
 
-Space.prototype.findShapeByPoint = function(p, refShape) {
+World.prototype.findShapeByPoint = function(p, refShape) {
 	var firstShape;
 
 	for (var i = 0; i < this.bodyArr.length; i++) {
@@ -280,7 +280,7 @@ Space.prototype.findShapeByPoint = function(p, refShape) {
 	return firstShape;
 }
 
-Space.prototype.findBodyByPoint = function(p, refBody) {
+World.prototype.findBodyByPoint = function(p, refBody) {
 	var firstBody;
 
 	for (var i = 0; i < this.bodyArr.length; i++) {
@@ -314,7 +314,7 @@ Space.prototype.findBodyByPoint = function(p, refBody) {
 }
 
 // TODO: Replace this function to shape hashing
-Space.prototype.shapeById = function(id) {
+World.prototype.shapeById = function(id) {
 	var shape;
 	for (var i = 0; i < this.bodyArr.length; i++) {
 		var body = this.bodyArr[i];
@@ -332,7 +332,7 @@ Space.prototype.shapeById = function(id) {
 	return null;
 }
 
-Space.prototype.jointById = function(id) {
+World.prototype.jointById = function(id) {
 	var index = this.jointHash[id];
 	if (index != undefined) {
 		return this.jointArr[index];
@@ -341,7 +341,7 @@ Space.prototype.jointById = function(id) {
 	return null;
 }
 
-Space.prototype.findVertexByPoint = function(p, minDist, refVertexId) {
+World.prototype.findVertexByPoint = function(p, minDist, refVertexId) {
 	var firstVertexId = -1;
 
 	refVertexId = refVertexId || -1;
@@ -375,7 +375,7 @@ Space.prototype.findVertexByPoint = function(p, minDist, refVertexId) {
 	return firstVertexId;
 }
 
-Space.prototype.findEdgeByPoint = function(p, minDist, refEdgeId) {
+World.prototype.findEdgeByPoint = function(p, minDist, refEdgeId) {
 	var firstEdgeId = -1;
 
 	refEdgeId = refEdgeId || -1;
@@ -413,7 +413,7 @@ Space.prototype.findEdgeByPoint = function(p, minDist, refEdgeId) {
 	return firstEdgeId;
 }
 
-Space.prototype.findJointByPoint = function(p, minDist, refJointId) {
+World.prototype.findJointByPoint = function(p, minDist, refJointId) {
 	var firstJointId = -1;
 
 	var dsq = minDist * minDist;
@@ -453,7 +453,7 @@ Space.prototype.findJointByPoint = function(p, minDist, refJointId) {
 	return firstJointId;
 }
 
-Space.prototype.findContactSolver = function(shape1, shape2) {
+World.prototype.findContactSolver = function(shape1, shape2) {
 	for (var i = 0; i < this.contactSolverArr.length; i++) {
 		var contactSolver = this.contactSolverArr[i];
 		if (shape1 == contactSolver.shape1 && shape2 == contactSolver.shape2) {
@@ -464,7 +464,7 @@ Space.prototype.findContactSolver = function(shape1, shape2) {
 	return null;
 }
 
-Space.prototype.genTemporalContactSolvers = function() {
+World.prototype.genTemporalContactSolvers = function() {
 	var t0 = Date.now();
 	var newContactSolverArr = [];
 
@@ -546,7 +546,7 @@ Space.prototype.genTemporalContactSolvers = function() {
 	return newContactSolverArr;
 }
 
-Space.prototype.initSolver = function(dt, dt_inv, warmStarting) {
+World.prototype.initSolver = function(dt, dt_inv, warmStarting) {
 	var t0 = Date.now();
 
 	// Initialize contact solvers
@@ -571,7 +571,7 @@ Space.prototype.initSolver = function(dt, dt_inv, warmStarting) {
 	stats.timeInitSolver = Date.now() - t0;
 }
 
-Space.prototype.velocitySolver = function(iteration) {
+World.prototype.velocitySolver = function(iteration) {
 	var t0 = Date.now();
 
 	for (var i = 0; i < iteration; i++) {
@@ -589,7 +589,7 @@ Space.prototype.velocitySolver = function(iteration) {
 	stats.timeVelocitySolver = Date.now() - t0;
 }
 
-Space.prototype.positionSolver = function(iteration) {
+World.prototype.positionSolver = function(iteration) {
 	var t0 = Date.now();
 
 	var positionSolved = false;
@@ -626,7 +626,7 @@ Space.prototype.positionSolver = function(iteration) {
 	return positionSolved;
 }
 
-Space.prototype.step = function(dt, vel_iteration, pos_iteration, warmStarting, allowSleep) {
+World.prototype.step = function(dt, vel_iteration, pos_iteration, warmStarting, allowSleep) {
 	var dt_inv = 1 / dt;
 
 	this.stepCount++;
@@ -732,8 +732,8 @@ Space.prototype.step = function(dt, vel_iteration, pos_iteration, warmStarting, 
 	if (allowSleep) {
 		var minSleepTime = 999999;
 
-		var linTolSqr = Space.SLEEP_LINEAR_TOLERANCE * Space.SLEEP_LINEAR_TOLERANCE;
-		var angTolSqr = Space.SLEEP_ANGULAR_TOLERANCE * Space.SLEEP_ANGULAR_TOLERANCE;
+		var linTolSqr = World.SLEEP_LINEAR_TOLERANCE * World.SLEEP_LINEAR_TOLERANCE;
+		var angTolSqr = World.SLEEP_ANGULAR_TOLERANCE * World.SLEEP_ANGULAR_TOLERANCE;
 
 		for (var i = 0; i < this.bodyArr.length; i++) {
 		   	var body = this.bodyArr[i];
@@ -755,7 +755,7 @@ Space.prototype.step = function(dt, vel_iteration, pos_iteration, warmStarting, 
 			}
 		}
 
-		if (positionSolved && minSleepTime >= Space.TIME_TO_SLEEP) {
+		if (positionSolved && minSleepTime >= World.TIME_TO_SLEEP) {
 			for (var i = 0; i < this.bodyArr.length; i++) {
 				var body = this.bodyArr[i];
 				if (!body) {
@@ -769,5 +769,5 @@ Space.prototype.step = function(dt, vel_iteration, pos_iteration, warmStarting, 
 }
 
 export {
-	Space
+	World
 }

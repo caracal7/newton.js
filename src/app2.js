@@ -37,7 +37,7 @@ import { collision } from "./utils/collision.js";
 import { Shape } from "./shapes/shape.js";
 
 
-import { Space } from "./shapes/space.js";
+import { World } from "./World.js";
 import { Body } from "./Body.js";
 import { stats } from "./utils/stats.js";
 
@@ -78,7 +78,7 @@ const App = function() {
 	var fps = 0;
 
 
-	var space;
+	var world;
 	const demoArr = [DemoCircles, DemoCar, DemoRagDoll, DemoSeeSaw, DemoPyramid, DemoCrank, DemoRope, DemoWeb, DemoBounce];
 	const demo = demoArr[0];
 
@@ -161,11 +161,11 @@ const App = function() {
 		renderer = RendererCanvas;
 		collision.init();
 
-		space = new Space();
+		world = new World();
 
 		mouseBody = new Body(Body.KINETIC);
 		mouseBody.resetMassData();
-		space.addBody(mouseBody);
+		world.addBody(mouseBody);
 
 		resetScene();
 
@@ -184,9 +184,9 @@ const App = function() {
 
 
 	function resetScene() {
-		space.clear();
-		space.gravity.copy(gravity);
-		demo.init(space);
+		world.clear();
+		world.gravity.copy(gravity);
+		demo.init(world);
 		initFrame();
 	}
 
@@ -236,7 +236,7 @@ const App = function() {
 
 			if (!mouseDown) {
 				var p = canvasToWorld(mousePosition);
-				var body = space.findBodyByPoint(p);
+				var body = world.findBodyByPoint(p);
 				domCanvas.style.cursor = body ? "pointer" : "default";
 			}
 
@@ -255,7 +255,7 @@ const App = function() {
 
 				for (var maxSteps = 4; maxSteps > 0 && timeDelta >= h; maxSteps--) {
 					var t0 = Date.now();
-					space.step(h, velocityIterations, positionIterations, warmStarting, allowSleep);
+					world.step(h, velocityIterations, positionIterations, warmStarting, allowSleep);
 					stats.timeStep += Date.now() - t0;
 					stats.stepCount++;
 
@@ -300,8 +300,8 @@ const App = function() {
 		camera.bounds.set(canvasToWorld(new vec2(0, domCanvas.height)), canvasToWorld(new vec2(domCanvas.width, 0)));
 
 		// Check the visibility of shapes for all bodies
-		for (var i = 0; i < space.bodyArr.length; i++) {
-			var body = space.bodyArr[i];
+		for (var i = 0; i < world.bodyArr.length; i++) {
+			var body = world.bodyArr[i];
 			if (!body) {
 				continue;
 			}
@@ -331,8 +331,8 @@ const App = function() {
 			bg.ctx.setTransform(camera.scale * meter2pixel(1), 0, 0, -(camera.scale * meter2pixel(1)), domCanvas.width * 0.5 - camera.origin.x, domCanvas.height + camera.origin.y);
 
 			// Draw static bodies
-			for (var i = 0; i < space.bodyArr.length; i++) {
-				var body = space.bodyArr[i];
+			for (var i = 0; i < world.bodyArr.length; i++) {
+				var body = world.bodyArr[i];
 				if (body && body.isStatic()) {
 					drawBody(bg.ctx, body, PIXEL_UNIT, "#000", bodyColor(body));
 				}
@@ -375,8 +375,8 @@ const App = function() {
 		dirtyBounds.clear();
 
 		// Draw bodies except for static bodies
-		for (var i = 0; i < space.bodyArr.length; i++) {
-			var body = space.bodyArr[i];
+		for (var i = 0; i < world.bodyArr.length; i++) {
+			var body = world.bodyArr[i];
 			if (body && body.visible) {
 				if (!body.isStatic()) {
 					drawBody(fg.ctx, body, PIXEL_UNIT, "#000", bodyColor(body));
@@ -386,9 +386,9 @@ const App = function() {
 
 		// Draw joints
 		if (showJoints) {
-			for (var i = 0; i < space.jointArr.length; i++) {
-				if (space.jointArr[i]) {
-					drawHelperJointAnchors(fg.ctx, space.jointArr[i]);
+			for (var i = 0; i < world.jointArr.length; i++) {
+				if (world.jointArr[i]) {
+					drawHelperJointAnchors(fg.ctx, world.jointArr[i]);
 				}
 			}
 		}
@@ -521,20 +521,20 @@ const App = function() {
 
 		// Remove previous mouse joint
 		if (mouseJoint) {
-			space.removeJoint(mouseJoint);
+			world.removeJoint(mouseJoint);
 			mouseJoint = null;
 		}
 
 		var p = canvasToWorld(pos);
 
 		// If we picked shape then create mouse joint
-		var body = space.findBodyByPoint(p);
+		var body = world.findBodyByPoint(p);
 		if (body) {
 			mouseBody.p.copy(p);
 			mouseBody.syncTransform();
 			mouseJoint = new MouseJoint(mouseBody, body, p);
 			mouseJoint.maxForce = body.m * 1000;
-			space.addJoint(mouseJoint);
+			world.addJoint(mouseJoint);
 		}
 
 		// for the touch device
@@ -549,7 +549,7 @@ const App = function() {
 		var p = canvasToWorld(pos);
 
 		if (mouseJoint) {
-			space.removeJoint(mouseJoint);
+			world.removeJoint(mouseJoint);
 			mouseJoint = null;
 		}
 
@@ -597,7 +597,7 @@ const App = function() {
 
 	function onMouseLeave(ev) {
 		if (mouseJoint) {
-			space.removeJoint(mouseJoint);
+			world.removeJoint(mouseJoint);
 			mouseJoint = null;
 		}
 	}
@@ -673,7 +673,7 @@ const App = function() {
 
 	function onTouchStart(ev) {
 		if (mouseJoint) {
-			space.removeJoint(mouseJoint);
+			world.removeJoint(mouseJoint);
 			mouseJoint = null;
 		}
 		if (ev.touches.length == 2) {

@@ -24,13 +24,13 @@ import { RevoluteJoint } from './../joints/joint_revolute.js';
 import { RopeJoint } from './../joints/joint_rope.js';
 
 const DemoRope = function() {
-	var space;
+	var world;
 	function init(s) {
-		space = s;
+		world = s;
 		var staticBody = new Body(Body.STATIC);
 		staticBody.addShape(new ShapeBox(0, 0.2, 20.48, 0.4));
 		staticBody.resetMassData();
-		space.addBody(staticBody);
+		world.addBody(staticBody);
 
 		var body = [];
 
@@ -56,25 +56,25 @@ const DemoRope = function() {
 			}
 
 			body[i].resetMassData();
-			space.addBody(body[i]);
+			world.addBody(body[i]);
 
 			if (i == 0) {
 				var joint = new RevoluteJoint(staticBody, body[i], new vec2(0, 10));
 				joint.collideConnected = false;
-				space.addJoint(joint);
+				world.addJoint(joint);
 			}
 			else {
 				var joint = new RevoluteJoint(body[i - 1], body[i], new vec2(i * 0.8, 10));
 				//joint.breakable = true;
 				//joint.maxForce = 8000000;
 				joint.collideConnected = false;
-				space.addJoint(joint);
+				world.addJoint(joint);
 			}
 		}
 
 		var joint = new RopeJoint(staticBody, body[9], new vec2(0, 10), new vec2(9 * 0.8, 10));
 		joint.collideConnected = false;
-		space.addJoint(joint);
+		world.addJoint(joint);
 	}
 
 	function runFrame() {

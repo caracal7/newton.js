@@ -22,15 +22,15 @@ import { ShapeBox, ShapePoly } from "./../shapes/shape_poly.js";
 import { vec2, deg2rad } from './../utils/math.js';
 
 const DemoSeeSaw = function() {
-	var space;
+	var world;
 	function init(s) {
-		space = s;
+		world = s;
 		var staticBody = new Body(Body.STATIC);
 		staticBody.addShape(new ShapeBox(0, 0.2, 20.48, 0.4));
 		staticBody.addShape(new ShapeBox(-10.04, 7.68, 0.4, 14.56));
 		staticBody.addShape(new ShapeBox(10.04, 7.68, 0.4, 14.56));
 		staticBody.resetMassData();
-		space.addBody(staticBody);
+		world.addBody(staticBody);
 
 		var body = new Body(Body.DYNAMIC, new vec2(-3, 1.6));
 		var shape = new ShapeBox(0, 0, 2.8, 1.6);
@@ -39,7 +39,7 @@ const DemoSeeSaw = function() {
 		shape.density = 2;
 		body.addShape(shape);
 		body.resetMassData();
-		space.addBody(body);
+		world.addBody(body);
 
 		var body = new Body(Body.DYNAMIC, new vec2(0, 2.8));
 		var shape = new ShapeBox(0, 0, 12, 0.2);
@@ -48,7 +48,7 @@ const DemoSeeSaw = function() {
 		shape.density = 1.2;
 		body.addShape(shape);
 		body.resetMassData();
-		space.addBody(body);
+		world.addBody(body);
 
 		for (var i = 0; i < 5; i++) {
 			for (var j = 0; j <= i; j++) {
@@ -59,7 +59,7 @@ const DemoSeeSaw = function() {
 				shape.density = 1;
 				body.addShape(shape);
 				body.resetMassData();
-				space.addBody(body);
+				world.addBody(body);
 			}
 		}
 
@@ -70,7 +70,7 @@ const DemoSeeSaw = function() {
 		shape.density = 2;
 		body.addShape(shape);
 		body.resetMassData();
-		space.addBody(body);
+		world.addBody(body);
 	}
 
 	function runFrame() {

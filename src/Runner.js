@@ -1,7 +1,7 @@
 import * as Physics from './index.js';
 
 import { collision } from "./utils/collision.js";
-import { Space } from "./shapes/space.js";
+import { World } from "./World.js";
 import { Body } from "./Body.js";
 import { Shape } from "./shapes/shape.js";
 import { stats } from "./utils/stats.js";
@@ -63,11 +63,11 @@ function Runner(renderer, app, settings = {}) {
 
 
     collision.init();
-    this.space = new Space();
+    this.world = new World();
 /*
             this.mouseBody = new Body(Body.KINETIC);
             this.mouseBody.resetMassData();
-            this.space.addBody(this.mouseBody);
+            this.world.addBody(this.mouseBody);
 */
     this.resetScene();
 
@@ -80,14 +80,14 @@ function Runner(renderer, app, settings = {}) {
 
 Runner.prototype.destroy = function() {
     this.pause = true;
-    this.space.clear();
+    this.world.clear();
     window.removeEventListener('resize', this.onResize);
 }
 
 Runner.prototype.resetScene = function() {
-    this.space.clear();
-    this.space.gravity.copy(this.settings.gravity);
-    this.app.init(this.space);
+    this.world.clear();
+    this.world.gravity.copy(this.settings.gravity);
+    this.app.init(this.world);
     this.initFrame();
 }
 
@@ -114,7 +114,7 @@ Runner.prototype.runFrame = function() {
 /*
     if (!mouseDown) {
         var p = this.canvasToWorld(mousePosition);
-        var body = this.space.findBodyByPoint(p);
+        var body = this.world.findBodyByPoint(p);
         domCanvas.style.cursor = body ? "pointer" : "default";
     }
 */
@@ -133,7 +133,7 @@ Runner.prototype.runFrame = function() {
 
         for (var maxSteps = 4; maxSteps > 0 && this.time.timeDelta >= h; maxSteps--) {
             var t0 = Date.now();
-            this.space.step(h, this.settings.velocityIterations, this.settings.positionIterations, this.settings.warmStarting, this.settings.allowSleep);
+            this.world.step(h, this.settings.velocityIterations, this.settings.positionIterations, this.settings.warmStarting, this.settings.allowSleep);
             stats.timeStep += Date.now() - t0;
             stats.stepCount++;
             this.time.timeDelta -= h;
@@ -170,8 +170,8 @@ Runner.prototype.drawFrame = function(frameTime) {
 	this.camera.bounds.set(this.canvasToWorld(new vec2(0, this.renderer.height)), this.canvasToWorld(new vec2(this.renderer.width, 0)));
 
 	// Check the visibility of shapes for all bodies
-	for (var i = 0; i < this.space.bodyArr.length; i++) {
-		var body = this.space.bodyArr[i];
+	for (var i = 0; i < this.world.bodyArr.length; i++) {
+		var body = this.world.bodyArr[i];
 		if (!body) continue;
 
 		body.visible = false;
@@ -195,8 +195,8 @@ Runner.prototype.drawFrame = function(frameTime) {
         this.renderer.clearBackground(this.camera, this.settings.backgroundColor)
 
 		// Draw static bodies
-		for (var i = 0; i < this.space.bodyArr.length; i++) {
-			var body = this.space.bodyArr[i];
+		for (var i = 0; i < this.world.bodyArr.length; i++) {
+			var body = this.world.bodyArr[i];
 			if (body && body.isStatic()) {
 
                 var body_color = bodyColor(body);
@@ -228,8 +228,8 @@ Runner.prototype.drawFrame = function(frameTime) {
 	this.renderer.beginDynamic(this.camera);
 
 	// Draw bodies except for static bodies
-	for (var i = 0; i < this.space.bodyArr.length; i++) {
-		var body = this.space.bodyArr[i];
+	for (var i = 0; i < this.world.bodyArr.length; i++) {
+		var body = this.world.bodyArr[i];
 		if (body && body.visible) {
 			if (!body.isStatic()) {
                 var body_color = bodyColor(body);
@@ -247,9 +247,9 @@ Runner.prototype.drawFrame = function(frameTime) {
 
 	// Draw joints
 	if (this.settings.showJoints) {
-		for (var i = 0; i < this.space.jointArr.length; i++) {
-			if (this.space.jointArr[i]) {
-				drawHelperJointAnchors(this.space.jointArr[i]);
+		for (var i = 0; i < this.world.jointArr.length; i++) {
+			if (this.world.jointArr[i]) {
+				drawHelperJointAnchors(this.world.jointArr[i]);
 			}
 		}
 	}

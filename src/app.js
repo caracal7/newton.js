@@ -40,7 +40,7 @@ import { ShapeTriangle, ShapeBox, ShapePoly } from "./shapes/shape_poly.js";
 import { ShapeCircle } from "./shapes/shape_circle.js";
 import { createConvexHull } from "./utils/util.js";
 
-import { Space } from "./shapes/space.js";
+import { World } from "./World.js";
 import { Body } from "./Body.js";
 import { stats } from "./utils/stats.js";
 
@@ -1957,7 +1957,7 @@ const App = function() {
 
 		collision.init();
 
-		space = new Space();
+		space = new World();
 
 		mouseBody = new Body(Body.KINETIC);
 		mouseBody.resetMassData();
@@ -3835,7 +3835,7 @@ const App = function() {
 			var dataURL = domCanvas.toDataURL();
 			ev.preventDefault();
 			break;
-		case 32: // Space
+		case 32: // World
 			if (!editorEnabled) {
 				onClickedPlayer("step");
 				ev.preventDefault();
