@@ -1,18 +1,36 @@
 {
-  "name": "physicsrus",
-  "version": "1.0.0",
-  "description": "Physics\"R\"us is 2D rigid body physics engine and intergrated WYSIWYG editor written in Javascript.",
-  "main": "index.js",
-  "directories": {
-    "lib": "lib"
-  },
+  "name": "newton.js",
+  "version": "0.0.0",
+  "description": "Javascript lightweight 2D rigid body physics engine",
+  "main": "dist/newton.cjs.js",
+  "browser": "dist/newton.esm.js",
+  "type": "module",
   "scripts": {
-    "start": "./node_modules/.bin/browser-sync start -s -w --directory --startPath ./play.html",
+    "start": "run-p dev:*",
+    "dev:build_esm": "./node_modules/.bin/esbuild src/index.js --format=esm --bundle --minify --target=chrome60,firefox60,safari12 --outfile=dist/newton.esm.js --watch",
+    "dev:demo": "./node_modules/.bin/browser-sync start -s -w --directory --startPath ./ui.html",
+    "build": "run-p build:*",
+    "build:iife": "./node_modules/.bin/esbuild src/iife.js --format=iife --bundle --minify --target=chrome60,firefox60,safari12 --outfile=dist/newton.js",
+    "build:cjs": "./node_modules/.bin/esbuild src/index.js --format=cjs  --bundle --minify --target=chrome60,firefox60,safari12 --outfile=dist/newton.cjs.js",
+    "build:esm": "./node_modules/.bin/esbuild src/index.js --format=esm  --bundle --minify --target=chrome60,firefox60,safari12 --outfile=dist/newton.esm.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "physics",
+    "rigid",
+    "collision",
+    "constraints",
+    "lightweight",
+    "tiny",
+    "matter-js",
+    "box2d"
+],
+  "author": "Dmitrii Vasilev",
+  "homepage": "newton.js.org",
+  "license": "MIT",
   "devDependencies": {
-    "browser-sync": "^3.0.2"
+    "browser-sync": "^3.0.2",
+    "esbuild": "^0.20.1",
+    "npm-run-all": "^4.1.5"
   }
 }

@@ -20,8 +20,6 @@ function bodyColor(body) {
 }
 
 function Runner(renderer, app, settings = {}) {
-    console.log('Runner',this)
-
     this.renderer = renderer;
     this.app = app;
 
@@ -63,14 +61,9 @@ function Runner(renderer, app, settings = {}) {
 
     this.onResize();
 
-
     collision.init();
     this.world = new World();
-/*
-            this.mouseBody = new Body(Body.KINETIC);
-            this.mouseBody.resetMassData();
-            this.world.addBody(this.mouseBody);
-*/
+
     this.resetScene();
 
     const update = () => {
@@ -81,10 +74,10 @@ function Runner(renderer, app, settings = {}) {
 }
 
 Runner.prototype.destroy = function() {
-    this.pause = true;
-    this.world.clear();
     window.removeEventListener('resize', this.onResize);
     window.removeEventListener('orientationchange', this.onResize);
+    this.pause = true;
+    this.world.clear();
 }
 
 Runner.prototype.resetScene = function() {

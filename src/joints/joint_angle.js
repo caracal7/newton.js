@@ -27,6 +27,9 @@
 // impulse = JT * lambda = [ 0, -lambda, 0, lambda ]
 //-------------------------------------------------------------------------------------------------
 
+import { Joint } from './joint.js';
+import { vec2 } from './../utils/math.js';
+
 const AngleJoint = function(body1, body2) {
 	Joint.call(this, Joint.TYPE_ANGLE, body1, body2, true);
 

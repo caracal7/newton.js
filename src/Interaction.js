@@ -183,8 +183,7 @@ function Interaction(runner) {
     	else if (this[event.type]) this[event.type](event);
     	event.preventDefault();
     }
-    //--------------------------------------------------------------------
-
+    //-------------------------------------------------------------------
     ["mousedown", "mousemove", "mouseup", "mouseleave", "mousewheel"]
         .forEach(event => this.runner.renderer.canvas.addEventListener(event, this[event]));
     this.runner.renderer.canvas.addEventListener("touchstart",  this.touchHandler);
@@ -195,6 +194,12 @@ function Interaction(runner) {
 }
 
 Interaction.prototype.destroy = function() {
+    ["mousedown", "mousemove", "mouseup", "mouseleave", "mousewheel"]
+        .forEach(event => this.runner.renderer.canvas.removeEventListener(event, this[event]));
+    this.runner.renderer.canvas.removeEventListener("touchstart",  this.touchHandler);
+    this.runner.renderer.canvas.removeEventListener("touchmove",   this.touchHandler);
+    this.runner.renderer.canvas.removeEventListener("touchend",    this.touchHandler);
+    this.runner.renderer.canvas.removeEventListener("touchcancel", this.touchHandler);
     this.removeJoint();
     this.runner.world.removeBody(this.mouseBody);
 }
