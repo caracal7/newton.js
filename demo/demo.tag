@@ -10,30 +10,38 @@
 <!import Web        from examples/web.js>
 <!import SeeSaw     from examples/seesaw.js>
 
+<!css demo.css>
+
+<header>
+    <span>
+        <label for="scene">Scene: </label>
+        <select id="scene" @input{
+            this.runner.app = this.demos[event.target.value](Newton);
+            this.runner.resetScene();
+        }>
+            <option value="Car">Car</option>
+            <option value="Bounce">Bounce</option>
+            <option value="Circles">Circles</option>
+            <option value="Crank">Crank</option>
+            <option value="Pyramid">Pyramid</option>
+            <option value="RagDoll">RagDoll</option>
+            <option value="Rope">Rope</option>
+            <option value="Web">Web</option>
+            <option value="SeeSaw">SeeSaw</option>
+        </select>
+    </span>
+</header>
+
 <canvas/>
 
 <!class>
     connected() {
+        this.demos = { Car, Bounce, Circles, Crank, Pyramid, RagDoll, Rope, Web, SeeSaw };
+
         const { Runner, CanvasRenderer, Interaction } = Newton;
-        const app       = SeeSaw(Newton);
-        const renderer  = new CanvasRenderer(this.$("canvas"));
-        const runner    = new Runner(renderer, app);
-        const pointer   = new Interaction(runner);
-    }
 
-<!style>
-    :host {
-        display: block;
-        width: 100%;
-        height: 100%;
-    }
-
-    *, :host {
-        box-sizing: border-box;
-    }
-
-    canvas {
-        border: 1px solid green;
-        width: 100%;
-        height: 100%;
+        const firstApp = Car(Newton);
+        const renderer = new CanvasRenderer(this.$("canvas"));
+        this.runner = new Runner(renderer, firstApp);
+        new Interaction(this.runner);
     }
