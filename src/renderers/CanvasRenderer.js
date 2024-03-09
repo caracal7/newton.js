@@ -346,15 +346,21 @@ CanvasRenderer.prototype.drawShape = function(shape, isStatic, lineWidth, outlin
 	}
 }
 
-CanvasRenderer.prototype.clearBackground = function(camera, backgroundColor) {
-	this.bg.ctx.fillStyle = backgroundColor;
-	this.bg.ctx.fillRect(0, 0, this.width, this.height);
-	this.bg.ctx.setTransform(camera.scale * meter2pixel(1), 0, 0, -(camera.scale * meter2pixel(1)), this.width * 0.5 - camera.origin.x, this.height + camera.origin.y);
-}
-
 CanvasRenderer.prototype.copyBackground = function(x, y, w, h, x1, y1, w1, h1) {
 	this.fg.ctx.drawImage(this.bg.canvas, x, y, w, h, x1, y1, w1, h1);
 };
+
+CanvasRenderer.prototype.beginStatic = function(camera, backgroundColor) {
+	this.bg.ctx.fillStyle = backgroundColor;
+	this.bg.ctx.fillRect(0, 0, this.width, this.height);
+	this.bg.ctx.save();
+	this.bg.ctx.setTransform(camera.scale * meter2pixel(1), 0, 0, -(camera.scale * meter2pixel(1)), this.width * 0.5 - camera.origin.x, this.height + camera.origin.y);
+}
+
+CanvasRenderer.prototype.endStatic = function() {
+	this.bg.ctx.restore();
+};
+
 
 CanvasRenderer.prototype.beginDynamic = function(camera) {
 	this.fg.ctx.save();
@@ -369,6 +375,14 @@ CanvasRenderer.prototype.endDynamic = function() {
 CanvasRenderer.prototype.resize = function() {
 	this.width  = this.fg.canvas.width  = this.bg.canvas.width  = this.canvas.width  = this.canvas.offsetWidth;
 	this.height = this.fg.canvas.height = this.bg.canvas.height = this.canvas.height = this.canvas.offsetHeight;
+}
+
+CanvasRenderer.prototype.drawHelperJointAnchors = function(p1, p2, radius, PIXEL_UNIT, jointAnchorColor) {
+	var rvec = new vec2(radius, 0);
+	var uvec = new vec2(0, radius);
+	drawBox(this.fg.ctx, p1, rvec, uvec, 0, "", jointAnchorColor);
+	drawBox(this.fg.ctx, p2, rvec, uvec, 0, "", jointAnchorColor);
+	drawLine(this.fg.ctx, p1, p2, PIXEL_UNIT, jointAnchorColor);
 }
 
 export {

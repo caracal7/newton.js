@@ -35,7 +35,7 @@ function Runner(renderer, app, settings = {}) {
     	enableDirtyBounds: true,
     	showJoints: true,
         backgroundColor: "rgb(95, 105, 118)",
-    	jointAnchorColor: "#004000",
+    	jointAnchorColor: "#11cf00",
     }, settings);
 
     // canvas rendering stuffs
@@ -59,6 +59,8 @@ function Runner(renderer, app, settings = {}) {
     }
 
     window.addEventListener('resize', this.onResize);
+    window.addEventListener('orientationchange', this.onResize);
+
     this.onResize();
 
 
@@ -82,6 +84,7 @@ Runner.prototype.destroy = function() {
     this.pause = true;
     this.world.clear();
     window.removeEventListener('resize', this.onResize);
+    window.removeEventListener('orientationchange', this.onResize);
 }
 
 Runner.prototype.resetScene = function() {
@@ -93,12 +96,12 @@ Runner.prototype.resetScene = function() {
 
 Runner.prototype.initFrame = function() {
     this.time = {
-        fps: 0,
+        fps:            0,
         fps_frameCount: 0,
-        fps_time: 0,
-        frameCount: 0,
-        lastTime: Date.now(),
-        timeDelta: 0
+        fps_time:       0,
+        frameCount:     0,
+        lastTime:       Date.now(),
+        timeDelta:      0
     }
     // Set dirtyBounds to full screen
     this.dirtyBounds.set(this.canvasToWorld(new vec2(0, this.renderer.height)), this.canvasToWorld(new vec2(this.renderer.width, 0)));
@@ -172,8 +175,6 @@ Runner.prototype.drawFrame = function(frameTime) {
 	// Check the visibility of shapes for all bodies
 	for (var i = 0; i < this.world.bodyArr.length; i++) {
 		var body = this.world.bodyArr[i];
-		if (!body) continue;
-
 		body.visible = false;
 
 		for (var j = 0; j < body.shapeArr.length; j++) {
@@ -192,12 +193,12 @@ Runner.prototype.drawFrame = function(frameTime) {
 	// Update whole background canvas if we needed
 	if (this.static_outdated) {
 		this.static_outdated = false;
-        this.renderer.clearBackground(this.camera, this.settings.backgroundColor)
+        this.renderer.beginStatic(this.camera, this.settings.backgroundColor)
 
 		// Draw static bodies
 		for (var i = 0; i < this.world.bodyArr.length; i++) {
 			var body = this.world.bodyArr[i];
-			if (body && body.isStatic()) {
+			if (body.isStatic()) {
 
                 var body_color = bodyColor(body);
                 for (var k = 0; k < body.shapeArr.length; k++) {
@@ -207,6 +208,8 @@ Runner.prototype.drawFrame = function(frameTime) {
         	    }
 			}
 		}
+        this.renderer.endStatic()
+
 	}
 
 	// Transform dirtyBounds world to screen
@@ -230,7 +233,7 @@ Runner.prototype.drawFrame = function(frameTime) {
 	// Draw bodies except for static bodies
 	for (var i = 0; i < this.world.bodyArr.length; i++) {
 		var body = this.world.bodyArr[i];
-		if (body && body.visible) {
+		if (body.visible) {
 			if (!body.isStatic()) {
                 var body_color = bodyColor(body);
                 for (var k = 0; k < body.shapeArr.length; k++) {
@@ -238,8 +241,7 @@ Runner.prototype.drawFrame = function(frameTime) {
         	        if (!shape.visible) continue;
                     this.renderer.drawShape(shape, false, PIXEL_UNIT, "#000", body_color);
     	            var expand = PIXEL_UNIT * 3;
-    	            var bounds = Bounds.expand(shape.bounds, expand, expand);
-    	            this.dirtyBounds.addBounds(bounds);
+    	            this.dirtyBounds.addBounds(Bounds.expand(shape.bounds, expand, expand));
         	    }
 			}
 		}
@@ -248,8 +250,21 @@ Runner.prototype.drawFrame = function(frameTime) {
 	// Draw joints
 	if (this.settings.showJoints) {
 		for (var i = 0; i < this.world.jointArr.length; i++) {
-			if (this.world.jointArr[i]) {
-				drawHelperJointAnchors(this.world.jointArr[i]);
+            var joint = this.world.jointArr[i];
+			if(joint) {
+                var p1 = joint.getWorldAnchor1();
+            	var p2 = joint.getWorldAnchor2();
+				this.renderer.drawHelperJointAnchors(p1, p2, HELPER_JOINT_ANCHOR_RADIUS, PIXEL_UNIT, this.settings.jointAnchorColor);
+
+                var bounds = new Bounds;
+                bounds.addExtents(p1, HELPER_JOINT_ANCHOR_RADIUS, HELPER_JOINT_ANCHOR_RADIUS);
+                bounds.addExtents(p2, HELPER_JOINT_ANCHOR_RADIUS, HELPER_JOINT_ANCHOR_RADIUS);
+                bounds.addPoint(p1);
+                bounds.addPoint(p2);
+                if (!joint.body1.isStatic() || !joint.body2.isStatic()) {
+                    bounds.expand(PIXEL_UNIT * 2, PIXEL_UNIT * 2);
+                    this.dirtyBounds.addBounds(bounds);
+                }
 			}
 		}
 	}

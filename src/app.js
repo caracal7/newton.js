@@ -143,7 +143,7 @@ const App = function() {
 		bounds: new Bounds,
 		scroll: new vec2(0, 0)
 	};
-	var dirtyBounds = new Bounds; // dirty bounds in world space
+	var dirtyBounds = new Bounds; // dirty bounds in world world
 
 	var pause = false;
 	var step = false;
@@ -157,7 +157,7 @@ const App = function() {
 	var showSettings = false;
 	var showHelp = false;
 
-	var space;
+	var world;
 	var demoArr = [DemoCircles, DemoCar, DemoRagDoll, DemoSeeSaw, DemoPyramid, DemoCrank, DemoRope, DemoWeb, DemoBounce];
 	var sceneNameArr = [];
 	var sceneIndex;
@@ -543,7 +543,7 @@ const App = function() {
 				if (selectionMode == SM_VERTICES) {
 					for (var i = 0; i < selectedFeatureArr.length; i++) {
 						var vertexId = selectedFeatureArr[i];
-						var shape = space.shapeById((vertexId >> 16) & 0xFFFF);
+						var shape = world.shapeById((vertexId >> 16) & 0xFFFF);
 						var body = shape.body;
 						var index = vertexId & 0xFFFF;
 
@@ -561,7 +561,7 @@ const App = function() {
 
 					for (var i = 0; i < selectedFeatureArr.length; i++) {
 						var edgeId = selectedFeatureArr[i];
-						var shape = space.shapeById((edgeId >> 16) & 0xFFFF);
+						var shape = world.shapeById((edgeId >> 16) & 0xFFFF);
 						var body = shape.body;
 						var index = edgeId & 0xFFFF;
 
@@ -634,7 +634,7 @@ const App = function() {
 							var body = selectedFeatureArr[i];
 							var dup = body.duplicate();
 
-							space.addBody(dup);
+							world.addBody(dup);
 							selectedFeatureArr[i] = dup;
 						}
 					}
@@ -655,7 +655,7 @@ const App = function() {
 				else if (selectionMode == SM_JOINTS) {
 					for (var i = 0; i < selectedFeatureArr.length; i++) {
 						var jointId = selectedFeatureArr[i];
-						var joint = space.jointById((jointId >> 16) & 0xFFFF);
+						var joint = world.jointById((jointId >> 16) & 0xFFFF);
 						var anchorIndex = jointId & 0xFFFF;
 
 						if (anchorIndex == 0) {
@@ -741,7 +741,7 @@ const App = function() {
 				if (selectionMode == SM_VERTICES) {
 					for (var i = 0; i < selectedFeatureArr.length; i++) {
 						var vertex = selectedFeatureArr[i];
-						var shape = space.shapeById((vertex >> 16) & 0xFFFF);
+						var shape = world.shapeById((vertex >> 16) & 0xFFFF);
 						var body = shape.body;
 						var index = vertex & 0xFFFF;
 
@@ -760,7 +760,7 @@ const App = function() {
 
 					for (var i = 0; i < selectedFeatureArr.length; i++) {
 						var edge = selectedFeatureArr[i];
-						var shape = space.shapeById((edge >> 16) & 0xFFFF);
+						var shape = world.shapeById((edge >> 16) & 0xFFFF);
 						var body = shape.body;
 						var index = edge & 0xFFFF;
 
@@ -835,7 +835,7 @@ const App = function() {
 							var body = selectedFeatureArr[i];
 							var dup = body.duplicate();
 
-							space.addBody(dup);
+							world.addBody(dup);
 							selectedFeatureArr[i] = dup;
 						}
 					}
@@ -857,7 +857,7 @@ const App = function() {
 				else if (selectionMode == SM_JOINTS) {
 					for (var i = 0; i < selectedFeatureArr.length; i++) {
 						var jointId = selectedFeatureArr[i];
-						var joint = space.jointById((jointId >> 16) & 0xFFFF);
+						var joint = world.jointById((jointId >> 16) & 0xFFFF);
 						var anchorIndex = jointId & 0xFFFF;
 
 						if (anchorIndex == 0) {
@@ -991,7 +991,7 @@ const App = function() {
 				if (selectionMode == SM_VERTICES) {
 					for (var i = 0; i < selectedFeatureArr.length; i++) {
 						var vertexId = selectedFeatureArr[i];
-						var shape = space.shapeById((vertexId >> 16) & 0xFFFF);
+						var shape = world.shapeById((vertexId >> 16) & 0xFFFF);
 						var body = shape.body;
 						var index = vertexId & 0xFFFF;
 
@@ -1008,7 +1008,7 @@ const App = function() {
 				else if (selectionMode == SM_EDGES) {
 					for (var i = 0; i < selectedFeatureArr.length; i++) {
 						var edgeId = selectedFeatureArr[i];
-						var shape = space.shapeById((edgeId >> 16) & 0xFFFF);
+						var shape = world.shapeById((edgeId >> 16) & 0xFFFF);
 						var body = shape.body;
 						var index = edgeId & 0xFFFF;
 
@@ -1072,7 +1072,7 @@ const App = function() {
 				else if (selectionMode == SM_JOINTS) {
 					for (var i = 0; i < selectedFeatureArr.length; i++) {
 						var jointId = selectedFeatureArr[i];
-						var joint = space.jointById((jointId >> 16) & 0xFFFF);
+						var joint = world.jointById((jointId >> 16) & 0xFFFF);
 						var anchorIndex = jointId & 0xFFFF;
 
 						if (anchorIndex == 0) {
@@ -1120,14 +1120,14 @@ const App = function() {
 				shape.u = DEFAULT_FRICTION;
 				creatingBody.addShape(shape);
 				creatingBody.resetMassData();
-				space.addBody(creatingBody);
+				world.addBody(creatingBody);
 			}
 		}
 		editModeEventArr[EM_CREATE_CIRCLE].mouseUp = function(ev) {
 			if (creatingBody) {
 				var shape = creatingBody.shapeArr[0];
 				if (shape.area() < 0.0001) {
-					space.removeBody(creatingBody);
+					world.removeBody(creatingBody);
 					shape = null;//delete shape; //XXX
 					creatingBody = null;//delete creatingBody; //XXX
 				}
@@ -1179,14 +1179,14 @@ const App = function() {
 				shape.u = DEFAULT_FRICTION;
 				creatingBody.addShape(shape);
 				creatingBody.resetMassData();
-				space.addBody(creatingBody);
+				world.addBody(creatingBody);
 			}
 		}
 		editModeEventArr[EM_CREATE_SEGMENT].mouseUp = function(ev) {
 			if (creatingBody) {
 				var shape = creatingBody.shapeArr[0];
 				if (shape.area() < 0.0001) {
-					space.removeBody(creatingBody);
+					world.removeBody(creatingBody);
 					shape = null;//delete shape; //XXX
 					creatingBody = null;//delete creatingBody; //XXX
 				}
@@ -1238,14 +1238,14 @@ const App = function() {
 				shape.u = DEFAULT_FRICTION;
 				creatingBody.addShape(shape);
 				creatingBody.resetMassData();
-				space.addBody(creatingBody);
+				world.addBody(creatingBody);
 			}
 		}
 		editModeEventArr[EM_CREATE_TRIANGLE].mouseUp = function(ev) {
 			if (creatingBody) {
 				var shape = creatingBody.shapeArr[0];
 				if (shape.area() < 0.0001) {
-					space.removeBody(creatingBody);
+					world.removeBody(creatingBody);
 					shape = null;//delete shape; //XXX
 					creatingBody = null;//delete creatingBody; //XXX
 				}
@@ -1315,14 +1315,14 @@ const App = function() {
 				shape.u = DEFAULT_FRICTION;
 				creatingBody.addShape(shape);
 				creatingBody.resetMassData();
-				space.addBody(creatingBody);
+				world.addBody(creatingBody);
 			}
 		}
 		editModeEventArr[EM_CREATE_BOX].mouseUp = function(ev) {
 			if (creatingBody) {
 				var shape = creatingBody.shapeArr[0];
 				if (shape.area() < 0.0001) {
-					space.removeBody(creatingBody);
+					world.removeBody(creatingBody);
 					shape = null;//delete shape; //XXX
 					creatingBody = null;//delete creatingBody; //XXX
 				}
@@ -1394,14 +1394,14 @@ const App = function() {
 				shape.u = DEFAULT_FRICTION;
 				creatingBody.addShape(shape);
 				creatingBody.resetMassData();
-				space.addBody(creatingBody);
+				world.addBody(creatingBody);
 			}
 		}
 		editModeEventArr[EM_CREATE_HEXAGON].mouseUp = function(ev) {
 			if (creatingBody) {
 				var shape = creatingBody.shapeArr[0];
 				if (shape.area() < 0.0001) {
-					space.removeBody(creatingBody);
+					world.removeBody(creatingBody);
 					shape = null;//delete shape; //XXX
 					creatingBody = null;//delete creatingBody; //XXX
 				}
@@ -1472,13 +1472,13 @@ const App = function() {
 				shape.u = DEFAULT_FRICTION;
 				creatingBody.addShape(shape);
 				creatingBody.resetMassData();
-				space.addBody(creatingBody);
+				world.addBody(creatingBody);
 			}
 		}
 		editModeEventArr[EM_CREATE_BRUSH].mouseUp = function(ev) {
 			var shape = creatingBody.shapeArr[0];
 			if (shape.area() < 0.0001) {
-				space.removeBody(creatingBody);
+				world.removeBody(creatingBody);
 				shape = null;//delete shape; //XXX
 				creatingBody = null;//delete creatingBody; //XXX
 			}
@@ -1528,7 +1528,7 @@ const App = function() {
 					var body2 = selectedFeatureArr[1];
 
 					creatingJoint = new AngleJoint(body1, body2);
-					space.addJoint(creatingJoint);
+					world.addJoint(creatingJoint);
 				}
 
 				creatingJoint = null;
@@ -1566,7 +1566,7 @@ const App = function() {
 					var body2 = selectedFeatureArr[1];
 
 					creatingJoint = new RevoluteJoint(body1, body2, p);
-					space.addJoint(creatingJoint);
+					world.addJoint(creatingJoint);
 				}
 			}
 		}
@@ -1608,7 +1608,7 @@ const App = function() {
 					var body2 = selectedFeatureArr[1];
 
 					creatingJoint = new WeldJoint(body1, body2, p);
-					space.addJoint(creatingJoint);
+					world.addJoint(creatingJoint);
 				}
 			}
 		}
@@ -1650,7 +1650,7 @@ const App = function() {
 					var body2 = selectedFeatureArr[1];
 
 					creatingJoint = new WheelJoint(body1, body2, p, p);
-					space.addJoint(creatingJoint);
+					world.addJoint(creatingJoint);
 				}
 			}
 		}
@@ -1692,7 +1692,7 @@ const App = function() {
 					var body2 = selectedFeatureArr[1];
 
 					creatingJoint = new PrismaticJoint(body1, body2, p, p);
-					space.addJoint(creatingJoint);
+					world.addJoint(creatingJoint);
 				}
 			}
 		}
@@ -1734,7 +1734,7 @@ const App = function() {
 					var body2 = selectedFeatureArr[1];
 
 					creatingJoint = new DistanceJoint(body1, body2, p, p);
-					space.addJoint(creatingJoint);
+					world.addJoint(creatingJoint);
 				}
 			}
 		}
@@ -1776,7 +1776,7 @@ const App = function() {
 					var body2 = selectedFeatureArr[1];
 
 					creatingJoint = new RopeJoint(body1, body2, p, p);
-					space.addJoint(creatingJoint);
+					world.addJoint(creatingJoint);
 				}
 			}
 		}
@@ -1834,12 +1834,12 @@ const App = function() {
 						}
 
 						if (joint.body1 == joint.body2) {
-							space.removeJoint(joint);
+							world.removeJoint(joint);
 							joint = null;//delete joint; //XXX
 						}
 					}
 
-					space.removeBody(body);
+					world.removeBody(body);
 				}
 
 				primaryBody.resetMassData();
@@ -1870,7 +1870,7 @@ const App = function() {
 				for (var i = 0; i < selectedFeatureArr.length; i++) {
 					var edgeId = selectedFeatureArr[i];
 					var shape_id = (edgeId >> 16) & 0xFFFF;
-					var shape = space.shapeById(shape_id);
+					var shape = world.shapeById(shape_id);
 
 					if (shape_id != prev_shape_id) {
 						addedCount = 0;
@@ -1957,11 +1957,11 @@ const App = function() {
 
 		collision.init();
 
-		space = new World();
+		world = new World();
 
 		mouseBody = new Body(Body.KINETIC);
 		mouseBody.resetMassData();
-		space.addBody(mouseBody);
+		world.addBody(mouseBody);
 
 		resetScene();
 
@@ -2071,7 +2071,7 @@ const App = function() {
 			if (selectionMode == SM_VERTICES) {
 				if (selectedFeatureArr.length == 1) {
 					var vertexId = selectedFeatureArr[0];
-					var shape = space.shapeById((vertexId >> 16) & 0xFFFF);
+					var shape = world.shapeById((vertexId >> 16) & 0xFFFF);
 					var index = vertexId & 0xFFFF;
 
 					domVertexInspector.style.display = "block";
@@ -2091,7 +2091,7 @@ const App = function() {
 			else if (selectionMode == SM_EDGES) {
 				if (selectedFeatureArr.length == 1) {
 					var edgeId = selectedFeatureArr[0];
-					var shape = space.shapeById((edgeId >> 16) & 0xFFFF);
+					var shape = world.shapeById((edgeId >> 16) & 0xFFFF);
 					var index = edgeId & 0xFFFF;
 
 					domEdgeInspector.style.display = "block";
@@ -2201,7 +2201,7 @@ const App = function() {
 			else if (selectionMode == SM_JOINTS) {
 				if (selectedFeatureArr.length == 1) {
 					var jointId = selectedFeatureArr[0];
-					var joint = space.jointById((jointId >> 16) & 0xFFFF);
+					var joint = world.jointById((jointId >> 16) & 0xFFFF);
 					var anchorIndex = jointId & 0xFFFF;
 
 					domJointInspector.style.display = "block";
@@ -2378,23 +2378,23 @@ const App = function() {
 	function loadSceneFromServer(name) {
 		var uri = "scenes/" + encodeURIComponent(name);
 		httpGetText(uri, false, function(text) {
-			space.create(text);
+			world.create(text);
 		});
 	}
 
 	function saveSceneToServer(name) {
-		var text = JSON.stringify(space, null, "\t");
+		var text = JSON.stringify(world, null, "\t");
 		var postData = "action=save&filename=" + encodeURIComponent(name) + "&text=" + encodeURIComponent(text);
 		httpPostText("scene.rb", false, postData, function(text) {});
 	}
 
 	function resetScene() {
-		space.clear();
-		space.gravity.copy(gravity);
+		world.clear();
+		world.gravity.copy(gravity);
 
 		if (sceneIndex < demoArr.length) {
 			const demo = demoArr[sceneIndex];
-			demo.init(space);
+			demo.init(world);
 		}
 		else {
 			demo = null;
@@ -2463,7 +2463,7 @@ const App = function() {
 			if (!editorEnabled) {
 				if (!mouseDown) {
 					var p = canvasToWorld(mousePosition);
-					var body = space.findBodyByPoint(p);
+					var body = world.findBodyByPoint(p);
 					domCanvas.style.cursor = body ? "pointer" : "default";
 				}
 
@@ -2482,7 +2482,7 @@ const App = function() {
 
 					for (var maxSteps = 4; maxSteps > 0 && timeDelta >= h; maxSteps--) {
 						var t0 = Date.now();
-						space.step(h, velocityIterations, positionIterations, warmStarting, allowSleep);
+						world.step(h, velocityIterations, positionIterations, warmStarting, allowSleep);
 						stats.timeStep += Date.now() - t0;
 						stats.stepCount++;
 
@@ -2539,7 +2539,7 @@ const App = function() {
 				domInfo.innerHTML =
 					["fps:", fps.toFixed(1), "tm_draw:", stats.timeDrawFrame, "step_cnt:", stats.stepCount, "tm_step:", stats.timeStep, "<br />"].join(" ") +
 					["tm_col:", stats.timeCollision, "tm_init_sv:", stats.timeInitSolver, "tm_vel_sv:", stats.timeVelocitySolver, "tm_pos_sv:", stats.timePositionSolver, "<br />"].join(" ") +
-					["bodies:", space.bodyArr.length, "joints:", space.jointArr.length, "contacts:", space.numContacts, "pos_iters:", stats.positionIterations].join(" ");
+					["bodies:", world.bodyArr.length, "joints:", world.jointArr.length, "contacts:", world.numContacts, "pos_iters:", stats.positionIterations].join(" ");
 			}
 		}
 		else {
@@ -2552,8 +2552,8 @@ const App = function() {
 		camera.bounds.set(canvasToWorld(new vec2(0, domCanvas.height)), canvasToWorld(new vec2(domCanvas.width, 0)));
 
 		// Check the visibility of shapes for all bodies
-		for (var i = 0; i < space.bodyArr.length; i++) {
-			var body = space.bodyArr[i];
+		for (var i = 0; i < world.bodyArr.length; i++) {
+			var body = world.bodyArr[i];
 			if (!body) {
 				continue;
 			}
@@ -2588,8 +2588,8 @@ const App = function() {
 			}
 			else {
 				// Draw static bodies
-				for (var i = 0; i < space.bodyArr.length; i++) {
-					var body = space.bodyArr[i];
+				for (var i = 0; i < world.bodyArr.length; i++) {
+					var body = world.bodyArr[i];
 					if (body && body.isStatic()) {
 						drawBody(bg.ctx, body, PIXEL_UNIT, "#000", bodyColor(body));
 					}
@@ -2634,8 +2634,8 @@ const App = function() {
 		dirtyBounds.clear();
 
 		// Draw bodies except for static bodies
-		for (var i = 0; i < space.bodyArr.length; i++) {
-			var body = space.bodyArr[i];
+		for (var i = 0; i < world.bodyArr.length; i++) {
+			var body = world.bodyArr[i];
 			if (body && body.visible) {
 				if (editorEnabled || (!editorEnabled && !body.isStatic())) {
 					drawBody(fg.ctx, body, PIXEL_UNIT, "#000", bodyColor(body));
@@ -2646,17 +2646,17 @@ const App = function() {
 		// Draw joints
 		if (!editorEnabled) {
 			if (showJoints) {
-				for (var i = 0; i < space.jointArr.length; i++) {
-					if (space.jointArr[i]) {
-						drawHelperJointAnchors(fg.ctx, space.jointArr[i]);
+				for (var i = 0; i < world.jointArr.length; i++) {
+					if (world.jointArr[i]) {
+						drawHelperJointAnchors(fg.ctx, world.jointArr[i]);
 					}
 				}
 			}
 
 			if (showAxis) {
-				for (var i = 0; i < space.bodyArr.length; i++) {
-					if (space.bodyArr[i]) {
-						drawHelperBodyAxis(fg.ctx, space.bodyArr[i]);
+				for (var i = 0; i < world.bodyArr.length; i++) {
+					if (world.bodyArr[i]) {
+						drawHelperBodyAxis(fg.ctx, world.bodyArr[i]);
 					}
 				}
 			}
@@ -2667,8 +2667,8 @@ const App = function() {
 
 		// Draw contacts
 		if (showContacts) {
-			for (var i = 0; i < space.contactSolverArr.length; i++) {
-				var contactSolver = space.contactSolverArr[i];
+			for (var i = 0; i < world.contactSolverArr.length; i++) {
+				var contactSolver = world.contactSolverArr[i];
 				for (var j = 0; j < contactSolver.contactArr.length; j++) {
 					var con = contactSolver.contactArr[j];
 					var offset = new vec2(PIXEL_UNIT * 2, PIXEL_UNIT * 2);
@@ -2819,22 +2819,22 @@ const App = function() {
 	}
 
 	function drawEditorHelpers(ctx) {
-		for (var i = 0; i < space.bodyArr.length; i++) {
-			if (space.bodyArr[i]) {
-				drawHelperBodyAxis(ctx, space.bodyArr[i]);
+		for (var i = 0; i < world.bodyArr.length; i++) {
+			if (world.bodyArr[i]) {
+				drawHelperBodyAxis(ctx, world.bodyArr[i]);
 			}
 		}
 
-		for (var i = 0; i < space.jointArr.length; i++) {
-			if (space.jointArr[i]) {
-				drawHelperJointAnchors(ctx, space.jointArr[i]);
+		for (var i = 0; i < world.jointArr.length; i++) {
+			if (world.jointArr[i]) {
+				drawHelperJointAnchors(ctx, world.jointArr[i]);
 			}
 		}
 
 		if (selectionMode == SM_VERTICES) {
 			// Draw vertices
-			for (var i = 0; i < space.bodyArr.length; i++) {
-				var body = space.bodyArr[i];
+			for (var i = 0; i < world.bodyArr.length; i++) {
+				var body = world.bodyArr[i];
 				if (!body) {
 					continue;
 				}
@@ -2867,7 +2867,7 @@ const App = function() {
 			// Draw selected vertices
 			for (var i = 0; i < selectedFeatureArr.length; i++) {
 				var vertexId = selectedFeatureArr[i];
-				var shape = space.shapeById((vertexId >> 16) & 0xFFFF);
+				var shape = world.shapeById((vertexId >> 16) & 0xFFFF);
 				if (shape && shape.visible) {
 					var index = vertexId & 0xFFFF;
 					var p = drawHelperShapeVertex(ctx, shape, index, selectionColor);
@@ -2878,7 +2878,7 @@ const App = function() {
 			// Draw highlighted vertex
 			for (var i = 0; i < highlightFeatureArr.length; i++) {
 				var vertexId = highlightFeatureArr[i];
-				var shape = space.shapeById((vertexId >> 16) & 0xFFFF);
+				var shape = world.shapeById((vertexId >> 16) & 0xFFFF);
 				if (shape && shape.visible) {
 					var index = vertexId & 0xFFFF;
 					var p = drawHelperShapeVertex(ctx, shape, index, highlightColor);
@@ -2890,7 +2890,7 @@ const App = function() {
 			// Draw selected edges
 			for (var i = 0; i < selectedFeatureArr.length; i++) {
 				var edgeId = selectedFeatureArr[i];
-				var shape = space.shapeById((edgeId >> 16) & 0xFFFF);
+				var shape = world.shapeById((edgeId >> 16) & 0xFFFF);
 				if (shape && shape.visible) {
 					var index1 = edgeId & 0xFFFF;
 					var index2 = (index1 + 1) % shape.tverts.length;
@@ -2907,7 +2907,7 @@ const App = function() {
 			// Draw highlighted edges
 			for (var i = 0; i < highlightFeatureArr.length; i++) {
 				var edgeId = highlightFeatureArr[i];
-				var shape = space.shapeById((edgeId >> 16) & 0xFFFF);
+				var shape = world.shapeById((edgeId >> 16) & 0xFFFF);
 				if (shape && shape.visible) {
 					var index1 = edgeId & 0xFFFF;
 					var index2 = (index1 + 1) % shape.tverts.length;
@@ -2969,7 +2969,7 @@ const App = function() {
 			// Draw selected joints
 			for (var i = 0; i < selectedFeatureArr.length; i++) {
 				var jointId = selectedFeatureArr[i];
-				var joint = space.jointById((jointId >> 16) & 0xFFFF);
+				var joint = world.jointById((jointId >> 16) & 0xFFFF);
 				var anchorIndex = jointId & 0xFFFF;
 
 				if (joint) {
@@ -2987,7 +2987,7 @@ const App = function() {
 			// Draw highlighted joint
 			for (var i = 0; i < highlightFeatureArr.length; i++) {
 				var jointId = highlightFeatureArr[i];
-				var joint = space.jointById((jointId >> 16) & 0xFFFF);
+				var joint = world.jointById((jointId >> 16) & 0xFFFF);
 				var anchorIndex = jointId & 0xFFFF;
 
 				var body1 = joint.body1;
@@ -3275,19 +3275,19 @@ const App = function() {
 
 	function getFeatureByPoint(p) {
 		if (selectionMode == SM_VERTICES) {
-			return space.findVertexByPoint(p, SELECTABLE_POINT_DIST_THREHOLD, selectedFeatureArr[0]);
+			return world.findVertexByPoint(p, SELECTABLE_POINT_DIST_THREHOLD, selectedFeatureArr[0]);
 		}
 		else if (selectionMode == SM_EDGES) {
-			return space.findEdgeByPoint(p, SELECTABLE_LINE_DIST_THREHOLD, selectedFeatureArr[0]);
+			return world.findEdgeByPoint(p, SELECTABLE_LINE_DIST_THREHOLD, selectedFeatureArr[0]);
 		}
 		else if (selectionMode == SM_SHAPES) {
-			return space.findShapeByPoint(p, selectedFeatureArr[0]);
+			return world.findShapeByPoint(p, selectedFeatureArr[0]);
 		}
 		else if (selectionMode == SM_BODIES) {
-			return space.findBodyByPoint(p, selectedFeatureArr[0]);
+			return world.findBodyByPoint(p, selectedFeatureArr[0]);
 		}
 		else if (selectionMode == SM_JOINTS) {
-			return space.findJointByPoint(p, SELECTABLE_POINT_DIST_THREHOLD, selectedFeatureArr[0])
+			return world.findJointByPoint(p, SELECTABLE_POINT_DIST_THREHOLD, selectedFeatureArr[0])
 		}
 
 		console.error("getFeatureByPoint");
@@ -3332,7 +3332,7 @@ const App = function() {
 
 			for (var i = 0; i < selectedFeatureArr.length; i++) {
 				var vertexId = selectedFeatureArr[i];
-				var shape = space.shapeById((vertexId >> 16) & 0xFFFF);
+				var shape = world.shapeById((vertexId >> 16) & 0xFFFF);
 				var index = vertexId & 0xFFFF;
 				var v = getShapeVertex(shape, index);
 
@@ -3347,7 +3347,7 @@ const App = function() {
 
 			for (var i = 0; i < selectedFeatureArr.length; i++) {
 				var edgeId = selectedFeatureArr[i];
-				var shape = space.shapeById((edgeId >> 16) & 0xFFFF);
+				var shape = world.shapeById((edgeId >> 16) & 0xFFFF);
 				var index = edgeId & 0xFFFF;
 				var v1 = getShapeVertex(shape, index);
 				var v2 = getShapeVertex(shape, index + 1);
@@ -3388,7 +3388,7 @@ const App = function() {
 
 			for (var i = 0; i < selectedFeatureArr.length; i++) {
 				var jointId = selectedFeatureArr[i];
-				var joint = space.jointById((jointId >> 16) & 0xFFFF);
+				var joint = world.jointById((jointId >> 16) & 0xFFFF);
 				var anchorIndex = jointId & 0xFFFF;
 
 				if (anchorIndex == 0) {
@@ -3467,7 +3467,7 @@ const App = function() {
 			body.cacheData();
 		}
 		else {
-			space.removeBody(body);
+			world.removeBody(body);
 		}
 	}
 
@@ -3510,20 +3510,20 @@ const App = function() {
 		if (!editorEnabled) {
 			// Remove previous mouse joint
 			if (mouseJoint) {
-				space.removeJoint(mouseJoint);
+				world.removeJoint(mouseJoint);
 				mouseJoint = null;
 			}
 
 			var p = canvasToWorld(pos);
 
 			// If we picked shape then create mouse joint
-			var body = space.findBodyByPoint(p);
+			var body = world.findBodyByPoint(p);
 			if (body) {
 				mouseBody.p.copy(p);
 				mouseBody.syncTransform();
 				mouseJoint = new MouseJoint(mouseBody, body, p);
 				mouseJoint.maxForce = body.m * 1000;
-				space.addJoint(mouseJoint);
+				world.addJoint(mouseJoint);
 			}
 		}
 		else {
@@ -3547,7 +3547,7 @@ const App = function() {
 
 		if (!editorEnabled) {
 			if (mouseJoint) {
-				space.removeJoint(mouseJoint);
+				world.removeJoint(mouseJoint);
 				mouseJoint = null;
 			}
 		}
@@ -3615,7 +3615,7 @@ const App = function() {
 
 	function onMouseLeave(ev) {
 		if (mouseJoint) {
-			space.removeJoint(mouseJoint);
+			world.removeJoint(mouseJoint);
 			mouseJoint = null;
 		}
 	}
@@ -3637,7 +3637,7 @@ const App = function() {
 				if (isValidFeature(feature)) {
 					if (selectionMode == SM_VERTICES) {
 						var shape_id = (feature >> 16) & 0xFFFF;
-						var shape = space.shapeById(shape_id);
+						var shape = world.shapeById(shape_id);
 
 						for (var i = 0; i < shape.tverts.length; i++) {
 							var vertexId = (shape_id << 16) | i;
@@ -3646,7 +3646,7 @@ const App = function() {
 					}
 					else if (selectionMode == SM_EDGES) {
 						var shape_id = (feature >> 16) & 0xFFFF;
-						var shape = space.shapeById(shape_id);
+						var shape = world.shapeById(shape_id);
 
 						for (var i = 0; i < shape.tverts.length; i++) {
 							var vertexId = (shape_id << 16) | i;
@@ -3740,7 +3740,7 @@ const App = function() {
 
 	function onTouchStart(ev) {
 		if (mouseJoint) {
-			space.removeJoint(mouseJoint);
+			world.removeJoint(mouseJoint);
 			mouseJoint = null;
 		}
 
@@ -3920,7 +3920,7 @@ const App = function() {
 	function onChangedVertexPositionX(value) {
 		if (selectedFeatureArr.length == 1) {
 			var vertexId = selectedFeatureArr[0];
-			var shape = space.shapeById((vertexId >> 16) & 0xFFFF);
+			var shape = world.shapeById((vertexId >> 16) & 0xFFFF);
 			var index = vertexId & 0xFFFF;
 
 			var v = getShapeVertex(shape, index);
@@ -3936,7 +3936,7 @@ const App = function() {
 	function onChangedVertexPositionY(value) {
 		if (selectedFeatureArr.length == 1) {
 			var vertexId = selectedFeatureArr[0];
-			var shape = space.shapeById((vertexId >> 16) & 0xFFFF);
+			var shape = world.shapeById((vertexId >> 16) & 0xFFFF);
 			var index = vertexId & 0xFFFF;
 
 			var v = getShapeVertex(shape, index);
@@ -3952,7 +3952,7 @@ const App = function() {
 	function onChangedEdgePositionX(offset, value) {
 		if (selectedFeatureArr.length == 1) {
 			var edgeId = selectedFeatureArr[0];
-			var shape = space.shapeById((edgeId >> 16) & 0xFFFF);
+			var shape = world.shapeById((edgeId >> 16) & 0xFFFF);
 			var index = (edgeId & 0xFFFF) + offset;
 
 			var v = getShapeVertex(shape, index);
@@ -3968,7 +3968,7 @@ const App = function() {
 	function onChangedEdgePositionY(offset, value) {
 		if (selectedFeatureArr.length == 1) {
 			var edgeId = selectedFeatureArr[0];
-			var shape = space.shapeById((edgeId >> 16) & 0xFFFF);
+			var shape = world.shapeById((edgeId >> 16) & 0xFFFF);
 			var index = (edgeId & 0xFFFF) + offset;
 
 			var v = getShapeVertex(shape, index);
@@ -4107,7 +4107,7 @@ const App = function() {
 	function onChangedJointAnchorPositionX(value) {
 		if (selectedFeatureArr.length == 1) {
 			var jointId = selectedFeatureArr[0];
-			var joint = space.jointById((jointId >> 16) & 0xFFFF);
+			var joint = world.jointById((jointId >> 16) & 0xFFFF);
 			var anchorIndex = jointId & 0xFFFF;
 
 			if (anchorIndex == 0) {
@@ -4126,7 +4126,7 @@ const App = function() {
 	function onChangedJointAnchorPositionY(value) {
 		if (selectedFeatureArr.length == 1) {
 			var jointId = selectedFeatureArr[0];
-			var joint = space.jointById((jointId >> 16) & 0xFFFF);
+			var joint = world.jointById((jointId >> 16) & 0xFFFF);
 			var anchorIndex = jointId & 0xFFFF;
 
 			if (anchorIndex == 0) {
@@ -4145,7 +4145,7 @@ const App = function() {
 	function onChangedJointMaxForce(value) {
 		if (selectedFeatureArr.length == 1) {
 			var jointId = selectedFeatureArr[0];
-			var joint = space.jointById((jointId >> 16) & 0xFFFF);
+			var joint = world.jointById((jointId >> 16) & 0xFFFF);
 			console.log(value);
 			joint.maxForce = parseFloat(value);
 		}
@@ -4154,7 +4154,7 @@ const App = function() {
 	function onClickedJointCollideConnected() {
 		if (selectedFeatureArr.length == 1) {
 			var jointId = selectedFeatureArr[0];
-			var joint = space.jointById((jointId >> 16) & 0xFFFF);
+			var joint = world.jointById((jointId >> 16) & 0xFFFF);
 			joint.collideConnected = !joint.collideConnected;
 		}
 	}
@@ -4162,7 +4162,7 @@ const App = function() {
 	function onClickedJointBreakable() {
 		if (selectedFeatureArr.length == 1) {
 			var jointId = selectedFeatureArr[0];
-			var joint = space.jointById((jointId >> 16) & 0xFFFF);
+			var joint = world.jointById((jointId >> 16) & 0xFFFF);
 			joint.breakable = !joint.breakable;
 		}
 	}
@@ -4170,7 +4170,7 @@ const App = function() {
 	function onClickedJointEnableLimit() {
 		if (selectedFeatureArr.length == 1) {
 			var jointId = selectedFeatureArr[0];
-			var joint = space.jointById((jointId >> 16) & 0xFFFF);
+			var joint = world.jointById((jointId >> 16) & 0xFFFF);
 			joint.limitEnabled = !joint.limitEnabled;
 
 			updateSidebar();
@@ -4180,7 +4180,7 @@ const App = function() {
 	function onChangedJointLimitLowerAngle(value) {
 		if (selectedFeatureArr.length == 1) {
 			var jointId = selectedFeatureArr[0];
-			var joint = space.jointById((jointId >> 16) & 0xFFFF);
+			var joint = world.jointById((jointId >> 16) & 0xFFFF);
 			joint.limitLowerAngle = deg2rad(parseFloat(value));
 		}
 	}
@@ -4188,7 +4188,7 @@ const App = function() {
 	function onChangedJointLimitUpperAngle(value) {
 		if (selectedFeatureArr.length == 1) {
 			var jointId = selectedFeatureArr[0];
-			var joint = space.jointById((jointId >> 16) & 0xFFFF);
+			var joint = world.jointById((jointId >> 16) & 0xFFFF);
 			joint.limitUpperAngle = deg2rad(parseFloat(value));
 		}
 	}
@@ -4196,7 +4196,7 @@ const App = function() {
 	function onClickedJointEnableMotor() {
 		if (selectedFeatureArr.length == 1) {
 			var jointId = selectedFeatureArr[0];
-			var joint = space.jointById((jointId >> 16) & 0xFFFF);
+			var joint = world.jointById((jointId >> 16) & 0xFFFF);
 			joint.motorEnabled = !joint.motorEnabled;
 
 			updateSidebar();
@@ -4206,7 +4206,7 @@ const App = function() {
 	function onChangedJointMotorSpeed(value) {
 		if (selectedFeatureArr.length == 1) {
 			var jointId = selectedFeatureArr[0];
-			var joint = space.jointById((jointId >> 16) & 0xFFFF);
+			var joint = world.jointById((jointId >> 16) & 0xFFFF);
 			joint.motorSpeed = deg2rad(parseFloat(value));
 		}
 	}
@@ -4214,7 +4214,7 @@ const App = function() {
 	function onChangedJointMaxMotorTorque(value) {
 		if (selectedFeatureArr.length == 1) {
 			var jointId = selectedFeatureArr[0];
-			var joint = space.jointById((jointId >> 16) & 0xFFFF);
+			var joint = world.jointById((jointId >> 16) & 0xFFFF);
 			joint.maxMotorTorque = parseFloat(value);
 		}
 	}
@@ -4222,7 +4222,7 @@ const App = function() {
 	function onChangedJointSpringFrequencyHz(value) {
 		if (selectedFeatureArr.length == 1) {
 			var jointId = selectedFeatureArr[0];
-			var joint = space.jointById((jointId >> 16) & 0xFFFF);
+			var joint = world.jointById((jointId >> 16) & 0xFFFF);
 			joint.setSpringFrequencyHz(parseFloat(value));
 		}
 	}
@@ -4230,7 +4230,7 @@ const App = function() {
 	function onChangedJointSpringDampingRatio(value) {
 		if (selectedFeatureArr.length == 1) {
 			var jointId = selectedFeatureArr[0];
-			var joint = space.jointById((jointId >> 16) & 0xFFFF);
+			var joint = world.jointById((jointId >> 16) & 0xFFFF);
 			joint.setSpringDampingRatio(parseFloat(value));
 		}
 	}
@@ -4305,7 +4305,7 @@ const App = function() {
 
 			for (var i = 0; i < selectedFeatureArr.length; i++) {
 				var vertexId = selectedFeatureArr[i];
-				var shape = space.shapeById((vertexId >> 16) & 0xFFFF);
+				var shape = world.shapeById((vertexId >> 16) & 0xFFFF);
 				var index = vertexId & 0xFFFF;
 
 				if (shape.type == Shape.TYPE_POLY) {
@@ -4328,7 +4328,7 @@ const App = function() {
 
 			for (var i = 0; i < selectedFeatureArr.length; i++) {
 				var edgeId = selectedFeatureArr[i];
-				var shape = space.shapeById((edgeId >> 16) & 0xFFFF);
+				var shape = world.shapeById((edgeId >> 16) & 0xFFFF);
 
 				if (shape.type == Shape.TYPE_POLY) {
 					var index = edgeId & 0xFFFF;
@@ -4356,15 +4356,15 @@ const App = function() {
 		else if (selectionMode == SM_BODIES) {
 			for (var i = 0; i < selectedFeatureArr.length; i++) {
 				var body = selectedFeatureArr[i];
-				space.removeBody(body);
+				world.removeBody(body);
 				body = null;//delete body; //XXX
 			}
 		}
 		else if (selectionMode == SM_JOINTS) {
 			for (var i = 0; i < selectedFeatureArr.length; i++) {
 				var jointId = selectedFeatureArr[i];
-				var joint = space.jointById((jointId >> 16) & 0xFFFF);
-				space.removeJoint(joint);
+				var joint = world.jointById((jointId >> 16) & 0xFFFF);
+				world.removeJoint(joint);
 				joint = null;//delete joint; //XXX
 			}
 		}
@@ -4452,7 +4452,7 @@ const App = function() {
 
 	function onChangedGravity(value) {
 		gravity.y = parseFloat(value);
-		space.gravity.copy(gravity);
+		world.gravity.copy(gravity);
 	}
 
 	function onChangedFrameRateHz(value) {
