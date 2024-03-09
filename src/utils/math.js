@@ -807,6 +807,13 @@ Bounds.expand = function(b, ax, ay) {
 	return b;
 }
 
+function distance(x1, y1, x2, y2)
+{
+    var dx = x1 - x2;                       // delta x
+    var dy = y1 - y2;                       // delta y
+    return Math.sqrt(dx * dx + dy * dy);    // distance
+};
+
 export {
 	deg2rad,
 	rad2deg,
@@ -816,6 +823,7 @@ export {
 	vec3,
 	mat2,
 	mat3,
+	distance,
 	Transform,
 	Bounds
 }

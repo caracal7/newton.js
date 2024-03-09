@@ -1,15 +1,16 @@
 import { Body } from "./Body.js";
-import { vec2, meter2pixel } from './utils/math.js';
+import { vec2, meter2pixel, distance } from './utils/math.js';
 import { MouseJoint } from "./joints/joint_mouse.js";
+
+
 
 function Interaction(runner) {
     this.runner = runner;
     this.state = {
         mouseDown:          false,
         mouseDownMoving:    false,
-        mousePosition:      new vec2(),
-        mousePositionOld:   new vec2(),
         mouseDownPosition:  new vec2(),
+        mousePositionOld:   new vec2(),
         touchPosOld:        new Array(2),
         touchDist:          undefined,
         gestureStartScale:  undefined,
@@ -24,17 +25,13 @@ function Interaction(runner) {
     //------------------------------ mousedown
     this.mousedown = event => {
         var pos = this.getMousePosition(event);
-
     	this.state.mouseDown = true;
     	this.state.mouseDownMoving = false;
-    	this.state.mouseDownPosition.x = this.state.mousePosition.x = pos.x;
-    	this.state.mouseDownPosition.y = this.state.mousePosition.y = pos.y;
-
+    	this.state.mouseDownPosition.x = pos.x;
+    	this.state.mouseDownPosition.y = pos.y;
         // Remove previous mouse joint
     	this.removeJoint();
-
     	var p = this.runner.canvasToWorld(pos);
-
     	// If we picked shape then create mouse joint
     	var body = this.runner.world.findBodyByPoint(p);
     	if (body) {
@@ -44,34 +41,34 @@ function Interaction(runner) {
     		this.mouseJoint.maxForce = body.m * 1000;
     		this.runner.world.addJoint(this.mouseJoint);
     	}
-
     	// for the touch device
-    	this.state.mousePositionOld.x = this.state.mousePosition.x;
-    	this.state.mousePositionOld.y = this.state.mousePosition.y;
-
+    	this.state.mousePositionOld.x = pos.x;
+    	this.state.mousePositionOld.y = pos.y;
     	event.preventDefault();
     };
     //------------------------------ mousemove
     this.mousemove = event => {
-    	this.state.mousePosition = this.getMousePosition(event);
+    	var pos = this.getMousePosition(event);
+        // "touchleave" HACK
+        if(
+            pos.x < 0 || pos.x > this.runner.renderer.width ||
+            pos.y < 0 || pos.y > this.runner.renderer.height
+        ) return this.mouseleave(event);
 
     	if (this.state.mouseDown) {
+            this.state.mouseDownMoving = true;
     		if (this.mouseJoint) {
-    			this.mouseBody.p.copy(this.runner.canvasToWorld(this.state.mousePosition));
+    			this.mouseBody.p.copy(this.runner.canvasToWorld(pos));
     			this.mouseBody.syncTransform();
     		}
     		else {
-    			var dx = this.state.mousePosition.x - this.state.mousePositionOld.x;
-    			var dy = this.state.mousePosition.y - this.state.mousePositionOld.y;
+    			var dx = pos.x - this.state.mousePositionOld.x;
+    			var dy = pos.y - this.state.mousePositionOld.y;
     			this.scrollView(-dx, dy);
+                this.state.mousePositionOld.x = pos.x;
+                this.state.mousePositionOld.y = pos.y;
     		}
     	}
-
-    	this.state.mousePositionOld.x = this.state.mousePosition.x;
-    	this.state.mousePositionOld.y = this.state.mousePosition.y;
-
-    	if (this.state.mouseDown) this.state.mouseDownMoving = true;
-
     	event.preventDefault();
     };
     //------------------------------ mouseup & mouseleave
@@ -81,7 +78,6 @@ function Interaction(runner) {
     	this.state.mouseDownMoving = false;
     	event.preventDefault();
     };
-
     //------------------------------ mousewheel
     this.mousewheel = event => {
     	var wheelDeltaX = 0;
@@ -116,14 +112,6 @@ function Interaction(runner) {
         this.scrollView(p.x * ds - dx, p.y * ds);
     	event.preventDefault();
     };
-
-    function distance(x1, y1, x2, y2)
-    {
-        var dx = x1 - x2;                       // delta x
-        var dy = y1 - y2;                       // delta y
-        return Math.sqrt(dx * dx + dy * dy);    // distance
-    };
-
     //------------------------------ touchstart
     this.touchstart = event => {
         this.removeJoint();
@@ -147,10 +135,15 @@ function Interaction(runner) {
         if (event.touches.length === 2) {
             var touch1 = this.getTouchPosition(event.touches[0]);
             var touch2 = this.getTouchPosition(event.touches[1]);
+            // "touchleave" HACK
+            if(
+                touch1.x < 0 || touch1.x > this.runner.renderer.width ||
+                touch1.y < 0 || touch1.y > this.runner.renderer.height ||
+                touch2.x < 0 || touch2.x > this.runner.renderer.width ||
+                touch2.y < 0 || touch2.y > this.runner.renderer.height
+            ) return this.mouseleave(event);
 
-            var dist = distance(touch1.x, touch1.y, touch2.x, touch2.y);
-
-            var scale = dist / this.state.touchDist;
+            var scale = distance(touch1.x, touch1.y, touch2.x, touch2.y) / this.state.touchDist;
             var threhold = Math.clamp(scale - 1, -0.1, 0.1);
         	var gestureScale = this.state.gestureStartScale * (scale - threhold);
 
@@ -171,7 +164,6 @@ function Interaction(runner) {
 
             this.state.touchPosOld[0] = touch1;
             this.state.touchPosOld[1] = touch2;
-
             event.preventDefault();
         }
     }
@@ -189,7 +181,6 @@ function Interaction(runner) {
     		first.target.dispatchEvent(simulatedEvent);
     	}
     	else if (this[event.type]) this[event.type](event);
-
     	event.preventDefault();
     }
     //--------------------------------------------------------------------
@@ -221,7 +212,7 @@ Interaction.prototype.getMousePosition = function(event) {
 
 Interaction.prototype.getTouchPosition = function(event) {
     var rect = this.runner.renderer.canvas.getBoundingClientRect();
-	return new vec2(event.pageX - rect.left, event.pageY - rect.top);
+	return new vec2(event.clientX - rect.left, event.clientY - rect.top);
 }
 
 Interaction.prototype.scrollView = function(dx, dy) {
