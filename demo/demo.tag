@@ -1,4 +1,4 @@
-<!import Newton from ../dist/newton.esm.js>
+<!import Newton     from ../dist/newton.esm.js>
 
 <!import Car        from examples/car.js>
 <!import Bounce     from examples/bounce.js>
@@ -19,6 +19,7 @@
         <option loop(Object.keys(state.demos) as demo | d => d) value=demo text(demo)/>
     </select>
     <@controls id="controls" runner=state.runner/>
+    <button class="edit">Edit</button>
 </header>
 
 <canvas/>

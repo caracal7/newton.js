@@ -18,13 +18,9 @@ header {
     padding: 10px 8px 10px 8px;
     display: block;
     vertical-align: middle;
-    font-size: 10px;
+    font-size: 14px;
     color: #ccc;
-    background-color: #3B3937;
-    background: -moz-linear-gradient(#3B3937, #2B2927);
-    background: -webkit-gradient(linear, left top, left bottom, from(#3B3937), to(#2B2927));
-    -webkit-box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.1), inset -1px -1px 0 rgba(0, 0, 0, 0.1);
-    -moz-box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.1), inset -1px -1px 0 rgba(0, 0, 0, 0.1);
+    background: linear-gradient(#3B3937, #2B2927);
     box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.1), inset -1px -1px 0 rgba(0, 0, 0, 0.1);
 }
 
@@ -34,4 +30,18 @@ canvas {
     bottom: 0;
     width: 100%;
     height: calc(100% - 42px);
+}
+
+button.edit {
+    height: 25px;
+    font-size: 10px;
+    color: white;
+    background: linear-gradient(#008AFF, #0050E0);
+    font-weight: bold;
+    margin-left: 15px;
+    padding: 0 15px;
+    border: 1px solid black;
+    border-radius: 5px;
+    box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.1), inset -1px -1px 0 rgba(0, 0, 0, 0.1);
+    vertical-align: middle;
 }
