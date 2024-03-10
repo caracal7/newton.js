@@ -153,18 +153,10 @@ function App(Newton) {
 	function runFrame() {
 	}
 
-	function keyDown(ev) {
-	}
-
-	function name() {
-		return "Car";
-	}
-
 	return {
 		init: init,
 		runFrame: runFrame,
-		keyDown: keyDown,
-		name: name
+		name: "Car"
 	};
 };
 

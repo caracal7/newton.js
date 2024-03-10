@@ -73,18 +73,10 @@ function App(Newton) {
 	function runFrame() {
 	}
 
-	function keyDown(ev) {
-	}
-
-	function name() {
-		return "See-saw";
-	}
-
 	return {
 		init: init,
 		runFrame: runFrame,
-		keyDown: keyDown,
-		name: name
+		name: "See-saw"
 	};
 };
 

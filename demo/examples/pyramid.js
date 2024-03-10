@@ -56,18 +56,10 @@ function App(Newton) {
 	function runFrame() {
 	}
 
-	function keyDown(ev) {
-	}
-
-	function name() {
-		return "Pyramid";
-	}
-
 	return {
 		init: init,
 		runFrame: runFrame,
-		keyDown: keyDown,
-		name: name
+		name: "Pyramid"
 	};
 };
 

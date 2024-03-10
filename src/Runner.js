@@ -1,11 +1,11 @@
-import * as Physics from './index.js';
+import * as Physics     from './index.js';
 
-import { collision } from "./utils/collision.js";
-import { World } from "./World.js";
-import { Body } from "./Body.js";
-import { Shape } from "./shapes/shape.js";
-import { stats } from "./utils/stats.js";
-import { MouseJoint } from "./joints/joint_mouse.js";
+import { collision }    from "./utils/collision.js";
+import { World }        from "./World.js";
+import { Body }         from "./Body.js";
+import { Shape }        from "./shapes/shape.js";
+import { stats }        from "./utils/stats.js";
+import { MouseJoint }   from "./joints/joint_mouse.js";
 import { Bounds, pixel2meter, meter2pixel, vec2 } from './utils/math.js';
 
 const HELPER_JOINT_ANCHOR_RADIUS = pixel2meter(2.5);
@@ -19,9 +19,15 @@ function bodyColor(body) {
     return randomColor[(body.id) % randomColor.length];
 }
 
+//  Private variables
+const App = Symbol("app");
+const Pause = Symbol("pause");
+
+const definePrivate = (obj, name, symbol, set) =>  Object.defineProperty(obj, name, { get() { return this[symbol] }, set });
+
 function Runner(renderer, app, settings = {}) {
     this.renderer = renderer;
-    this.app = app;
+    this[App] = app;
 
     this.settings = Object.assign({
         gravity: new vec2(0, -10),
@@ -53,7 +59,7 @@ function Runner(renderer, app, settings = {}) {
         // Set dirtyBounds to full screen
         this.dirtyBounds.set(this.canvasToWorld(new vec2(0, this.renderer.height)), this.canvasToWorld(new vec2(this.renderer.width, 0)));
         this.static_outdated = true;
-        if(this.pause) this.drawFrame(0);
+        if(this[Pause]) this.drawFrame(0);
     }
 
     window.addEventListener('resize', this.onResize);
@@ -66,9 +72,24 @@ function Runner(renderer, app, settings = {}) {
 
     this.resetScene();
 
+    definePrivate(this, 'app', App, value => {
+        this[App] = value;
+        this.resetScene();
+        this[Pause] && this.start();
+    })
+    definePrivate(this, 'pause', Pause, value => {
+        if(!value) this.start();
+        else this[Pause] = true;
+    })
+
+    this.start();
+}
+
+Runner.prototype.start = function() {
+    this[Pause] = false;
     const update = () => {
         this.runFrame();
-        if(!this.pause) window.requestAnimationFrame(update);
+        this[Pause] || window.requestAnimationFrame(update);
     }
     window.requestAnimationFrame(update);
 }
@@ -76,16 +97,18 @@ function Runner(renderer, app, settings = {}) {
 Runner.prototype.destroy = function() {
     window.removeEventListener('resize', this.onResize);
     window.removeEventListener('orientationchange', this.onResize);
-    this.pause = true;
+    this[Pause] = true;
     this.world.clear();
 }
 
 Runner.prototype.resetScene = function() {
     this.world.clear();
     this.world.gravity.copy(this.settings.gravity);
-    this.app.init(this.world);
+    this[App].init(this.world);
     this.initFrame();
 }
+
+
 
 Runner.prototype.initFrame = function() {
     this.time = {
@@ -107,14 +130,7 @@ Runner.prototype.runFrame = function() {
     frameTime = Math.floor(frameTime * 60 + 0.5) / 60;
     this.time.lastTime = time;
 
-/*
-    if (!mouseDown) {
-        var p = this.canvasToWorld(mousePosition);
-        var body = this.world.findBodyByPoint(p);
-        domCanvas.style.cursor = body ? "pointer" : "default";
-    }
-*/
-    if (!this.pause || this.step) {
+    if (!this[Pause] || this.step) {
         var h = 1 / this.settings.frameRateHz;
 
         this.time.timeDelta += frameTime;
@@ -137,7 +153,7 @@ Runner.prototype.runFrame = function() {
 
         if (this.time.timeDelta > h) this.time.timeDelta = 0;
 
-        this.app.runFrame();
+        this[App].runFrame();
     }
 
     if (stats.stepCount > 0) this.render(frameTime);

@@ -1,0 +1,32 @@
+:host {
+    margin-left: 7px;
+}
+
+button {
+    width: 32px;
+    height: 25px;
+    display: inline-block;
+    line-height: 14px;
+    background-repeat: no-repeat;
+    background-image: url("/demo/assets/glyphicons-halflings-white.png");
+}
+button:disabled {
+    -webkit-filter: brightness(35%);
+    filter: brightness(35%);
+}
+
+.repeat {
+    background-position: -209px -20px;
+}
+
+.pause {
+    background-position: -280px -68px;
+}
+
+.play {
+    background-position: -255px -68px;
+}
+
+.step-forward {
+    background-position: -377px -68px;
+}

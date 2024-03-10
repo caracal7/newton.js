@@ -220,18 +220,10 @@ function App(Newton) {
 	function runFrame() {
 	}
 
-	function keyDown(ev) {
-	}
-
-	function name() {
-		return "Rag-doll";
-	}
-
 	return {
 		init: init,
 		runFrame: runFrame,
-		keyDown: keyDown,
-		name: name
+		name: "Rag-doll"
 	};
 };
 

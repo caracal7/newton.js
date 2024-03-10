@@ -1,10 +1,10 @@
-.btn {
+button {
     background-color: #111;
 }
 
-.btn {
+button {
     margin: 0;
-    padding: 0px 0px 0px 0px;
+    padding: 0;
     height: 25px;
     font-size: 10px;
     line-height: 12px;
@@ -18,32 +18,18 @@
     border: 1px solid;
     border-color: black;
     border-radius: 5px;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
-    -webkit-box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.1), inset -1px -1px 0 rgba(0, 0, 0, 0.1);
-    -moz-box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.1), inset -1px -1px 0 rgba(0, 0, 0, 0.1);
     box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.1), inset -1px -1px 0 rgba(0, 0, 0, 0.1);
     background: #4B4947;
     background: -moz-linear-gradient(#4B4947, #32302D);
     background: -webkit-gradient(linear, left top, left bottom, from(#4B4947), to(#32302D));
-    /*background-position: 0 0;*/
-    /* cross browser inline block hack
-  see http://blog.mozilla.com/webdev/2009/02/20/cross-browser-inline-block/ */
+
     display: -moz-inline-stack;
     display: inline-block;
     vertical-align: middle;
-    *display: inline !important;
-    /* help IE to calm down a bit */
     zoom: 1;
-    /*disable text selection (Firefox only)*/
-    -moz-user-select: none;
 }
 
-.btn_group {
-    margin: 0;
-}
-
-.btn.segment {
+button.segment {
     margin-left: -4px;
     display: inline-block;
     border-right-width: 0;
@@ -52,7 +38,7 @@
     -webkit-border-radius: 0px;
 }
 
-.btn.segment:first-child {
+button.segment:first-child {
     margin-left: 0px;
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
@@ -62,7 +48,7 @@
     -webkit-border-bottom-left-radius: 5px;
 }
 
-.btn.segment:last-child {
+button.segment:last-child {
     border-right-width: 1px;
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
@@ -73,23 +59,23 @@
 }
 
 /* hide selection background color */
-.btn::selection {
+button::selection {
     background: transparent;
 }
 
-.btn:hover {
+button:hover {
     /*background-position: 0 -50px;*/
     color: white;
 }
 
-.btn:active {
+button:active {
     position: relative;
     box-shadow: inset 1px 2px 3px rgba(0, 0, 0, 0.5), 0 1px 0 #6B6967;
     -moz-box-shadow: inset 1px 2px 3px rgba(0, 0, 0, 0.5), 0 1px 0 #6B6967;
     -webkit-box-shadow: inset 1px 2px 3px rgba(0, 0, 0, 0.5), 0 1px 0 #6B6967;
 }
 
-.btn.pushed {
+button.pushed {
     color: black;
     background: #fa0;
     text-shadow: 0px 0px 0px;
@@ -98,96 +84,96 @@
     box-shadow: inset 1px 2px 3px rgba(0, 0, 0, 0.5), 0 1px 0 #6B6967;
 }
 
-.btn.pushed:hover {
+button.pushed:hover {
     color: black;
 }
 
-.btn.grey {
+button.grey {
     background: #CCCCBB !important;
 }
 
-.btn.grey.pushed {
+button.grey.pushed {
     color: white;
 }
 
-.btn.grey.pushed:hover {
+button.grey.pushed:hover {
     color: white;
 }
 
-.btn.blue {
+button.blue {
     color: white;
     background: #005AFF;
     background: -moz-linear-gradient(#008AFF, #0050E0);
     background: -webkit-gradient(linear, left top, left bottom, from(#008AFF), to(#0050E0));
 }
 
-.btn.blue.pushed {
+button.blue.pushed {
     color: white;
 }
 
-.btn.blue.pushed:hover {
+button.blue.pushed:hover {
     color: white;
 }
 
-.btn.red {
+button.red {
     color: white;
     background: #E32100;
     background: -moz-linear-gradient(#FF5030, #D02010);
     background: -webkit-gradient(linear, left top, left bottom, from(#FF5030), to(#D02010));
 }
 
-.btn.red.pushed {
+button.red.pushed {
     color: white;
 }
 
-.btn.red.pushed:hover {
+button.red.pushed:hover {
     color: white;
 }
 
-.btn.green {
+button.green {
     background: #20A000 !important;
 }
 
-.btn.green.pushed {
+button.green.pushed {
     color: white;
 }
 
-.btn.green.pushed:hover {
+button.green.pushed:hover {
     color: white;
 }
 
-.btn.yellow {
+button.yellow {
     background: #F0A000 !important;
 }
 
-.btn.yellow.pushed {
+button.yellow.pushed {
     color: white;
 }
 
-.btn.yellow.pushed:hover {
+button.yellow.pushed:hover {
     color: white;
 }
 
-.btn.orange {
+button.orange {
     background: #F87006 !important;
 }
 
-.btn.orange.pushed {
+button.orange.pushed {
     color: white;
 }
 
-.btn.orange.pushed:hover {
+button.orange.pushed:hover {
     color: white;
 }
 
-.btn.purple {
+button.purple {
     background: #7D13B6 !important;
 }
 
-.btn.purple.pushed {
+button.purple.pushed {
     color: white;
 }
 
-.btn.purple.pushed:hover {
+button.purple.pushed:hover {
     color: white;
 }

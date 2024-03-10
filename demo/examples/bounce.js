@@ -45,18 +45,10 @@ function App(Newton) {
 	function runFrame() {
 	}
 
-	function keyDown(ev) {
-	}
-
-	function name() {
-		return "Bounce-test";
-	}
-
 	return {
 		init: init,
 		runFrame: runFrame,
-		keyDown: keyDown,
-		name: name
+		name: 'Bounce-test'
 	};
 };
 
