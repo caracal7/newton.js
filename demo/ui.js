@@ -1080,6 +1080,10 @@
       if (["disabled", "multiple"].includes(key))
         return true;
     }
+    if (tag === "select") {
+      if (["disabled"].includes(key))
+        return true;
+    }
     return false;
   }
 
@@ -1515,15 +1519,10 @@
         if (__i__.exit) {
           return childIndex + 1;
         } else {
-          let isExitNow = Exit_Single(
-            container.__rendererName ? container._childNodes[childIndex] : container.childNodes[childIndex],
-            tag,
-            state,
-            container,
-            index
-          );
+          let _childNodes = container.__rendererName ? container._childNodes : container.childNodes;
+          let isExitNow = Exit_Single(_childNodes[childIndex], tag, state, container, index);
           if (isExitNow) {
-            return childIndex;
+            return childIndex < _childNodes.length - 1 ? childIndex + 1 : childIndex;
           } else {
             return childIndex + 1;
           }
@@ -8148,7 +8147,7 @@ Parse Error: ${e.stack}`);
   }
 
   // src/index.js
-  var VERSION = "0.7.3-dev";
+  var VERSION = "0.7.4-dev";
   !VERSION.endsWith("-dev") && console.log(`ui.js \u2764\uFE0F ${VERSION} alpha experiment. Make user interfaces great again!`);
   var UIjs = {
     VERSION,
