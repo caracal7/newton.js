@@ -24,7 +24,7 @@ const App   = Symbol("app");
 const Pause = Symbol("pause");
 const Events    = Symbol("events");
 
-const events    = ['beforeRender'];
+const events    = ['beforeRenderBody', 'beforeRenderShape'];
 
 
 const definePrivate = (obj, name, symbol, set) =>  Object.defineProperty(obj, name, { get() { return this[symbol] }, set });
@@ -199,7 +199,7 @@ Runner.prototype.drawFrame = function(frameTime) {
 		}
 	}
 
-    var colors = {};
+
 
 	// Update whole background canvas if we needed
 	if (this.static_outdated) {
@@ -210,15 +210,22 @@ Runner.prototype.drawFrame = function(frameTime) {
 		for (var i = 0; i < this.world.bodyArr.length; i++) {
 			var body = this.world.bodyArr[i];
 			if (body.isStatic()) {
-                colors.outline = "#000";
-                colors.body = bodyColor(body);
+                var body_colors = {
+                    outline: "#000",
+                    body: bodyColor(body)
+                };
 
-                this[Events]?.beforeRender?.forEach(callback => callback(body, colors));
+                this[Events]?.beforeRenderBody?.forEach(callback => callback(body, body_colors));
 
                 for (var k = 0; k < body.shapeArr.length; k++) {
         	        var shape = body.shapeArr[k];
         	        if (!shape.visible) continue;
-                    this.renderer.drawShape(shape, true,  PIXEL_UNIT, colors.outline, colors.body);
+                    var shape_colors = {
+                        outline: body_colors.outline,
+                        body: body_colors.body,
+                    };
+                    this[Events]?.beforeRenderShape?.forEach(callback => callback(shape, shape_colors));
+                    this.renderer.drawShape(shape, true,  PIXEL_UNIT, shape_colors.outline, shape_colors.body);
         	    }
 			}
 		}
@@ -249,15 +256,22 @@ Runner.prototype.drawFrame = function(frameTime) {
 		var body = this.world.bodyArr[i];
 		if (body.visible) {
 			if (!body.isStatic()) {
-                colors.outline = "#000";
-                colors.body = bodyColor(body);
+                var body_colors = {
+                    outline: "#000",
+                    body: bodyColor(body)
+                };
 
-                this[Events]?.beforeRender?.forEach(callback => callback(body, colors));
+                this[Events]?.beforeRenderBody?.forEach(callback => callback(body, body_colors));
 
                 for (var k = 0; k < body.shapeArr.length; k++) {
         	        var shape = body.shapeArr[k];
         	        if (!shape.visible) continue;
-                    this.renderer.drawShape(shape, false, PIXEL_UNIT, colors.outline, colors.body);
+                    var shape_colors = {
+                        outline: body_colors.outline,
+                        body: body_colors.body,
+                    };
+                    this[Events]?.beforeRenderShape?.forEach(callback => callback(shape, shape_colors));
+                    this.renderer.drawShape(shape, false, PIXEL_UNIT, shape_colors.outline, shape_colors.body);
     	            var expand = PIXEL_UNIT * 3;
     	            this.dirtyBounds.addBounds(Bounds.expand(shape.bounds, expand, expand));
         	    }

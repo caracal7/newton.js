@@ -17,8 +17,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import { Bounds, vec2, meter2pixel } from './../utils/math.js';
-import { Shape } from "./../shapes/shape.js";
+
 
 var ARROW_TYPE_NONE = 0;
 var ARROW_TYPE_NORMAL = 1;
@@ -184,15 +183,15 @@ function drawRect(ctx, mins, maxs, lineWidth, strokeStyle, fillStyle) {
 	}
 }
 
-function drawBox(ctx, center, rvec, uvec, lineWidth, strokeStyle, fillStyle) {
+function drawBox(ctx, center, rvec, uvec, lineWidth, strokeStyle, fillStyle, Newton) {
 	ctx.beginPath();
 
-	var l = vec2.sub(center, rvec);
-	var r = vec2.add(center, rvec);
-	var lb = vec2.sub(l, uvec);
-	var lt = vec2.add(l, uvec);
-	var rb = vec2.sub(r, uvec);
-	var rt = vec2.add(r, uvec);
+	var l = Newton.vec2.sub(center, rvec);
+	var r = Newton.vec2.add(center, rvec);
+	var lb = Newton.vec2.sub(l, uvec);
+	var lt = Newton.vec2.add(l, uvec);
+	var rb = Newton.vec2.sub(r, uvec);
+	var rt = Newton.vec2.add(r, uvec);
 
 	ctx.moveTo(lb.x, lb.y);
 	ctx.lineTo(rb.x, rb.y);
@@ -214,7 +213,7 @@ function drawBox(ctx, center, rvec, uvec, lineWidth, strokeStyle, fillStyle) {
 	}
 }
 
-function drawCircle(ctx, center, radius, angle, lineWidth, strokeStyle, fillStyle) {
+function drawCircle(ctx, center, radius, angle, lineWidth, strokeStyle, fillStyle, Newton) {
 	ctx.beginPath();
 
 	ctx.arc(center.x, center.y, radius, 0, Math.PI*2, false);
@@ -227,7 +226,7 @@ function drawCircle(ctx, center, radius, angle, lineWidth, strokeStyle, fillStyl
 	if (strokeStyle) {
 		if (typeof angle == "number") {
 			ctx.moveTo(center.x, center.y);
-			var rt = vec2.add(center, vec2.scale(vec2.rotation(angle), radius));
+			var rt = Newton.vec2.add(center, Newton.vec2.scale(Newton.vec2.rotation(angle), radius));
 			ctx.lineTo(rt.x, rt.y);
 		}
 
@@ -260,22 +259,22 @@ function drawArc(ctx, center, radius, startAngle, endAngle, lineWidth, strokeSty
 	}
 }
 
-function drawSegment(ctx, a, b, radius, lineWidth, strokeStyle, fillStyle) {
+function drawSegment(ctx, a, b, radius, lineWidth, strokeStyle, fillStyle, Newton) {
 	ctx.beginPath();
 
-	var dn = vec2.normalize(vec2.perp(vec2.sub(b, a)));
+	var dn = Newton.vec2.normalize(Newton.vec2.perp(Newton.vec2.sub(b, a)));
 	var start_angle = dn.toAngle();
 	ctx.arc(a.x, a.y, radius, start_angle, start_angle + Math.PI, false);
 
-	var ds = vec2.scale(dn, -radius);
-	var bp = vec2.add(b, ds);
+	var ds = Newton.vec2.scale(dn, -radius);
+	var bp = Newton.vec2.add(b, ds);
 	ctx.lineTo(bp.x, bp.y);
 
 	start_angle += Math.PI;
 	ctx.arc(b.x, b.y, radius, start_angle, start_angle + Math.PI, false);
 
-	ds = vec2.scale(dn, radius);
-	var ap = vec2.add(a, ds);
+	ds = Newton.vec2.scale(dn, radius);
+	var ap = Newton.vec2.add(a, ds);
 	ctx.lineTo(ap.x, ap.y);
 
 	ctx.closePath();
@@ -317,7 +316,8 @@ function drawPolygon(ctx, verts, lineWidth, strokeStyle, fillStyle) {
 }
 
 
-function CanvasRenderer(canvas) {
+function CanvasRenderer(Newton, canvas) {
+	this.Newton = Newton;
     this.canvas = canvas;
 	canvas.style.touchAction = 'none';
 	canvas.style.webkitTransform = 'translate3d(0, 0, 0)';
@@ -330,18 +330,17 @@ function CanvasRenderer(canvas) {
     };
     this.bg.ctx = this.bg.canvas.getContext("2d");
 	this.resize();
-
 };
 
 CanvasRenderer.prototype.drawShape = function(shape, isStatic, lineWidth, outlineColor, fillColor) {
 	switch (shape.type) {
-		case Shape.TYPE_CIRCLE:
-			drawCircle(isStatic ? this.bg.ctx : this.fg.ctx, shape.tc, shape.r, shape.body.a, lineWidth, outlineColor, fillColor);
+		case this.Newton.Shape.TYPE_CIRCLE:
+			drawCircle(isStatic ? this.bg.ctx : this.fg.ctx, shape.tc, shape.r, shape.body.a, lineWidth, outlineColor, fillColor, this.Newton);
 			break;
-		case Shape.TYPE_SEGMENT:
-			drawSegment(isStatic ? this.bg.ctx : this.fg.ctx, shape.ta, shape.tb, shape.r, lineWidth, outlineColor, fillColor);
+		case this.Newton.Shape.TYPE_SEGMENT:
+			drawSegment(isStatic ? this.bg.ctx : this.fg.ctx, shape.ta, shape.tb, shape.r, lineWidth, outlineColor, fillColor, this.Newton);
 			break;
-		case Shape.TYPE_POLY:
+		case this.Newton.Shape.TYPE_POLY:
 			if (shape.convexity) drawPolygon(isStatic ? this.bg.ctx : this.fg.ctx, shape.tverts, lineWidth, outlineColor, fillColor);
 			else drawPolygon(isStatic ? this.bg.ctx : this.fg.ctx, shape.tverts, lineWidth, outlineColor, fillColor);
 			break;
@@ -356,7 +355,7 @@ CanvasRenderer.prototype.beginStatic = function(camera, backgroundColor) {
 	this.bg.ctx.fillStyle = backgroundColor;
 	this.bg.ctx.fillRect(0, 0, this.width, this.height);
 	this.bg.ctx.save();
-	this.bg.ctx.setTransform(camera.scale * meter2pixel(1), 0, 0, -(camera.scale * meter2pixel(1)), this.width * 0.5 - camera.origin.x, this.height + camera.origin.y);
+	this.bg.ctx.setTransform(camera.scale * this.Newton.meter2pixel(1), 0, 0, -(camera.scale * this.Newton.meter2pixel(1)), this.width * 0.5 - camera.origin.x, this.height + camera.origin.y);
 }
 
 CanvasRenderer.prototype.endStatic = function() {
@@ -366,7 +365,7 @@ CanvasRenderer.prototype.endStatic = function() {
 
 CanvasRenderer.prototype.beginDynamic = function(camera) {
 	this.fg.ctx.save();
-	this.fg.ctx.setTransform(camera.scale * meter2pixel(1), 0, 0, -(camera.scale * meter2pixel(1)), this.width * 0.5 - camera.origin.x, this.height + camera.origin.y);
+	this.fg.ctx.setTransform(camera.scale * this.Newton.meter2pixel(1), 0, 0, -(camera.scale * this.Newton.meter2pixel(1)), this.width * 0.5 - camera.origin.x, this.height + camera.origin.y);
 };
 
 CanvasRenderer.prototype.endDynamic = function() {
@@ -380,10 +379,10 @@ CanvasRenderer.prototype.resize = function() {
 }
 
 CanvasRenderer.prototype.drawHelperJointAnchors = function(p1, p2, radius, PIXEL_UNIT, jointAnchorColor) {
-	var rvec = new vec2(radius, 0);
-	var uvec = new vec2(0, radius);
-	drawBox(this.fg.ctx, p1, rvec, uvec, 0, "", jointAnchorColor);
-	drawBox(this.fg.ctx, p2, rvec, uvec, 0, "", jointAnchorColor);
+	var rvec = new this.Newton.vec2(radius, 0);
+	var uvec = new this.Newton.vec2(0, radius);
+	drawBox(this.fg.ctx, p1, rvec, uvec, 0, "", jointAnchorColor, this.Newton);
+	drawBox(this.fg.ctx, p2, rvec, uvec, 0, "", jointAnchorColor, this.Newton);
 	drawLine(this.fg.ctx, p1, p2, PIXEL_UNIT, jointAnchorColor);
 }
 

@@ -55,7 +55,7 @@
         const { Runner, CanvasRenderer, Interaction } = Newton;
 
         const firstApp      = Compound(Newton);
-        const renderer      = new CanvasRenderer(this.$('canvas'));
+        const renderer      = new CanvasRenderer(Newton, this.$('canvas'));
         const runner        = new Runner(renderer, firstApp);
         const interaction   = new Interaction(runner);
 
