@@ -42,7 +42,7 @@ section > button:last-child {
     border-bottom-right-radius: 5px;
 }
 
-section > button.pushed {
+section > button.active {
     color: black;
     background: #fa0;
     text-shadow: 0px 0px 0px;

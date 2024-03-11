@@ -1,11 +1,11 @@
 
 
-<section>
+<section @click{ element.childNodes.forEach(node => node.className = node === event.target && 'active')}>
     <button>Vertices</button>
     <button>Edge</button>
     <button>Shapes</button>
     <button>Bodies</button>
-    <button class="pushed">Joints</button>
+    <button>Joints</button>
 </section>
 
 <section>
@@ -16,10 +16,22 @@
     <input type="radio" name="select" %checked=state.radio id="Joints" value="Joints"><label for="Joints">Joints</label>
 </section>
 
-
-
+<section style="--color: red">
+    <div var="data-example-1">This is a div with the attribute value "data-example-1".</div>
+    <div var="data-example-2">This is a div with the attribute value "data-example-2".</div>
+    <div var="other-attribute">This div has a different attribute value.</div>
+</section>
 
 <!css controls.css>
+
+<!style>
+    :host {
+      --selector-attribute: "data-example";
+    }
+
+    [var^="data-example-1"] {
+        color: red;
+    }
 
 <!state>
     runner:  undefined,
