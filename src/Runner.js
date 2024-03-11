@@ -22,12 +22,17 @@ function bodyColor(body) {
 //  Private variables
 const App   = Symbol("app");
 const Pause = Symbol("pause");
+const Events    = Symbol("events");
+
+const events    = ['beforeRender'];
+
 
 const definePrivate = (obj, name, symbol, set) =>  Object.defineProperty(obj, name, { get() { return this[symbol] }, set });
 
 function Runner(renderer, app, settings = {}) {
     this.renderer = renderer;
     this[App] = app;
+    this[Events] = {};
 
     this.settings = Object.assign({
         gravity: new vec2(0, -10),
@@ -194,6 +199,8 @@ Runner.prototype.drawFrame = function(frameTime) {
 		}
 	}
 
+    var colors = {};
+
 	// Update whole background canvas if we needed
 	if (this.static_outdated) {
 		this.static_outdated = false;
@@ -203,12 +210,15 @@ Runner.prototype.drawFrame = function(frameTime) {
 		for (var i = 0; i < this.world.bodyArr.length; i++) {
 			var body = this.world.bodyArr[i];
 			if (body.isStatic()) {
+                colors.outline = "#000";
+                colors.body = bodyColor(body);
 
-                var body_color = bodyColor(body);
+                this[Events]?.beforeRender?.forEach(callback => callback(body, colors));
+
                 for (var k = 0; k < body.shapeArr.length; k++) {
         	        var shape = body.shapeArr[k];
         	        if (!shape.visible) continue;
-                    this.renderer.drawShape(shape, true,  PIXEL_UNIT, "#000", body_color);
+                    this.renderer.drawShape(shape, true,  PIXEL_UNIT, colors.outline, colors.body);
         	    }
 			}
 		}
@@ -239,11 +249,15 @@ Runner.prototype.drawFrame = function(frameTime) {
 		var body = this.world.bodyArr[i];
 		if (body.visible) {
 			if (!body.isStatic()) {
-                var body_color = bodyColor(body);
+                colors.outline = "#000";
+                colors.body = bodyColor(body);
+
+                this[Events]?.beforeRender?.forEach(callback => callback(body, colors));
+
                 for (var k = 0; k < body.shapeArr.length; k++) {
         	        var shape = body.shapeArr[k];
         	        if (!shape.visible) continue;
-                    this.renderer.drawShape(shape, false, PIXEL_UNIT, "#000", body_color);
+                    this.renderer.drawShape(shape, false, PIXEL_UNIT, colors.outline, colors.body);
     	            var expand = PIXEL_UNIT * 3;
     	            this.dirtyBounds.addBounds(Bounds.expand(shape.bounds, expand, expand));
         	    }
@@ -286,6 +300,22 @@ Runner.prototype.canvasToWorld = function(p) {
         (this.camera.origin.x + (p.x - this.renderer.width * 0.5)) / (this.camera.scale * meter2pixel(1)),
         (this.camera.origin.y - (p.y - this.renderer.height))      / (this.camera.scale * meter2pixel(1)));
 }
+
+Runner.prototype.on = function(event, callback) {
+    if(!events.includes(event)) throw `Unknown event "${event}"`;
+    if(this[Events][event]) {
+        if(this[Events][event].find(cb => cb === callback)) return;
+    } else this[Events][event] = [];
+    this[Events][event].push(callback);
+}
+
+Runner.prototype.off = function(event, callback) {
+    if(!events.includes(event)) throw `Unknown event "${event}"`;
+    if(!this[Events][event]) return;
+    const index = this[Events][event].findIndex(cb => cb === callback);
+    if(index !== -1) this[Events][event].splice(index, 1);
+}
+
 
 export {
     Runner

@@ -14,14 +14,32 @@
     connected() {
         this.interaction = this.state.runner.interaction;
 
-        this.mousedown = (...data) => {
-            console.log('mousedown', data)
+        this.mousedown = (body, screen, world) => {}
+
+        this.mouseup = (body, screen, world, move) => {
+
+            console.log('mouseup', body, move)
+
+            if(!move) {
+                this.selected_body = body;
+
+            }
         }
 
+        this.beforeRender = (body, colors) => {
+            if(body === this.selected_body) {
+                colors.outline = '#FFFFFF';
+                colors.body = 'gold';
+            }
+        }
+        this.state.runner.on('beforeRender', this.beforeRender);
         this.interaction.on('mousedown', this.mousedown);
+        this.interaction.on('mouseup', this.mouseup);
     }
     disconnected() {
+        this.state.runner.off('beforeRender', this.beforeRender);
         this.interaction.off('mousedown', this.mousedown);
+        this.interaction.off('mouseup', this.mouseup);
     }
 
 <!style>
@@ -37,7 +55,7 @@
     button.play {
         position: absolute;
         right: 15px;
-        height: 25px;
+        height: 22px;
         font-size: 10px;
         color: black;
         background: linear-gradient(#00FF8A, #00E050);

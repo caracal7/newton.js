@@ -5,7 +5,7 @@ import { MouseJoint } from "./joints/joint_mouse.js";
 //  Private variables
 const Events    = Symbol("events");
 
-const events    = ['mousedown'];
+const events    = ['mousedown', 'mouseup'];
 
 function Interaction(runner) {
     this.runner = runner;
@@ -47,11 +47,14 @@ function Interaction(runner) {
     		this.mouseJoint.maxForce = body.m * 1000;
     		this.runner.world.addJoint(this.mouseJoint);
     	}
-    	// for the touch device
+
     	this.state.mousePositionOld.x = pos.x;
     	this.state.mousePositionOld.y = pos.y;
 
-        this[Events]?.mousedown?.forEach(callback => callback(body, pos, p));
+        if(this[Events]?.mousedown?.length) {
+            this[Events].mousedown.forEach(callback => callback(body, pos, p));
+            if(this.runner.pause) this.runner.drawFrame(0);
+        }
 
     	event.preventDefault();
     };
@@ -84,8 +87,16 @@ function Interaction(runner) {
     //------------------------------ mouseup & mouseleave
     this.mouseup = this.mouseleave = event => {
     	this.removeJoint();
-    	this.state.mouseDown = false;
-    	this.state.mouseDownMoving = false;
+
+        if(this[Events]?.mouseup?.length) {
+        	var pos = this.getMousePosition(event);
+            var p = this.runner.canvasToWorld(pos);
+        	var body = this.runner.world.findBodyByPoint(p);
+            this[Events].mouseup.forEach(callback => callback(body, pos, p, this.state.mouseDownMoving));
+        }
+
+        this.state.mouseDown = false;
+
         if(this.runner.pause) this.runner.drawFrame(0);
     	event.preventDefault();
     };
@@ -128,24 +139,27 @@ function Interaction(runner) {
     //------------------------------ touchstart
     this.touchstart = event => {
         this.removeJoint();
+
         if (event.touches.length === 2) {
+        	this.state.mouseDownMoving = false;
             this.state.gestureStartScale = this.runner.camera.scale;
             this.state.touchPosOld[0] = this.getTouchPosition(event.touches[0]);
             this.state.touchPosOld[1] = this.getTouchPosition(event.touches[1]);
-
             this.state.touchDist = distance(
                 this.state.touchPosOld[0].x,
                 this.state.touchPosOld[0].y,
                 this.state.touchPosOld[1].x,
                 this.state.touchPosOld[1].y
             );
-
             event.preventDefault();
         }
     }
     //------------------------------ touchmove
     this.touchmove = event => {
+
         if (event.touches.length === 2) {
+            this.state.mouseDownMoving = true;
+
             var touch1 = this.getTouchPosition(event.touches[0]);
             var touch2 = this.getTouchPosition(event.touches[1]);
             // "touchleave" HACK
@@ -179,8 +193,8 @@ function Interaction(runner) {
             this.state.touchPosOld[1] = touch2;
 
             if(this.runner.pause) this.runner.drawFrame(0);
-            event.preventDefault();
         }
+        event.preventDefault();
     }
     //------------------------------ touchHandler
     this.touchHandler = event => {
@@ -201,6 +215,7 @@ function Interaction(runner) {
     //-------------------------------------------------------------------
     ["mousedown", "mousemove", "mouseup", "mouseleave", "mousewheel"]
         .forEach(event => this.runner.renderer.canvas.addEventListener(event, this[event]));
+
     this.runner.renderer.canvas.addEventListener("touchstart",  this.touchHandler);
     this.runner.renderer.canvas.addEventListener("touchmove",   this.touchHandler);
     this.runner.renderer.canvas.addEventListener("touchend",    this.touchHandler);
@@ -240,7 +255,10 @@ Interaction.prototype.scrollView = function(dx, dy) {
 	this.runner.camera.origin.x += dx;
 	this.runner.camera.origin.y += dy;
 	// Set dirtyBounds to full screen
-	this.runner.dirtyBounds.set(this.runner.canvasToWorld(new vec2(0, this.runner.renderer.height)), this.runner.canvasToWorld(new vec2(this.runner.renderer.width, 0)));
+	this.runner.dirtyBounds.set(
+        this.runner.canvasToWorld(new vec2(0, this.runner.renderer.height)),
+        this.runner.canvasToWorld(new vec2(this.runner.renderer.width, 0))
+    );
 	this.runner.static_outdated = true;
 }
 

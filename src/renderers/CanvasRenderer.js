@@ -319,6 +319,8 @@ function drawPolygon(ctx, verts, lineWidth, strokeStyle, fillStyle) {
 
 function CanvasRenderer(canvas) {
     this.canvas = canvas;
+	canvas.style.touchAction = 'none';
+	canvas.style.webkitTransform = 'translate3d(0, 0, 0)';
 	this.fg = {
         canvas,
 		ctx: canvas.getContext("2d")

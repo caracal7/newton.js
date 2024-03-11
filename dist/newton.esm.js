@@ -2484,12 +2484,15 @@ function bodyColor(body) {
 }
 var App = Symbol("app");
 var Pause = Symbol("pause");
+var Events = Symbol("events");
+var events = ["beforeRender"];
 var definePrivate = (obj, name, symbol, set) => Object.defineProperty(obj, name, { get() {
   return this[symbol];
 }, set });
 function Runner(renderer, app, settings = {}) {
   this.renderer = renderer;
   this[App] = app;
+  this[Events] = {};
   this.settings = Object.assign({
     gravity: new vec2(0, -10),
     frameRateHz: 60,
@@ -2607,6 +2610,7 @@ Runner.prototype.render = function(frameTime) {
   stats.timeDrawFrame = Date.now() - t0;
 };
 Runner.prototype.drawFrame = function(frameTime) {
+  var _a, _b, _c, _d;
   this.camera.bounds.set(this.canvasToWorld(new vec2(0, this.renderer.height)), this.canvasToWorld(new vec2(this.renderer.width, 0)));
   for (var i = 0; i < this.world.bodyArr.length; i++) {
     var body = this.world.bodyArr[i];
@@ -2622,18 +2626,21 @@ Runner.prototype.drawFrame = function(frameTime) {
       }
     }
   }
+  var colors = {};
   if (this.static_outdated) {
     this.static_outdated = false;
     this.renderer.beginStatic(this.camera, this.settings.backgroundColor);
     for (var i = 0; i < this.world.bodyArr.length; i++) {
       var body = this.world.bodyArr[i];
       if (body.isStatic()) {
-        var body_color = bodyColor(body);
+        colors.outline = "#000";
+        colors.body = bodyColor(body);
+        (_b = (_a = this[Events]) == null ? void 0 : _a.beforeRender) == null ? void 0 : _b.forEach((callback) => callback(body, colors));
         for (var k = 0; k < body.shapeArr.length; k++) {
           var shape = body.shapeArr[k];
           if (!shape.visible)
             continue;
-          this.renderer.drawShape(shape, true, PIXEL_UNIT, "#000", body_color);
+          this.renderer.drawShape(shape, true, PIXEL_UNIT, colors.outline, colors.body);
         }
       }
     }
@@ -2658,12 +2665,14 @@ Runner.prototype.drawFrame = function(frameTime) {
     var body = this.world.bodyArr[i];
     if (body.visible) {
       if (!body.isStatic()) {
-        var body_color = bodyColor(body);
+        colors.outline = "#000";
+        colors.body = bodyColor(body);
+        (_d = (_c = this[Events]) == null ? void 0 : _c.beforeRender) == null ? void 0 : _d.forEach((callback) => callback(body, colors));
         for (var k = 0; k < body.shapeArr.length; k++) {
           var shape = body.shapeArr[k];
           if (!shape.visible)
             continue;
-          this.renderer.drawShape(shape, false, PIXEL_UNIT, "#000", body_color);
+          this.renderer.drawShape(shape, false, PIXEL_UNIT, colors.outline, colors.body);
           var expand = PIXEL_UNIT * 3;
           this.dirtyBounds.addBounds(Bounds.expand(shape.bounds, expand, expand));
         }
@@ -2703,10 +2712,29 @@ Runner.prototype.canvasToWorld = function(p) {
     (this.camera.origin.y - (p.y - this.renderer.height)) / (this.camera.scale * meter2pixel(1))
   );
 };
+Runner.prototype.on = function(event, callback) {
+  if (!events.includes(event))
+    throw 'Unknown event "'.concat(event, '"');
+  if (this[Events][event]) {
+    if (this[Events][event].find((cb) => cb === callback))
+      return;
+  } else
+    this[Events][event] = [];
+  this[Events][event].push(callback);
+};
+Runner.prototype.off = function(event, callback) {
+  if (!events.includes(event))
+    throw 'Unknown event "'.concat(event, '"');
+  if (!this[Events][event])
+    return;
+  const index = this[Events][event].findIndex((cb) => cb === callback);
+  if (index !== -1)
+    this[Events][event].splice(index, 1);
+};
 
 // src/Interaction.js
-var Events = Symbol("events");
-var events = ["mousedown"];
+var Events2 = Symbol("events");
+var events2 = ["mousedown", "mouseup"];
 function Interaction(runner) {
   this.runner = runner;
   this.runner.interaction = this;
@@ -2742,7 +2770,11 @@ function Interaction(runner) {
     }
     this.state.mousePositionOld.x = pos.x;
     this.state.mousePositionOld.y = pos.y;
-    (_b = (_a = this[Events]) == null ? void 0 : _a.mousedown) == null ? void 0 : _b.forEach((callback) => callback(body, pos, p));
+    if ((_b = (_a = this[Events2]) == null ? void 0 : _a.mousedown) == null ? void 0 : _b.length) {
+      this[Events2].mousedown.forEach((callback) => callback(body, pos, p));
+      if (this.runner.pause)
+        this.runner.drawFrame(0);
+    }
     event.preventDefault();
   };
   this.mousemove = (event) => {
@@ -2767,9 +2799,15 @@ function Interaction(runner) {
     event.preventDefault();
   };
   this.mouseup = this.mouseleave = (event) => {
+    var _a, _b;
     this.removeJoint();
+    if ((_b = (_a = this[Events2]) == null ? void 0 : _a.mouseup) == null ? void 0 : _b.length) {
+      var pos = this.getMousePosition(event);
+      var p = this.runner.canvasToWorld(pos);
+      var body = this.runner.world.findBodyByPoint(p);
+      this[Events2].mouseup.forEach((callback) => callback(body, pos, p, this.state.mouseDownMoving));
+    }
     this.state.mouseDown = false;
-    this.state.mouseDownMoving = false;
     if (this.runner.pause)
       this.runner.drawFrame(0);
     event.preventDefault();
@@ -2803,6 +2841,7 @@ function Interaction(runner) {
   this.touchstart = (event) => {
     this.removeJoint();
     if (event.touches.length === 2) {
+      this.state.mouseDownMoving = false;
       this.state.gestureStartScale = this.runner.camera.scale;
       this.state.touchPosOld[0] = this.getTouchPosition(event.touches[0]);
       this.state.touchPosOld[1] = this.getTouchPosition(event.touches[1]);
@@ -2817,6 +2856,7 @@ function Interaction(runner) {
   };
   this.touchmove = (event) => {
     if (event.touches.length === 2) {
+      this.state.mouseDownMoving = true;
       var touch1 = this.getTouchPosition(event.touches[0]);
       var touch2 = this.getTouchPosition(event.touches[1]);
       if (touch1.x < 0 || touch1.x > this.runner.renderer.width || touch1.y < 0 || touch1.y > this.runner.renderer.height || touch2.x < 0 || touch2.x > this.runner.renderer.width || touch2.y < 0 || touch2.y > this.runner.renderer.height)
@@ -2840,8 +2880,8 @@ function Interaction(runner) {
       this.state.touchPosOld[1] = touch2;
       if (this.runner.pause)
         this.runner.drawFrame(0);
-      event.preventDefault();
     }
+    event.preventDefault();
   };
   this.touchHandler = (event) => {
     if (event.touches.length <= 1) {
@@ -2863,7 +2903,7 @@ function Interaction(runner) {
   this.runner.renderer.canvas.addEventListener("touchmove", this.touchHandler);
   this.runner.renderer.canvas.addEventListener("touchend", this.touchHandler);
   this.runner.renderer.canvas.addEventListener("touchcancel", this.touchHandler);
-  this[Events] = {};
+  this[Events2] = {};
 }
 Interaction.prototype.destroy = function() {
   ["mousedown", "mousemove", "mouseup", "mouseleave", "mousewheel"].forEach((event) => this.runner.renderer.canvas.removeEventListener(event, this[event]));
@@ -2890,27 +2930,30 @@ Interaction.prototype.getTouchPosition = function(event) {
 Interaction.prototype.scrollView = function(dx, dy) {
   this.runner.camera.origin.x += dx;
   this.runner.camera.origin.y += dy;
-  this.runner.dirtyBounds.set(this.runner.canvasToWorld(new vec2(0, this.runner.renderer.height)), this.runner.canvasToWorld(new vec2(this.runner.renderer.width, 0)));
+  this.runner.dirtyBounds.set(
+    this.runner.canvasToWorld(new vec2(0, this.runner.renderer.height)),
+    this.runner.canvasToWorld(new vec2(this.runner.renderer.width, 0))
+  );
   this.runner.static_outdated = true;
 };
 Interaction.prototype.on = function(event, callback) {
-  if (!events.includes(event))
+  if (!events2.includes(event))
     throw 'Unknown event "'.concat(event, '"');
-  if (this[Events][event]) {
-    if (this[Events][event].find((cb) => cb === callback))
+  if (this[Events2][event]) {
+    if (this[Events2][event].find((cb) => cb === callback))
       return;
   } else
-    this[Events][event] = [];
-  this[Events][event].push(callback);
+    this[Events2][event] = [];
+  this[Events2][event].push(callback);
 };
 Interaction.prototype.off = function(event, callback) {
-  if (!events.includes(event))
+  if (!events2.includes(event))
     throw 'Unknown event "'.concat(event, '"');
-  if (!this[Events][event])
+  if (!this[Events2][event])
     return;
-  const index = this[Events][event].findIndex((cb) => cb === callback);
+  const index = this[Events2][event].findIndex((cb) => cb === callback);
   if (index !== -1)
-    this[Events][event].splice(index, 1);
+    this[Events2][event].splice(index, 1);
 };
 
 // src/joints/joint_rope.js
@@ -4013,6 +4056,8 @@ function drawPolygon(ctx, verts, lineWidth, strokeStyle, fillStyle) {
 }
 function CanvasRenderer(canvas) {
   this.canvas = canvas;
+  canvas.style.touchAction = "none";
+  canvas.style.webkitTransform = "translate3d(0, 0, 0)";
   this.fg = {
     canvas,
     ctx: canvas.getContext("2d")
