@@ -83,19 +83,19 @@ function Interaction(runner) {
     	}
     	event.preventDefault();
     };
+
     //------------------------------ mouseup & mouseleave
     this.mouseup = this.mouseleave = event => {
-    	this.removeJoint();
-
         if(this[Events]?.mouseup?.length) {
         	var pos = this.getMousePosition(event);
             var p = this.runner.canvasToWorld(pos);
-        	var body = this.runner.world.findBodyByPoint(p);
-            this[Events].mouseup.forEach(callback => callback(body, pos, p, this.state.pointerDownMoving));
+            this[Events].mouseup.forEach(callback => callback(
+                event.type == 'mouseleave' ? undefined : this.runner.world.findBodyByPoint(p),
+                pos, p, this.state.pointerDownMoving
+            ));
         }
-
         this.state.mouseDown = false;
-
+    	this.removeJoint();
         if(this.runner.pause) this.runner.drawFrame(0);
     	event.preventDefault();
     };

@@ -14,24 +14,18 @@
     connected() {
         this.interaction = this.state.runner.interaction;
 
-        this.mousedown = (body, screen, world) => {}
+        this.mousedown = (body, screen, world) => {};
 
         this.mouseup = (body, screen, world, move) => {
-
-            console.log('mouseup', body, move)
-
-            if(!move) {
-                this.selected_body = body;
-
-            }
-        }
+            if(!move) this.selected_body = body;
+        };
 
         this.beforeRender = (body, colors) => {
             if(body === this.selected_body) {
                 colors.outline = '#FFFFFF';
                 colors.body = 'gold';
             }
-        }
+        };
         this.state.runner.on('beforeRender', this.beforeRender);
         this.interaction.on('mousedown', this.mousedown);
         this.interaction.on('mouseup', this.mouseup);

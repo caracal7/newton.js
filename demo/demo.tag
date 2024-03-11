@@ -1,6 +1,7 @@
 <!import Newton     from ../dist/newton.esm.js>
 
 <!import Car        from examples/car.js>
+<!import Compound   from examples/compound.js>
 <!import Bounce     from examples/bounce.js>
 <!import Circles    from examples/circles.js>
 <!import Crank      from examples/crank.js>
@@ -53,12 +54,12 @@
     connected() {
         const { Runner, CanvasRenderer, Interaction } = Newton;
 
-        const firstApp      = Crank(Newton);
+        const firstApp      = Compound(Newton);
         const renderer      = new CanvasRenderer(this.$('canvas'));
         const runner        = new Runner(renderer, firstApp);
         const interaction   = new Interaction(runner);
 
-        this.state.demos = { Car, Bounce, Circles, Crank, Pyramid, RagDoll, Rope, Web, SeeSaw };
+        this.state.demos = { Car, Compound, Bounce, Circles, Crank, Pyramid, RagDoll, Rope, Web, SeeSaw };
         this.state.runner = runner;
         this.render();
     }

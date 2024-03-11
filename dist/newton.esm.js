@@ -2800,14 +2800,18 @@ function Interaction(runner) {
   };
   this.mouseup = this.mouseleave = (event) => {
     var _a, _b;
-    this.removeJoint();
     if ((_b = (_a = this[Events2]) == null ? void 0 : _a.mouseup) == null ? void 0 : _b.length) {
       var pos = this.getMousePosition(event);
       var p = this.runner.canvasToWorld(pos);
-      var body = this.runner.world.findBodyByPoint(p);
-      this[Events2].mouseup.forEach((callback) => callback(body, pos, p, this.state.pointerDownMoving));
+      this[Events2].mouseup.forEach((callback) => callback(
+        event.type == "mouseleave" ? void 0 : this.runner.world.findBodyByPoint(p),
+        pos,
+        p,
+        this.state.pointerDownMoving
+      ));
     }
     this.state.mouseDown = false;
+    this.removeJoint();
     if (this.runner.pause)
       this.runner.drawFrame(0);
     event.preventDefault();
