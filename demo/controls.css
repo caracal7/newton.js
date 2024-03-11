@@ -5,8 +5,12 @@
 button {
     width: 32px;
     height: 25px;
-    display: inline-block;
-    line-height: 14px;
+    background: linear-gradient(#008AFF, #0050E0);
+    border: 1px solid black;
+    border-radius: 5px;
+    box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.1), inset -1px -1px 0 rgba(0, 0, 0, 0.1);
+    vertical-align: middle;
+    cursor: pointer;
     background-repeat: no-repeat;
     background-image: url("/demo/assets/glyphicons-halflings-white.png");
 }

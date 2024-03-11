@@ -2,7 +2,6 @@
 <button class=(state.runner?.pause ? "play" : "pause") @click=pauseResume/>
 <button class="step-forward" disabled=!state.runner?.pause @click=step/>
 
-<!css assets/button.css>
 <!css controls.css>
 
 <!state>

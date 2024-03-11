@@ -30,7 +30,7 @@
 <canvas/>
 
 <!state>
-    edit: false,
+    edit: true,
     demos: {}
 
 <!class>

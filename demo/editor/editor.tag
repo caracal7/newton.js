@@ -1,6 +1,8 @@
+<!tag @controls controls>
 <!css ../assets/header.css>
 
 <header if(!state.edit)>
+    <@controls id="controls" runner=state.runner/>
     <button class="play" @click=this.emit("play") text("Play")/>
 </header>
 
