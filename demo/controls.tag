@@ -1,6 +1,6 @@
 <button class="repeat" @click=restart/>
 <button class=(state.runner?.pause ? "play" : "pause") @click=pauseResume/>
-<button class="step-forward" disabled=!state.runner?.pause/>
+<button class="step-forward" disabled=!state.runner?.pause @click=step/>
 
 <!css assets/button.css>
 <!css controls.css>
@@ -9,6 +9,8 @@
     runner:  undefined
 
 <!class>
+
+
     restart() {
         this.state.runner.pause = false;
         this.state.runner.resetScene();
@@ -18,4 +20,8 @@
     pauseResume() {
         this.state.runner.pause = !this.state.runner.pause;
         this.render();
+    }
+
+    step() {
+        this.state.runner.runFrame();
     }

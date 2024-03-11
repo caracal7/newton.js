@@ -1,8 +1,26 @@
+<!css ../assets/header.css>
+
 <header if(!state.edit)>
-    <button class="play" @click=this.emit("close") text("Play")/>
+    <button class="play" @click=this.emit("play") text("Play")/>
 </header>
 
-<!css header.css>
+
+<!state>
+    runner: undefined
+
+<!class>
+    connected() {
+        this.interaction = this.state.runner.interaction;
+
+        this.mousedown = (...data) => {
+            console.log('mousedown', data)
+        }
+
+        this.interaction.on('mousedown', this.mousedown);
+    }
+    disconnected() {
+        this.interaction.off('mousedown', this.mousedown);
+    }
 
 <!style>
     *, :host {

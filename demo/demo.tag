@@ -11,22 +11,21 @@
 <!import SeeSaw     from examples/seesaw.js>
 
 <!tag @controls controls>
-<!tag @editor editor>
+<!tag @editor   editor/editor>
 
 <!css demo.css>
-<!css header.css>
+<!css assets/header.css>
 
 <header if(!state.edit)>
     <label for="scene">Scene: </label>
-    <select id="scene" disabled=state.edit @input=cangeDemo>
+    <select id="scene" disabled=state.edit @input=changeDemo>
         <option loop(Object.keys(state.demos) as demo | d => d) value=demo text(demo)/>
     </select>
     <@controls id="controls" runner=state.runner/>
-    <button class="edit" @click{ state.edit = true } text("Edit")/>
+    <button class="edit" @click=edit text("Edit")/>
 </header>
 
-<@editor if(state.edit) @close{ state.edit = false }/>
-
+<@editor if(state.edit) runner=state.runner @play/>
 
 <canvas/>
 
@@ -35,7 +34,18 @@
     demos: {}
 
 <!class>
-    cangeDemo(event) {
+    play() {
+        this.state.runner.pause = false;
+        this.state.edit = false;
+        this.render();
+    }
+    edit() {
+        this.state.runner.pause = true;
+        this.state.edit = true;
+        this.render();
+    }
+
+    changeDemo(event) {
         this.state.runner.app = this.state.demos[event.target.value](Newton);
         this.$('#controls').render();
     }
@@ -43,10 +53,10 @@
     connected() {
         const { Runner, CanvasRenderer, Interaction } = Newton;
 
-        const firstApp = Car(Newton);
-        const renderer = new CanvasRenderer(this.$('canvas'));
-        const runner   = new Runner(renderer, firstApp);
-        new Interaction(runner);
+        const firstApp      = Crank(Newton);
+        const renderer      = new CanvasRenderer(this.$('canvas'));
+        const runner        = new Runner(renderer, firstApp);
+        const interaction   = new Interaction(runner);
 
         this.state.demos = { Car, Bounce, Circles, Crank, Pyramid, RagDoll, Rope, Web, SeeSaw };
         this.state.runner = runner;

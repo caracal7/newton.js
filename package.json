@@ -7,12 +7,15 @@
   "type": "module",
   "scripts": {
     "start": "run-p dev:*",
-    "dev:build_esm": "./node_modules/.bin/esbuild src/index.js --format=esm --bundle --minify --target=chrome60,firefox60,safari12 --outfile=dist/newton.esm.js --watch",
-    "dev:demo": "./node_modules/.bin/browser-sync start -s -w --directory --startPath ./ui.html",
+    "dev:build_esm": "./node_modules/.bin/esbuild src/index.js --format=esm --bundle --target=chrome60,firefox60,safari12 --outfile=dist/newton.esm.js --watch",
+    "dev:demo": "./node_modules/.bin/browser-sync start -s -w --directory --startPath ./index.html",
     "build": "run-p build:*",
-    "build:iife": "./node_modules/.bin/esbuild src/iife.js --format=iife --bundle --minify --target=chrome60,firefox60,safari12 --outfile=dist/newton.js",
-    "build:cjs": "./node_modules/.bin/esbuild src/index.js --format=cjs  --bundle --minify --target=chrome60,firefox60,safari12 --outfile=dist/newton.cjs.js",
-    "build:esm": "./node_modules/.bin/esbuild src/index.js --format=esm  --bundle --minify --target=chrome60,firefox60,safari12 --outfile=dist/newton.esm.js",
+    "build:iife": "./node_modules/.bin/esbuild src/iife.js --format=iife --bundle --target=chrome60,firefox60,safari12 --outfile=dist/newton.js",
+    "build:iife-min": "./node_modules/.bin/esbuild src/iife.js --format=iife --bundle --minify --target=chrome60,firefox60,safari12 --outfile=dist/newton.js",
+    "build:cjs": "./node_modules/.bin/esbuild src/index.js --format=cjs  --bundle --target=chrome60,firefox60,safari12 --outfile=dist/newton.cjs.js",
+    "build:cjs-min": "./node_modules/.bin/esbuild src/index.js --format=cjs  --bundle --minify --target=chrome60,firefox60,safari12 --outfile=dist/newton.cjs.js",
+    "build:esm": "./node_modules/.bin/esbuild src/index.js --format=esm  --bundle --target=chrome60,firefox60,safari12 --outfile=dist/newton.esm.js",
+    "build:esm-min": "./node_modules/.bin/esbuild src/index.js --format=esm  --bundle --minify --target=chrome60,firefox60,safari12 --outfile=dist/newton.esm.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

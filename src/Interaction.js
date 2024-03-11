@@ -2,10 +2,15 @@ import { Body } from "./Body.js";
 import { vec2, meter2pixel, distance } from './utils/math.js';
 import { MouseJoint } from "./joints/joint_mouse.js";
 
+//  Private variables
+const Events    = Symbol("events");
 
+const events    = ['mousedown'];
 
 function Interaction(runner) {
     this.runner = runner;
+    this.runner.interaction = this;
+
     this.state = {
         mouseDown:          false,
         mouseDownMoving:    false,
@@ -25,6 +30,7 @@ function Interaction(runner) {
     //------------------------------ mousedown
     this.mousedown = event => {
         var pos = this.getMousePosition(event);
+
     	this.state.mouseDown = true;
     	this.state.mouseDownMoving = false;
     	this.state.mouseDownPosition.x = pos.x;
@@ -44,6 +50,9 @@ function Interaction(runner) {
     	// for the touch device
     	this.state.mousePositionOld.x = pos.x;
     	this.state.mousePositionOld.y = pos.y;
+
+        this[Events]?.mousedown?.forEach(callback => callback(body, pos, p));
+
     	event.preventDefault();
     };
     //------------------------------ mousemove
@@ -191,6 +200,7 @@ function Interaction(runner) {
     this.runner.renderer.canvas.addEventListener("touchend",    this.touchHandler);
     this.runner.renderer.canvas.addEventListener("touchcancel", this.touchHandler);
 
+    this[Events] = {};
 }
 
 Interaction.prototype.destroy = function() {
@@ -227,6 +237,22 @@ Interaction.prototype.scrollView = function(dx, dy) {
 	this.runner.dirtyBounds.set(this.runner.canvasToWorld(new vec2(0, this.runner.renderer.height)), this.runner.canvasToWorld(new vec2(this.runner.renderer.width, 0)));
 	this.runner.static_outdated = true;
 }
+
+Interaction.prototype.on = function(event, callback) {
+    if(!events.includes(event)) throw `Unknown event "${event}"`;
+    if(this[Events][event]) {
+        if(this[Events][event].find(cb => cb === callback)) return;
+    } else this[Events][event] = [];
+    this[Events][event].push(callback);
+}
+
+Interaction.prototype.off = function(event, callback) {
+    if(!events.includes(event)) throw `Unknown event "${event}"`;
+    if(!this[Events][event]) return;
+    const index = this[Events][event].findIndex(cb => cb === callback);
+    if(index !== -1) this[Events][event].splice(index, 1);
+}
+
 
 export {
     Interaction

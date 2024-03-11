@@ -14,13 +14,13 @@ const PIXEL_UNIT = pixel2meter(1);
 const randomColor = ["#BEB", "#48B", "#CAA", "#8D5", "#6BE", "#98D", "#E78", "#7BC", "#E9E", "#BCD", "#EB6", "#EE7"]; // Random colors for drawing bodies
 
 function bodyColor(body) {
-    if (!body.isDynamic()) return "#777";
-    if (!body.isAwake()) return "#999";
+    if (!body.isDynamic())  return "#777";
+    if (!body.isAwake())    return "#999";
     return randomColor[(body.id) % randomColor.length];
 }
 
 //  Private variables
-const App = Symbol("app");
+const App   = Symbol("app");
 const Pause = Symbol("pause");
 
 const definePrivate = (obj, name, symbol, set) =>  Object.defineProperty(obj, name, { get() { return this[symbol] }, set });
@@ -130,31 +130,26 @@ Runner.prototype.runFrame = function() {
     frameTime = Math.floor(frameTime * 60 + 0.5) / 60;
     this.time.lastTime = time;
 
-    if (!this[Pause] || this.step) {
-        var h = 1 / this.settings.frameRateHz;
+    var h = 1 / this.settings.frameRateHz;
 
-        this.time.timeDelta += frameTime;
+    this.time.timeDelta += frameTime;
 
-        if (this.step) {
-            this.step = false;
-            this.time.timeDelta = h;
-        }
+    if(this[Pause]) this.time.timeDelta = h;
 
-        stats.timeStep = 0;
-        stats.stepCount = 0;
+    stats.timeStep = 0;
+    stats.stepCount = 0;
 
-        for (var maxSteps = 4; maxSteps > 0 && this.time.timeDelta >= h; maxSteps--) {
-            var t0 = Date.now();
-            this.world.step(h, this.settings.velocityIterations, this.settings.positionIterations, this.settings.warmStarting, this.settings.allowSleep);
-            stats.timeStep += Date.now() - t0;
-            stats.stepCount++;
-            this.time.timeDelta -= h;
-        }
-
-        if (this.time.timeDelta > h) this.time.timeDelta = 0;
-
-        this[App].runFrame();
+    for (var maxSteps = 4; maxSteps > 0 && this.time.timeDelta >= h; maxSteps--) {
+        var t0 = Date.now();
+        this.world.step(h, this.settings.velocityIterations, this.settings.positionIterations, this.settings.warmStarting, this.settings.allowSleep);
+        stats.timeStep += Date.now() - t0;
+        stats.stepCount++;
+        this.time.timeDelta -= h;
     }
+
+    if (this.time.timeDelta > h) this.time.timeDelta = 0;
+
+    this[App].runFrame();
 
     if (stats.stepCount > 0) this.render(frameTime);
 
