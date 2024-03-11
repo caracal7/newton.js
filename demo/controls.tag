@@ -9,7 +9,6 @@
 
 <!class>
 
-
     restart() {
         this.state.runner.pause = false;
         this.state.runner.resetScene();

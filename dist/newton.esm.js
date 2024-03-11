@@ -2761,6 +2761,8 @@ function Interaction(runner) {
         this.state.mousePositionOld.x = pos.x;
         this.state.mousePositionOld.y = pos.y;
       }
+      if (this.runner.pause)
+        this.runner.drawFrame(0);
     }
     event.preventDefault();
   };
@@ -2768,6 +2770,8 @@ function Interaction(runner) {
     this.removeJoint();
     this.state.mouseDown = false;
     this.state.mouseDownMoving = false;
+    if (this.runner.pause)
+      this.runner.drawFrame(0);
     event.preventDefault();
   };
   this.mousewheel = (event) => {
@@ -2792,6 +2796,8 @@ function Interaction(runner) {
     var p = this.runner.canvasToWorld(this.getMousePosition(event));
     var dx = wheelDeltaX * 0.2;
     this.scrollView(p.x * ds - dx, p.y * ds);
+    if (this.runner.pause)
+      this.runner.drawFrame(0);
     event.preventDefault();
   };
   this.touchstart = (event) => {
@@ -2832,6 +2838,8 @@ function Interaction(runner) {
       }
       this.state.touchPosOld[0] = touch1;
       this.state.touchPosOld[1] = touch2;
+      if (this.runner.pause)
+        this.runner.drawFrame(0);
       event.preventDefault();
     }
   };
