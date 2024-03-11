@@ -5,15 +5,16 @@
 
 <!class>
     toggleActive() {
-        this.slotted.forEach(node => node.classList[(node.value || node.textContent) == this.state.selected ? 'add' : 'remove']('active'));
+        this.slotted.forEach(node => node.classList[(node.value || node.textContent) == this.state.selected ? 'add' : 'remove']('selected'));
     }
 
     slotChange() {
 		this.slotted.filter(x => x.nodeName === 'BUTTON')
 			.forEach(button => button.onclick = [null, "false"].includes(button.getAttribute('disabled'))
 				? () => {
-                    this.state.selected = button.value || button.textContent;
-                    this.emit('select', this.state.selected);
+                    const selected = button.value || button.textContent;
+                    if(selected == this.state.selected) return;
+                    this.emit('select', this.state.selected = selected);
                     this.toggleActive();
                 } : undefined
             );
@@ -63,11 +64,12 @@
         box-shadow: inset 1px 2px 3px rgba(0, 0, 0, 0.5), 0 1px 0 #6B6967!important;
     }
 
-    ::slotted(button.active) {
+    ::slotted(button.selected) {
         color: black!important;
         background: #fa0!important;
         text-shadow: 0px 0px 0px!important;
         box-shadow: inset 1px 2px 3px rgba(0, 0, 0, 0.5), 0 1px 0 #6B6967!important;
+        cursor: auto!important;
     }
 
 

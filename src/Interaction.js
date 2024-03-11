@@ -13,7 +13,7 @@ function Interaction(runner) {
 
     this.state = {
         mouseDown:          false,
-        mouseDownMoving:    false,
+        pointerDownMoving:  false,
         mouseDownPosition:  new vec2(),
         mousePositionOld:   new vec2(),
         touchPosOld:        new Array(2),
@@ -30,9 +30,8 @@ function Interaction(runner) {
     //------------------------------ mousedown
     this.mousedown = event => {
         var pos = this.getMousePosition(event);
-
     	this.state.mouseDown = true;
-    	this.state.mouseDownMoving = false;
+    	this.state.pointerDownMoving = false;
     	this.state.mouseDownPosition.x = pos.x;
     	this.state.mouseDownPosition.y = pos.y;
         // Remove previous mouse joint
@@ -68,7 +67,7 @@ function Interaction(runner) {
         ) return this.mouseleave(event);
 
     	if (this.state.mouseDown) {
-            this.state.mouseDownMoving = true;
+            this.state.pointerDownMoving = true;
     		if (this.mouseJoint) {
     			this.mouseBody.p.copy(this.runner.canvasToWorld(pos));
     			this.mouseBody.syncTransform();
@@ -92,7 +91,7 @@ function Interaction(runner) {
         	var pos = this.getMousePosition(event);
             var p = this.runner.canvasToWorld(pos);
         	var body = this.runner.world.findBodyByPoint(p);
-            this[Events].mouseup.forEach(callback => callback(body, pos, p, this.state.mouseDownMoving));
+            this[Events].mouseup.forEach(callback => callback(body, pos, p, this.state.pointerDownMoving));
         }
 
         this.state.mouseDown = false;
@@ -141,7 +140,7 @@ function Interaction(runner) {
         this.removeJoint();
 
         if (event.touches.length === 2) {
-        	this.state.mouseDownMoving = false;
+        	this.state.pointerDownMoving = false;
             this.state.gestureStartScale = this.runner.camera.scale;
             this.state.touchPosOld[0] = this.getTouchPosition(event.touches[0]);
             this.state.touchPosOld[1] = this.getTouchPosition(event.touches[1]);
@@ -158,7 +157,7 @@ function Interaction(runner) {
     this.touchmove = event => {
 
         if (event.touches.length === 2) {
-            this.state.mouseDownMoving = true;
+            this.state.pointerDownMoving = true;
 
             var touch1 = this.getTouchPosition(event.touches[0]);
             var touch2 = this.getTouchPosition(event.touches[1]);
