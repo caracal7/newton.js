@@ -1,8 +1,23 @@
-<!tag @controls controls>
+<!tag @buttons-group ../tags/buttons-group>
+
 <!css ../assets/header.css>
 
 <header if(!state.edit)>
-    <@controls id="controls" runner=state.runner/>
+
+
+    <@buttons-group selected='Bodies' @select{
+        console.log('select', event.detail)
+        this.selected_body = undefined;
+        this.state.runner.drawFrame(0);
+    }>
+        <button>Bodies</button>
+        <button>Shapes</button>
+        <button>Edges</button>
+        <button>Vertices</button>
+        <button>Joints</button>
+    </@buttons-group>
+
+
     <button class="play" @click=this.emit("play") text("Play")/>
 </header>
 
