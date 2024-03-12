@@ -44,7 +44,7 @@
         color: black;
         background: linear-gradient(#00FF8A, #00E050);
         font-weight: bold;
-        padding: 0 15px;
+        padding: 0 7px;
         border: 1px solid black;
         border-radius: 5px;
         box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.1), inset -1px -1px 0 rgba(0, 0, 0, 0.1);

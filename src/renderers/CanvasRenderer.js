@@ -378,13 +378,18 @@ CanvasRenderer.prototype.resize = function() {
 	this.height = this.fg.canvas.height = this.bg.canvas.height = this.canvas.height = this.canvas.offsetHeight;
 }
 
-CanvasRenderer.prototype.drawHelperJointAnchors = function(p1, p2, radius, PIXEL_UNIT, jointAnchorColor) {
+CanvasRenderer.prototype.drawHelperJointAnchors = function(p1, p2, radius, lineWidth, jointAnchorColor) {
 	var rvec = new this.Newton.vec2(radius, 0);
 	var uvec = new this.Newton.vec2(0, radius);
 	drawBox(this.fg.ctx, p1, rvec, uvec, 0, "", jointAnchorColor, this.Newton);
 	drawBox(this.fg.ctx, p2, rvec, uvec, 0, "", jointAnchorColor, this.Newton);
-	drawLine(this.fg.ctx, p1, p2, PIXEL_UNIT, jointAnchorColor);
+	drawLine(this.fg.ctx, p1, p2, lineWidth, jointAnchorColor);
 }
+
+CanvasRenderer.prototype.drawLine = function(p1, p2, lineWidth, strokeStyle) {
+	drawLine(this.fg.ctx, p1, p2, lineWidth, strokeStyle);
+}
+
 
 export {
 	CanvasRenderer,

@@ -2488,7 +2488,7 @@ function bodyColor(body) {
 var App = Symbol("app");
 var Pause = Symbol("pause");
 var Events = Symbol("events");
-var events = ["beforeRenderBody", "beforeRenderShape"];
+var events = ["beforeRenderBody", "beforeRenderShape", "renderFrame"];
 var definePrivate = (obj, name, symbol, set) => Object.defineProperty(obj, name, { get() {
   return this[symbol];
 }, set });
@@ -2496,6 +2496,7 @@ function Runner(renderer, app, settings = {}) {
   this.renderer = renderer;
   this[App] = app;
   this[Events] = {};
+  this.PIXEL_UNIT = PIXEL_UNIT;
   this.settings = Object.assign({
     gravity: new vec22(0, -10),
     frameRateHz: 60,
@@ -2621,7 +2622,7 @@ Runner.prototype.redraw = function() {
   this.drawFrame(0);
 };
 Runner.prototype.drawFrame = function(frameTime = 0) {
-  var _a, _b, _c, _d, _e, _f, _g, _h;
+  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
   this.camera.bounds.set(this.canvasToWorld(new vec22(0, this.renderer.height)), this.canvasToWorld(new vec22(this.renderer.width, 0)));
   for (var i = 0; i < this.world.bodyArr.length; i++) {
     var body = this.world.bodyArr[i];
@@ -2722,6 +2723,7 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
       }
     }
   }
+  (_j = (_i = this[Events]) == null ? void 0 : _i.renderFrame) == null ? void 0 : _j.forEach((callback) => callback(frameTime));
   this.renderer.endDynamic();
 };
 Runner.prototype.worldToCanvas = function(p) {
@@ -4149,12 +4151,15 @@ CanvasRenderer.prototype.resize = function() {
   this.width = this.fg.canvas.width = this.bg.canvas.width = this.canvas.width = this.canvas.offsetWidth;
   this.height = this.fg.canvas.height = this.bg.canvas.height = this.canvas.height = this.canvas.offsetHeight;
 };
-CanvasRenderer.prototype.drawHelperJointAnchors = function(p1, p2, radius, PIXEL_UNIT2, jointAnchorColor) {
+CanvasRenderer.prototype.drawHelperJointAnchors = function(p1, p2, radius, lineWidth, jointAnchorColor) {
   var rvec = new this.Newton.vec2(radius, 0);
   var uvec = new this.Newton.vec2(0, radius);
   drawBox(this.fg.ctx, p1, rvec, uvec, 0, "", jointAnchorColor, this.Newton);
   drawBox(this.fg.ctx, p2, rvec, uvec, 0, "", jointAnchorColor, this.Newton);
-  drawLine(this.fg.ctx, p1, p2, PIXEL_UNIT2, jointAnchorColor);
+  drawLine(this.fg.ctx, p1, p2, lineWidth, jointAnchorColor);
+};
+CanvasRenderer.prototype.drawLine = function(p1, p2, lineWidth, strokeStyle) {
+  drawLine(this.fg.ctx, p1, p2, lineWidth, strokeStyle);
 };
 
 // src/index.js

@@ -24,7 +24,7 @@ const App   = Symbol("app");
 const Pause = Symbol("pause");
 const Events    = Symbol("events");
 
-const events    = ['beforeRenderBody', 'beforeRenderShape'];
+const events    = ['beforeRenderBody', 'beforeRenderShape', 'renderFrame'];
 
 
 const definePrivate = (obj, name, symbol, set) =>  Object.defineProperty(obj, name, { get() { return this[symbol] }, set });
@@ -34,7 +34,7 @@ function Runner(renderer, app, settings = {}) {
     this[App] = app;
     this[Events] = {};
 
-
+    this.PIXEL_UNIT = PIXEL_UNIT;
 
     this.settings = Object.assign({
         gravity: new vec2(0, -10),
@@ -49,7 +49,6 @@ function Runner(renderer, app, settings = {}) {
     	jointAnchorColor: "#11cf00",
     }, settings);
 
-    // canvas rendering stuffs
     this.camera = {
         origin: new vec2(0, 0),
         scale: 1,
@@ -213,8 +212,6 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
 		}
 	}
 
-
-
 	// Update whole background canvas if we needed
 	if (this.static_outdated) {
 		this.static_outdated = false;
@@ -243,8 +240,7 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
         	    }
 			}
 		}
-        this.renderer.endStatic()
-
+        this.renderer.endStatic();
 	}
 
 	// Transform dirtyBounds world to screen
@@ -314,8 +310,13 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
 			}
 		}
 	}
+
+    this[Events]?.renderFrame?.forEach(callback => callback(frameTime));
+
     this.renderer.endDynamic();
 }
+
+
 
 Runner.prototype.worldToCanvas = function(p) {
     return new vec2(
