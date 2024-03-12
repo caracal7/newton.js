@@ -1006,6 +1006,9 @@ function inertiaForPoly(mass, verts, offset) {
   }
   return mass * sum1 / (6 * sum2);
 }
+function isAppleMobileDevice() {
+  return navigator.userAgent.match(/iPhone|iPod|iPad/gi) ? true : false;
+}
 
 // src/shapes/shape_circle.js
 var ShapeCircle = function(local_x, local_y, radius) {
@@ -2754,11 +2757,13 @@ Runner.prototype.off = function(event, callback) {
 };
 
 // src/Interaction.js
+var SELECTABLE_LINE_DIST_THREHOLD = pixel2meter(isAppleMobileDevice() ? 8 : 4);
 var Events2 = Symbol("events");
-var events2 = ["mousedown", "mouseup"];
+var events2 = ["mousedown", "mouseup", "mousemove"];
 function Interaction(runner) {
   this.runner = runner;
   this.runner.interaction = this;
+  this.SELECTABLE_LINE_DIST_THREHOLD = SELECTABLE_LINE_DIST_THREHOLD;
   this.state = {
     mouseDown: false,
     pointerDownMoving: false,
@@ -2799,6 +2804,7 @@ function Interaction(runner) {
     event.preventDefault();
   };
   this.mousemove = (event) => {
+    var _a, _b;
     var pos = this.getMousePosition(event);
     if (pos.x < 0 || pos.x > this.runner.renderer.width || pos.y < 0 || pos.y > this.runner.renderer.height)
       return this.mouseleave(event);
@@ -2814,9 +2820,18 @@ function Interaction(runner) {
         this.state.mousePositionOld.x = pos.x;
         this.state.mousePositionOld.y = pos.y;
       }
+      ;
       if (this.runner.pause)
         this.runner.drawFrame(0);
     }
+    ;
+    if ((_b = (_a = this[Events2]) == null ? void 0 : _a.mousemove) == null ? void 0 : _b.length) {
+      var p = this.runner.canvasToWorld(pos);
+      this[Events2].mousemove.forEach((callback) => callback(pos, p));
+      if (this.runner.pause)
+        this.runner.drawFrame(0);
+    }
+    ;
     event.preventDefault();
   };
   this.mouseup = this.mouseleave = (event) => {
@@ -2831,6 +2846,7 @@ function Interaction(runner) {
         this.state.pointerDownMoving
       ));
     }
+    ;
     this.state.mouseDown = false;
     this.removeJoint();
     if (this.runner.pause)

@@ -1,15 +1,21 @@
-import { Body } from "./Body.js";
-import { vec2, meter2pixel, distance } from './utils/math.js';
-import { MouseJoint } from "./joints/joint_mouse.js";
+import { Body }                         from "./Body.js";
+import { vec2, meter2pixel, distance }  from './utils/math.js';
+import { MouseJoint }                   from "./joints/joint_mouse.js";
+import { pixel2meter }                  from './utils/math.js';
+import { isAppleMobileDevice }          from './utils/util.js';
+
+const SELECTABLE_LINE_DIST_THREHOLD = pixel2meter(isAppleMobileDevice() ? 8 : 4);
 
 //  Private variables
 const Events    = Symbol("events");
 
-const events    = ['mousedown', 'mouseup'];
+const events    = ['mousedown', 'mouseup', 'mousemove'];
 
 function Interaction(runner) {
     this.runner = runner;
     this.runner.interaction = this;
+
+    this.SELECTABLE_LINE_DIST_THREHOLD = SELECTABLE_LINE_DIST_THREHOLD;
 
     this.state = {
         mouseDown:          false,
@@ -78,9 +84,14 @@ function Interaction(runner) {
     			this.scrollView(-dx, dy);
                 this.state.mousePositionOld.x = pos.x;
                 this.state.mousePositionOld.y = pos.y;
-    		}
+    		};
             if(this.runner.pause) this.runner.drawFrame(0);
-    	}
+    	};
+        if(this[Events]?.mousemove?.length) {
+            var p = this.runner.canvasToWorld(pos);
+            this[Events].mousemove.forEach(callback => callback(pos, p));
+            if(this.runner.pause) this.runner.drawFrame(0);
+        };
     	event.preventDefault();
     };
 
@@ -93,7 +104,7 @@ function Interaction(runner) {
                 event.type == 'mouseleave' ? undefined : this.runner.world.findBodyByPoint(p),
                 pos, p, this.state.pointerDownMoving
             ));
-        }
+        };
         this.state.mouseDown = false;
     	this.removeJoint();
         if(this.runner.pause) this.runner.drawFrame(0);
@@ -155,7 +166,6 @@ function Interaction(runner) {
     }
     //------------------------------ touchmove
     this.touchmove = event => {
-
         if (event.touches.length === 2) {
             this.state.pointerDownMoving = true;
 

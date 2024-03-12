@@ -33,6 +33,7 @@ import { DemoBounce } from "./demo/demo_bounce.js";
 
 import { RendererCanvas, ARROW_TYPE_NONE, ARROW_TYPE_NORMAL, ARROW_TYPE_CIRCLE, ARROW_TYPE_BOX } from "./renderers/renderer_canvas.js";
 
+import { Joint } from "./joints/joint.js";
 import { Color } from "./lib/color.js";
 import { collision } from "./utils/collision.js";
 import { Shape } from "./shapes/shape.js";

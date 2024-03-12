@@ -148,6 +148,10 @@ function createConvexHull(points) {
 	return newPoints;
 }
 
+function isAppleMobileDevice() {
+	return navigator.userAgent.match(/iPhone|iPod|iPad/gi) ? true : false;
+}
+
 export {
 	areaForCircle,
 	inertiaForCircle,
@@ -158,5 +162,6 @@ export {
 	centroidForPoly,
 	inertiaForPoly,
 	inertiaForBox,
-	createConvexHull
+	createConvexHull,
+	isAppleMobileDevice
 }

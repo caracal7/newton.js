@@ -1,3 +1,15 @@
+<header if(!state.edit)>
+    <label for="scene">Scene: </label>
+    <select id="scene" disabled=state.edit @input=changeDemo>
+        <option loop(Object.keys(state.demos) as demo | d => d) value=demo text(demo)/>
+    </select>
+    <@controls id="controls" runner=state.runner/>
+    <@toggle-button checked=state.showJoints @changed=showJoints text('Joints')/>
+    <button class="edit" @click=edit text("Edit")/>
+</header>
+<@editor if(state.edit) runner=state.runner @play/>
+<canvas/>
+
 <!import Newton     from ../dist/newton.esm.js>
 
 <!import Car        from examples/car.js>
@@ -11,35 +23,30 @@
 <!import Web        from examples/web.js>
 <!import SeeSaw     from examples/seesaw.js>
 
-<!tag @controls controls>
-<!tag @editor   editor/editor>
+<!tag @controls         controls>
+<!tag @editor           editor/editor>
+<!tag @toggle-button    tags/toggle-button>
 
 <!css demo.css>
 <!css assets/header.css>
 
-<header if(!state.edit)>
-    <label for="scene">Scene: </label>
-    <select id="scene" disabled=state.edit @input=changeDemo>
-        <option loop(Object.keys(state.demos) as demo | d => d) value=demo text(demo)/>
-    </select>
-    <@controls id="controls" runner=state.runner/>
-    <button class="edit" @click=edit text("Edit")/>
-</header>
-
-<@editor if(state.edit) runner=state.runner @play/>
-
-<canvas/>
-
 <!state>
+    showJoints: true,
     edit: false,
     demos: {}
 
 <!class>
+    showJoints(event) {
+        this.state.runner.settings.showJoints = this.state.showJoints = event.detail;
+        this.render();
+    }
+
     play() {
         this.state.runner.pause = false;
         this.state.edit = false;
         this.render();
     }
+
     edit() {
         this.state.runner.pause = true;
         this.state.edit = true;
@@ -54,7 +61,7 @@
     connected() {
         const { Runner, CanvasRenderer, Interaction } = Newton;
 
-        const firstApp      = Compound(Newton);
+        const firstApp      = Crank(Newton);
         const renderer      = new CanvasRenderer(Newton, this.$('canvas'));
         const runner        = new Runner(renderer, firstApp);
         const interaction   = new Interaction(runner);

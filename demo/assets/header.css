@@ -8,8 +8,10 @@ header {
     padding: 10px 8px 10px 8px;
     display: block;
     vertical-align: middle;
-    font-size: 14px;
     color: #ccc;
     background: linear-gradient(#3B3937, #2B2927);
     box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.1), inset -1px -1px 0 rgba(0, 0, 0, 0.1);
+
+    user-select: none;
+    -webkit-user-select: none;
 }

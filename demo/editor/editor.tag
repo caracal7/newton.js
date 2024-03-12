@@ -1,16 +1,12 @@
 <!tag @buttons-group ../tags/buttons-group>
 <!tag @bodies bodies>
 <!tag @shapes shapes>
+<!tag @edges edges>
 
 <!css ../assets/header.css>
 
 <header if(!state.edit)>
-    <@buttons-group selected=state.selection_type @select{
-        state.selection_type = event.detail;
-        this.selected_body = undefined;
-        this.selected_shape = undefined;
-        state.runner.redraw();
-    }>
+    <@buttons-group selected=state.selection_type @select{ state.selection_type = event.detail }>
         <button>Bodies</button>
         <button>Shapes</button>
         <button>Edges</button>
@@ -23,51 +19,11 @@
 
 <@bodies runner=state.runner if(state.selection_type == 'Bodies')/>
 <@shapes runner=state.runner if(state.selection_type == 'Shapes')/>
+<@edges  runner=state.runner if(state.selection_type == 'Edges')/>
 
 <!state>
-    selection_type: 'Bodies',
+    selection_type: 'Edges',
     runner: undefined
-
-<!class>
-    connected() {
-        return;
-        this.interaction = this.state.runner.interaction;
-
-        this.mouseup = (body, screen, world, move) => {
-            if(!move) {
-                if(this.state.selection_type == 'Bodies') {
-                    this.selected_body = body;
-                    this.state.runner.redraw();
-                }
-                if(this.state.selection_type == 'Shapes') {
-                    this.selected_shape = body && this.state.runner.world.findShapeByPoint(world);
-                    this.state.runner.redraw();
-                }
-            }
-        };
-
-        this.beforeRenderBody = (body, colors) => {
-            if(body === this.selected_body) {
-                colors.outline = '#FFFFFF';
-                colors.body = 'gold';
-            }
-        };
-        this.beforeRenderShape = (shape, colors) => {
-            if(shape === this.selected_shape) {
-                colors.outline = '#FFFFFF';
-                colors.body = 'gold';
-            }
-        };
-        this.state.runner.on('beforeRenderBody', this.beforeRenderBody);
-        this.state.runner.on('beforeRenderShape', this.beforeRenderShape);
-        this.interaction.on('mouseup', this.mouseup);
-    }
-    disconnected() {
-        return;
-        this.state.runner.off('beforeRenderBody', this.beforeRenderBody);
-        this.state.runner.off('beforeRenderShape', this.beforeRenderShape);
-        this.interaction.off('mouseup', this.mouseup);
-    }
 
 <!style>
     *, :host {

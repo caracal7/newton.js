@@ -34,6 +34,8 @@ function Runner(renderer, app, settings = {}) {
     this[App] = app;
     this[Events] = {};
 
+
+
     this.settings = Object.assign({
         gravity: new vec2(0, -10),
     	frameRateHz: 60,
