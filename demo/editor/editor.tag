@@ -1,4 +1,6 @@
 <!tag @buttons-group ../tags/buttons-group>
+<!tag @bodies bodies>
+<!tag @shapes shapes>
 
 <!css ../assets/header.css>
 
@@ -7,7 +9,7 @@
         state.selection_type = event.detail;
         this.selected_body = undefined;
         this.selected_shape = undefined;
-        state.runner.drawFrame(0);
+        state.runner.redraw();
     }>
         <button>Bodies</button>
         <button>Shapes</button>
@@ -19,6 +21,8 @@
     <button class="play" @click=this.emit("play") text("Play")/>
 </header>
 
+<@bodies runner=state.runner if(state.selection_type == 'Bodies')/>
+<@shapes runner=state.runner if(state.selection_type == 'Shapes')/>
 
 <!state>
     selection_type: 'Bodies',
@@ -26,6 +30,7 @@
 
 <!class>
     connected() {
+        return;
         this.interaction = this.state.runner.interaction;
 
         this.mouseup = (body, screen, world, move) => {
@@ -58,6 +63,7 @@
         this.interaction.on('mouseup', this.mouseup);
     }
     disconnected() {
+        return;
         this.state.runner.off('beforeRenderBody', this.beforeRenderBody);
         this.state.runner.off('beforeRenderShape', this.beforeRenderShape);
         this.interaction.off('mouseup', this.mouseup);
