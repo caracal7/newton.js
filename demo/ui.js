@@ -1522,7 +1522,7 @@
           let _childNodes = container.__rendererName ? container._childNodes : container.childNodes;
           let isExitNow = Exit_Single(_childNodes[childIndex], tag, state, container, index);
           if (isExitNow) {
-            return childIndex < _childNodes.length - 1 ? childIndex + 1 : childIndex;
+            return childIndex;
           } else {
             return childIndex + 1;
           }
@@ -8147,7 +8147,7 @@ Parse Error: ${e.stack}`);
   }
 
   // src/index.js
-  var VERSION = "0.7.4-dev";
+  var VERSION = "0.7.5-dev";
   !VERSION.endsWith("-dev") && console.log(`ui.js \u2764\uFE0F ${VERSION} alpha experiment. Make user interfaces great again!`);
   var UIjs = {
     VERSION,
