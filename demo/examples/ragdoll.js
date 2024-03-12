@@ -17,7 +17,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-function App(Newton) {
+export default Newton => {
 
 	const { Body, ShapeCircle, ShapeBox, ShapePoly, RevoluteJoint, vec2, deg2rad } = Newton;
 
@@ -217,14 +217,7 @@ function App(Newton) {
 		bodyHead.applyLinearImpulse(new vec2(120, 0), new vec2(0, 7.34));
 	}
 
-	function runFrame() {
-	}
-
 	return {
-		init: init,
-		runFrame: runFrame,
-		name: "Rag-doll"
+		init: init
 	};
 };
-
-export default App;

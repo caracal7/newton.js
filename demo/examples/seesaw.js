@@ -17,7 +17,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-function App(Newton) {
+export default Newton => {
 
 	const { Body, ShapeBox, ShapePoly, vec2, deg2rad } = Newton;
 
@@ -70,14 +70,7 @@ function App(Newton) {
 		world.addBody(body);
 	}
 
-	function runFrame() {
-	}
-
 	return {
-		init: init,
-		runFrame: runFrame,
-		name: "See-saw"
+		init: init
 	};
 };
-
-export default App;

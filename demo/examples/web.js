@@ -17,7 +17,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-function App(Newton) {
+export default Newton => {
 
 	const { Body, ShapeBox, DistanceJoint, vec2 } = Newton;
 
@@ -103,14 +103,7 @@ function App(Newton) {
 		world.addJoint(joint8);
 	}
 
-	function runFrame() {
-	}
-
 	return {
-		init: init,
-		runFrame: runFrame,
-		name: "Web"
+		init: init
 	};
 };
-
-export default App;

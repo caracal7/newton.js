@@ -17,7 +17,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-function App(Newton) {
+export default Newton => {
 
 	const { Body, ShapeBox, RevoluteJoint, RopeJoint, vec2 } = Newton;
 
@@ -71,15 +71,8 @@ function App(Newton) {
 		joint.collideConnected = false;
 		world.addJoint(joint);
 	}
-
-	function runFrame() {
-	}
-
+	
 	return {
-		init: init,
-		runFrame: runFrame,
-		name: "Rope"
+		init: init
 	};
 };
-
-export default App;

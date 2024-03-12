@@ -8,6 +8,7 @@
   "scripts": {
     "start": "run-p dev:*",
     "dev:build_esm": "./node_modules/.bin/esbuild src/index.js --format=esm --bundle --target=chrome60,firefox60,safari12 --outfile=dist/newton.esm.js --watch",
+    "dev:build_calc____": "./node_modules/.bin/esbuild src/index.js --format=esm --bundle --target=chrome60,firefox60,safari12 --outfile=../i.js-dev/examples/examples/other/calc/norm/newton.esm.js --watch",
     "dev:demo": "./node_modules/.bin/browser-sync start -s -w --directory --startPath ./index.html",
     "build": "run-p build:*",
     "build:iife": "./node_modules/.bin/esbuild src/iife.js --format=iife --bundle --target=chrome60,firefox60,safari12 --outfile=dist/newton.js",

@@ -26,10 +26,9 @@ const Events    = Symbol("events");
 
 const events    = ['beforeRenderBody', 'beforeRenderShape', 'renderFrame'];
 
-
 const definePrivate = (obj, name, symbol, set) =>  Object.defineProperty(obj, name, { get() { return this[symbol] }, set });
 
-function Runner(renderer, app, settings = {}) {
+function Runner(renderer, app) {
     this.renderer = renderer;
     this[App] = app;
     this[Events] = {};
@@ -47,16 +46,16 @@ function Runner(renderer, app, settings = {}) {
     	showJoints: true,
         backgroundColor: "rgb(95, 105, 118)",
     	jointAnchorColor: "#11cf00",
-    }, settings);
+    }, app.settings || {});
 
-    this.camera = {
+    this.camera = Object.assign({
         origin: new vec2(0, 0),
         scale: 1,
         minScale: 0.5,
         maxScale: 8.0,
         bounds: new Bounds,
         scroll: new vec2(0, 0)
-    };
+    }, app.camera || {});
 
     this.dirtyBounds = new Bounds; // dirty bounds in world space
 
@@ -155,7 +154,8 @@ Runner.prototype.runFrame = function() {
 
     if (this.time.timeDelta > h) this.time.timeDelta = 0;
 
-    this[App].runFrame();
+
+    this[App].runFrame && this[App].runFrame();
 
     if (stats.stepCount > 0) this.render(frameTime);
 
