@@ -177,7 +177,19 @@ Runner.prototype.render = function(frameTime) {
     stats.timeDrawFrame = Date.now() - t0;
 }
 
-Runner.prototype.drawFrame = function(frameTime) {
+
+Runner.prototype.redraw = function() {
+    // Set dirtyBounds to full screen
+    this.dirtyBounds.set(
+        this.canvasToWorld(new vec2(0, this.renderer.height)),
+        this.canvasToWorld(new vec2(this.renderer.width, 0))
+    );
+	this.static_outdated = true;
+    this.drawFrame(0);
+}
+
+
+Runner.prototype.drawFrame = function(frameTime = 0) {
 	// camera.bounds for culling
 	this.camera.bounds.set(this.canvasToWorld(new vec2(0, this.renderer.height)), this.canvasToWorld(new vec2(this.renderer.width, 0)));
 

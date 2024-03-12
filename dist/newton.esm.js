@@ -2609,7 +2609,15 @@ Runner.prototype.render = function(frameTime) {
   this.drawFrame(frameTime);
   stats.timeDrawFrame = Date.now() - t0;
 };
-Runner.prototype.drawFrame = function(frameTime) {
+Runner.prototype.redraw = function() {
+  this.dirtyBounds.set(
+    this.canvasToWorld(new vec22(0, this.renderer.height)),
+    this.canvasToWorld(new vec22(this.renderer.width, 0))
+  );
+  this.static_outdated = true;
+  this.drawFrame(0);
+};
+Runner.prototype.drawFrame = function(frameTime = 0) {
   var _a, _b, _c, _d, _e, _f, _g, _h;
   this.camera.bounds.set(this.canvasToWorld(new vec22(0, this.renderer.height)), this.canvasToWorld(new vec22(this.renderer.width, 0)));
   for (var i = 0; i < this.world.bodyArr.length; i++) {

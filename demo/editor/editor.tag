@@ -28,14 +28,15 @@
     connected() {
         this.interaction = this.state.runner.interaction;
 
-
         this.mouseup = (body, screen, world, move) => {
             if(!move) {
                 if(this.state.selection_type == 'Bodies') {
                     this.selected_body = body;
+                    this.state.runner.redraw();
                 }
                 if(this.state.selection_type == 'Shapes') {
                     this.selected_shape = body && this.state.runner.world.findShapeByPoint(world);
+                    this.state.runner.redraw();
                 }
             }
         };
