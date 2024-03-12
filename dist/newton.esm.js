@@ -2811,16 +2811,18 @@ function Interaction(runner) {
     if (pos.x < 0 || pos.x > this.runner.renderer.width || pos.y < 0 || pos.y > this.runner.renderer.height)
       return this.mouseleave(event);
     if (this.state.mouseDown) {
-      this.state.pointerDownMoving = true;
       if (this.mouseJoint) {
         this.mouseBody.p.copy(this.runner.canvasToWorld(pos));
         this.mouseBody.syncTransform();
       } else {
         var dx = pos.x - this.state.mousePositionOld.x;
         var dy = pos.y - this.state.mousePositionOld.y;
-        this.scrollView(-dx, dy);
-        this.state.mousePositionOld.x = pos.x;
-        this.state.mousePositionOld.y = pos.y;
+        if (dx || dy) {
+          this.scrollView(-dx, dy);
+          this.state.mousePositionOld.x = pos.x;
+          this.state.mousePositionOld.y = pos.y;
+          this.state.pointerDownMoving = true;
+        }
       }
       ;
       if (this.runner.pause)

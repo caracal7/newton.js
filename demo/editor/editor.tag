@@ -22,7 +22,7 @@
 <@edges  runner=state.runner if(state.selection_type == 'Edges')/>
 
 <!state>
-    selection_type: 'Edges',
+    selection_type: 'Bodies',
     runner: undefined
 
 <!style>
