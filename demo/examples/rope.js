@@ -71,8 +71,11 @@ export default Newton => {
 		joint.collideConnected = false;
 		world.addJoint(joint);
 	}
-	
+
 	return {
-		init: init
+		init: init,
+		camera: {
+			origin: new vec2(0, 400)
+		}
 	};
 };

@@ -43,6 +43,9 @@ export default Newton => {
 	}
 
 	return {
-		init: init
+		init: init,
+		camera: {
+			origin: new vec2(0, 400)
+		}
 	};
 };;

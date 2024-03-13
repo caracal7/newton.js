@@ -62,7 +62,10 @@ function Runner(renderer, app) {
     this.onResize = () => {
         this.renderer.resize();
         // Set dirtyBounds to full screen
-        this.dirtyBounds.set(this.canvasToWorld(new vec2(0, this.renderer.height)), this.canvasToWorld(new vec2(this.renderer.width, 0)));
+        this.dirtyBounds.set(
+            this.canvasToWorld(new vec2(0, this.renderer.height)),
+            this.canvasToWorld(new vec2(this.renderer.width, 0))
+        );
         this.static_outdated = true;
         if(this[Pause]) this.drawFrame(0);
     }
@@ -79,6 +82,8 @@ function Runner(renderer, app) {
 
     definePrivate(this, 'app', App, value => {
         this[App] = value;
+        this.settings = Object.assign(this.settings, value.settings || {});
+        this.camera = Object.assign(this.camera, value.camera || {});
         this.resetScene();
         this[Pause] && this.start();
     })
@@ -125,7 +130,10 @@ Runner.prototype.initFrame = function() {
         timeDelta:      0
     }
     // Set dirtyBounds to full screen
-    this.dirtyBounds.set(this.canvasToWorld(new vec2(0, this.renderer.height)), this.canvasToWorld(new vec2(this.renderer.width, 0)));
+    this.dirtyBounds.set(
+        this.canvasToWorld(new vec2(0, this.renderer.height)),
+        this.canvasToWorld(new vec2(this.renderer.width, 0))
+    );
     this.static_outdated = true;
 }
 
@@ -192,7 +200,10 @@ Runner.prototype.redraw = function() {
 
 Runner.prototype.drawFrame = function(frameTime = 0) {
 	// camera.bounds for culling
-	this.camera.bounds.set(this.canvasToWorld(new vec2(0, this.renderer.height)), this.canvasToWorld(new vec2(this.renderer.width, 0)));
+	this.camera.bounds.set(
+        this.canvasToWorld(new vec2(0, this.renderer.height)),
+        this.canvasToWorld(new vec2(this.renderer.width, 0))
+    );
 
 	// Check the visibility of shapes for all bodies
 	for (var i = 0; i < this.world.bodyArr.length; i++) {
@@ -321,13 +332,13 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
 Runner.prototype.worldToCanvas = function(p) {
     return new vec2(
         this.renderer.width * 0.5 + (p.x * (this.camera.scale * meter2pixel(1)) - this.camera.origin.x),
-        this.renderer.height      - (p.y * (this.camera.scale * meter2pixel(1)) - this.camera.origin.y));
+        this.renderer.height * 0.5      - (p.y * (this.camera.scale * meter2pixel(1)) - this.camera.origin.y));
 }
 
 Runner.prototype.canvasToWorld = function(p) {
     return new vec2(
         (this.camera.origin.x + (p.x - this.renderer.width * 0.5)) / (this.camera.scale * meter2pixel(1)),
-        (this.camera.origin.y - (p.y - this.renderer.height))      / (this.camera.scale * meter2pixel(1)));
+        (this.camera.origin.y - (p.y - this.renderer.height * 0.5))      / (this.camera.scale * meter2pixel(1)));
 }
 
 Runner.prototype.on = function(event, callback) {

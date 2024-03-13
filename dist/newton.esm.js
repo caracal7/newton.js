@@ -2520,7 +2520,10 @@ function Runner(renderer, app) {
   this.dirtyBounds = new Bounds();
   this.onResize = () => {
     this.renderer.resize();
-    this.dirtyBounds.set(this.canvasToWorld(new vec22(0, this.renderer.height)), this.canvasToWorld(new vec22(this.renderer.width, 0)));
+    this.dirtyBounds.set(
+      this.canvasToWorld(new vec22(0, this.renderer.height)),
+      this.canvasToWorld(new vec22(this.renderer.width, 0))
+    );
     this.static_outdated = true;
     if (this[Pause])
       this.drawFrame(0);
@@ -2533,6 +2536,8 @@ function Runner(renderer, app) {
   this.resetScene();
   definePrivate(this, "app", App, (value) => {
     this[App] = value;
+    this.settings = Object.assign(this.settings, value.settings || {});
+    this.camera = Object.assign(this.camera, value.camera || {});
     this.resetScene();
     this[Pause] && this.start();
   });
@@ -2573,7 +2578,10 @@ Runner.prototype.initFrame = function() {
     lastTime: Date.now(),
     timeDelta: 0
   };
-  this.dirtyBounds.set(this.canvasToWorld(new vec22(0, this.renderer.height)), this.canvasToWorld(new vec22(this.renderer.width, 0)));
+  this.dirtyBounds.set(
+    this.canvasToWorld(new vec22(0, this.renderer.height)),
+    this.canvasToWorld(new vec22(this.renderer.width, 0))
+  );
   this.static_outdated = true;
 };
 Runner.prototype.runFrame = function() {
@@ -2623,7 +2631,10 @@ Runner.prototype.redraw = function() {
 };
 Runner.prototype.drawFrame = function(frameTime = 0) {
   var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
-  this.camera.bounds.set(this.canvasToWorld(new vec22(0, this.renderer.height)), this.canvasToWorld(new vec22(this.renderer.width, 0)));
+  this.camera.bounds.set(
+    this.canvasToWorld(new vec22(0, this.renderer.height)),
+    this.canvasToWorld(new vec22(this.renderer.width, 0))
+  );
   for (var i = 0; i < this.world.bodyArr.length; i++) {
     var body = this.world.bodyArr[i];
     body.visible = false;
@@ -2729,13 +2740,13 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
 Runner.prototype.worldToCanvas = function(p) {
   return new vec22(
     this.renderer.width * 0.5 + (p.x * (this.camera.scale * meter2pixel(1)) - this.camera.origin.x),
-    this.renderer.height - (p.y * (this.camera.scale * meter2pixel(1)) - this.camera.origin.y)
+    this.renderer.height * 0.5 - (p.y * (this.camera.scale * meter2pixel(1)) - this.camera.origin.y)
   );
 };
 Runner.prototype.canvasToWorld = function(p) {
   return new vec22(
     (this.camera.origin.x + (p.x - this.renderer.width * 0.5)) / (this.camera.scale * meter2pixel(1)),
-    (this.camera.origin.y - (p.y - this.renderer.height)) / (this.camera.scale * meter2pixel(1))
+    (this.camera.origin.y - (p.y - this.renderer.height * 0.5)) / (this.camera.scale * meter2pixel(1))
   );
 };
 Runner.prototype.on = function(event, callback) {
@@ -4137,14 +4148,14 @@ CanvasRenderer.prototype.beginStatic = function(camera, backgroundColor) {
   this.bg.ctx.fillStyle = backgroundColor;
   this.bg.ctx.fillRect(0, 0, this.width, this.height);
   this.bg.ctx.save();
-  this.bg.ctx.setTransform(camera.scale * this.Newton.meter2pixel(1), 0, 0, -(camera.scale * this.Newton.meter2pixel(1)), this.width * 0.5 - camera.origin.x, this.height + camera.origin.y);
+  this.bg.ctx.setTransform(camera.scale * this.Newton.meter2pixel(1), 0, 0, -(camera.scale * this.Newton.meter2pixel(1)), this.width * 0.5 - camera.origin.x, this.height * 0.5 + camera.origin.y);
 };
 CanvasRenderer.prototype.endStatic = function() {
   this.bg.ctx.restore();
 };
 CanvasRenderer.prototype.beginDynamic = function(camera) {
   this.fg.ctx.save();
-  this.fg.ctx.setTransform(camera.scale * this.Newton.meter2pixel(1), 0, 0, -(camera.scale * this.Newton.meter2pixel(1)), this.width * 0.5 - camera.origin.x, this.height + camera.origin.y);
+  this.fg.ctx.setTransform(camera.scale * this.Newton.meter2pixel(1), 0, 0, -(camera.scale * this.Newton.meter2pixel(1)), this.width * 0.5 - camera.origin.x, this.height * 0.5 + camera.origin.y);
 };
 CanvasRenderer.prototype.endDynamic = function() {
   this.fg.ctx.restore();

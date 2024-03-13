@@ -355,7 +355,7 @@ CanvasRenderer.prototype.beginStatic = function(camera, backgroundColor) {
 	this.bg.ctx.fillStyle = backgroundColor;
 	this.bg.ctx.fillRect(0, 0, this.width, this.height);
 	this.bg.ctx.save();
-	this.bg.ctx.setTransform(camera.scale * this.Newton.meter2pixel(1), 0, 0, -(camera.scale * this.Newton.meter2pixel(1)), this.width * 0.5 - camera.origin.x, this.height + camera.origin.y);
+	this.bg.ctx.setTransform(camera.scale * this.Newton.meter2pixel(1), 0, 0, -(camera.scale * this.Newton.meter2pixel(1)), this.width * 0.5 - camera.origin.x, this.height * 0.5 + camera.origin.y);
 }
 
 CanvasRenderer.prototype.endStatic = function() {
@@ -365,7 +365,7 @@ CanvasRenderer.prototype.endStatic = function() {
 
 CanvasRenderer.prototype.beginDynamic = function(camera) {
 	this.fg.ctx.save();
-	this.fg.ctx.setTransform(camera.scale * this.Newton.meter2pixel(1), 0, 0, -(camera.scale * this.Newton.meter2pixel(1)), this.width * 0.5 - camera.origin.x, this.height + camera.origin.y);
+	this.fg.ctx.setTransform(camera.scale * this.Newton.meter2pixel(1), 0, 0, -(camera.scale * this.Newton.meter2pixel(1)), this.width * 0.5 - camera.origin.x, this.height * 0.5 + camera.origin.y);
 };
 
 CanvasRenderer.prototype.endDynamic = function() {
