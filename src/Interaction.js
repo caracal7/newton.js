@@ -280,11 +280,7 @@ Interaction.prototype.getTouchPosition = function(event) {
 Interaction.prototype.scrollView = function(dx, dy) {
 	this.runner.camera.origin.x += dx;
 	this.runner.camera.origin.y += dy;
-	// Set dirtyBounds to full screen
-	this.runner.dirtyBounds.set(
-        this.runner.canvasToWorld(new vec2(0, this.runner.renderer.height)),
-        this.runner.canvasToWorld(new vec2(this.runner.renderer.width, 0))
-    );
+    this.runner.dirtyBoundsToFullscreen();
 	this.runner.static_outdated = true;
 }
 

@@ -2575,10 +2575,7 @@ function Runner(renderer, app) {
   this.dirtyBounds = new Bounds();
   this.onResize = () => {
     this.renderer.resize();
-    this.dirtyBounds.set(
-      this.canvasToWorld(new vec22(0, this.renderer.height)),
-      this.canvasToWorld(new vec22(this.renderer.width, 0))
-    );
+    this.dirtyBoundsToFullscreen();
     this.static_outdated = true;
     if (this[Pause])
       this.drawFrame(0);
@@ -2633,10 +2630,7 @@ Runner.prototype.initFrame = function() {
     lastTime: Date.now(),
     timeDelta: 0
   };
-  this.dirtyBounds.set(
-    this.canvasToWorld(new vec22(0, this.renderer.height)),
-    this.canvasToWorld(new vec22(this.renderer.width, 0))
-  );
+  this.dirtyBoundsToFullscreen();
   this.static_outdated = true;
 };
 Runner.prototype.runFrame = function() {
@@ -2677,10 +2671,7 @@ Runner.prototype.render = function(frameTime) {
   stats.timeDrawFrame = Date.now() - t0;
 };
 Runner.prototype.redraw = function() {
-  this.dirtyBounds.set(
-    this.canvasToWorld(new vec22(0, this.renderer.height)),
-    this.canvasToWorld(new vec22(this.renderer.width, 0))
-  );
+  this.runner.dirtyBoundsToFullscreen();
   this.static_outdated = true;
   this.drawFrame(0);
 };
@@ -2804,6 +2795,14 @@ Runner.prototype.canvasToWorld = function(p) {
     (this.camera.origin.x + (p.x - this.renderer.width * 0.5)) / (this.camera.scale * meter2pixel(1)),
     (this.camera.origin.y - (p.y - this.renderer.height * 0.5)) / (this.camera.scale * meter2pixel(1))
   );
+};
+Runner.prototype.dirtyBoundsToFullscreen = function() {
+  this.dirtyBounds.set(
+    this.canvasToWorld(new vec22(0, this.renderer.height)),
+    this.canvasToWorld(new vec22(this.renderer.width, 0))
+  );
+};
+Runner.prototype.scaleCameraToBounds = function() {
 };
 Runner.prototype.on = function(event, callback) {
   if (!events.includes(event))
@@ -3059,10 +3058,7 @@ Interaction.prototype.getTouchPosition = function(event) {
 Interaction.prototype.scrollView = function(dx, dy) {
   this.runner.camera.origin.x += dx;
   this.runner.camera.origin.y += dy;
-  this.runner.dirtyBounds.set(
-    this.runner.canvasToWorld(new vec22(0, this.runner.renderer.height)),
-    this.runner.canvasToWorld(new vec22(this.runner.renderer.width, 0))
-  );
+  this.runner.dirtyBoundsToFullscreen();
   this.runner.static_outdated = true;
 };
 Interaction.prototype.on = function(event, callback) {

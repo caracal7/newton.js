@@ -61,11 +61,7 @@ function Runner(renderer, app) {
 
     this.onResize = () => {
         this.renderer.resize();
-        // Set dirtyBounds to full screen
-        this.dirtyBounds.set(
-            this.canvasToWorld(new vec2(0, this.renderer.height)),
-            this.canvasToWorld(new vec2(this.renderer.width, 0))
-        );
+        this.dirtyBoundsToFullscreen();
         this.static_outdated = true;
         if(this[Pause]) this.drawFrame(0);
     }
@@ -129,11 +125,7 @@ Runner.prototype.initFrame = function() {
         lastTime:       Date.now(),
         timeDelta:      0
     }
-    // Set dirtyBounds to full screen
-    this.dirtyBounds.set(
-        this.canvasToWorld(new vec2(0, this.renderer.height)),
-        this.canvasToWorld(new vec2(this.renderer.width, 0))
-    );
+    this.dirtyBoundsToFullscreen();
     this.static_outdated = true;
 }
 
@@ -188,11 +180,7 @@ Runner.prototype.render = function(frameTime) {
 
 
 Runner.prototype.redraw = function() {
-    // Set dirtyBounds to full screen
-    this.dirtyBounds.set(
-        this.canvasToWorld(new vec2(0, this.renderer.height)),
-        this.canvasToWorld(new vec2(this.renderer.width, 0))
-    );
+    this.runner.dirtyBoundsToFullscreen();
 	this.static_outdated = true;
     this.drawFrame(0);
 }
@@ -343,6 +331,21 @@ Runner.prototype.canvasToWorld = function(p) {
     return new vec2(
         (this.camera.origin.x + (p.x - this.renderer.width * 0.5)) / (this.camera.scale * meter2pixel(1)),
         (this.camera.origin.y - (p.y - this.renderer.height * 0.5))      / (this.camera.scale * meter2pixel(1)));
+}
+
+Runner.prototype.dirtyBoundsToFullscreen = function() {
+    this.dirtyBounds.set(
+        this.canvasToWorld(new vec2(0, this.renderer.height)),
+        this.canvasToWorld(new vec2(this.renderer.width, 0))
+    );
+}
+
+
+
+
+
+Runner.prototype.scaleCameraToBounds  = function() {
+
 }
 
 Runner.prototype.on = function(event, callback) {
