@@ -11,7 +11,12 @@ const Events    = Symbol("events");
 
 const events    = ['mousedown', 'mouseup', 'mousemove'];
 
-function Interaction(runner) {
+function Interaction(runner, settings) {
+    this.settings = Object.assign({
+        pick: true,
+        zoom: true
+    }, settings || {});
+
     this.runner = runner;
     this.runner.interaction = this;
 
@@ -45,7 +50,7 @@ function Interaction(runner) {
     	var p = this.runner.canvasToWorld(pos);
     	// If we picked shape then create mouse joint
     	var body = this.runner.world.findBodyByPoint(p);
-    	if (body) {
+    	if (this.settings.pick && body) {
     		this.mouseBody.p.copy(p);
     		this.mouseBody.syncTransform();
     		this.mouseJoint = new MouseJoint(this.mouseBody, body, p);
@@ -115,6 +120,8 @@ function Interaction(runner) {
     };
     //------------------------------ mousewheel
     this.mousewheel = event => {
+        if(!settings.zoom) return event.preventDefault();
+
     	var wheelDeltaX = 0;
     	var wheelDeltaY = 0;
 
@@ -169,6 +176,8 @@ function Interaction(runner) {
     }
     //------------------------------ touchmove
     this.touchmove = event => {
+        if(!settings.zoom) return event.preventDefault();
+
         if (event.touches.length === 2) {
             this.state.pointerDownMoving = true;
 

@@ -527,6 +527,7 @@ const App = function() {
 
 				var delta = new vec2(wdx, wdy);
 
+
 				if (transformAxis & TRANSFORM_AXIS_X) {
 					transformCenter.x += wdx;
 				}
@@ -599,6 +600,8 @@ const App = function() {
 							selectedFeatureArr[i] = dup;
 						}
 					}
+
+		console.log('delta', delta)
 
 					for (var i = 0; i < selectedFeatureArr.length; i++) {
 						var shape = selectedFeatureArr[i];
