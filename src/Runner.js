@@ -190,7 +190,6 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
 
     this[Events]?.beforeRenderFrame?.forEach(callback => callback(frameTime));
 
-
 	// camera.bounds for culling
 	this.camera.bounds.set(
         this.canvasToWorld(new vec2(0, this.renderer.height)),
@@ -330,7 +329,7 @@ Runner.prototype.worldToCanvas = function(p) {
 Runner.prototype.canvasToWorld = function(p) {
     return new vec2(
         (this.camera.origin.x + (p.x - this.renderer.width * 0.5)) / (this.camera.scale * meter2pixel(1)),
-        (this.camera.origin.y - (p.y - this.renderer.height * 0.5))      / (this.camera.scale * meter2pixel(1)));
+        (this.camera.origin.y - (p.y - this.renderer.height * 0.5)) / (this.camera.scale * meter2pixel(1)));
 }
 
 Runner.prototype.dirtyBoundsToFullscreen = function() {
@@ -340,12 +339,18 @@ Runner.prototype.dirtyBoundsToFullscreen = function() {
     );
 }
 
-
-
-
-
 Runner.prototype.scaleCameraToBounds  = function() {
+    console.log(this.camera)
 
+//    console.log(this.dirtyBounds, meter2pixel(1))
+//    console.log(this.camera.bounds.maxs.x, this.camera.bounds.mins.x )
+    var dx = this.camera.bounds.maxs.x - this.camera.bounds.mins.x;
+    var dy = this.camera.bounds.maxs.y - this.camera.bounds.mins.y;
+    console.log(dx, dy, dx / meter2pixel(1), dy / meter2pixel(1))
+
+    this.camera.scale = Math.min(dx / meter2pixel(1), dy / meter2pixel(1));
+    this.runner.dirtyBoundsToFullscreen();
+    this.runner.initFrame();
 }
 
 Runner.prototype.on = function(event, callback) {

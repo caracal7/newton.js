@@ -2803,6 +2803,13 @@ Runner.prototype.dirtyBoundsToFullscreen = function() {
   );
 };
 Runner.prototype.scaleCameraToBounds = function() {
+  console.log(this.camera);
+  var dx = this.camera.bounds.maxs.x - this.camera.bounds.mins.x;
+  var dy = this.camera.bounds.maxs.y - this.camera.bounds.mins.y;
+  console.log(dx, dy, dx / meter2pixel(1), dy / meter2pixel(1));
+  this.camera.scale = Math.min(dx / meter2pixel(1), dy / meter2pixel(1));
+  this.runner.dirtyBoundsToFullscreen();
+  this.runner.initFrame();
 };
 Runner.prototype.on = function(event, callback) {
   if (!events.includes(event))
