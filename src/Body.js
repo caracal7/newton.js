@@ -149,6 +149,8 @@ Body.prototype.setType = function(type) {
 Body.prototype.addShape = function(shape) {
 	shape.body = this;
 	this.shapeArr.push(shape);
+	this.awake(true);
+	this.cacheData();
 }
 
 Body.prototype.removeShape = function(shape) {
@@ -156,6 +158,8 @@ Body.prototype.removeShape = function(shape) {
 	if (index != -1) {
 		this.shapeArr.splice(index, 1);
 		shape.body = undefined;
+		this.awake(true);
+		this.cacheData();
 	}
 }
 

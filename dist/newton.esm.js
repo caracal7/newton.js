@@ -1518,12 +1518,16 @@ Body.prototype.setType = function(type) {
 Body.prototype.addShape = function(shape) {
   shape.body = this;
   this.shapeArr.push(shape);
+  this.awake(true);
+  this.cacheData();
 };
 Body.prototype.removeShape = function(shape) {
   var index = this.shapeArr.indexOf(shape);
   if (index != -1) {
     this.shapeArr.splice(index, 1);
     shape.body = void 0;
+    this.awake(true);
+    this.cacheData();
   }
 };
 Body.prototype.setMass = function(mass) {
