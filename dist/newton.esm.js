@@ -1898,7 +1898,6 @@ var stats = {};
 // src/World.js
 function World() {
   this.bodyArr = [];
-  this.bodyHash = {};
   this.jointArr = [];
   this.jointHash = {};
   this.numContacts = 0;
@@ -1921,7 +1920,6 @@ World.prototype.clear = function() {
     }
   }
   this.bodyArr = [];
-  this.bodyHash = {};
   this.jointArr = [];
   this.jointHash = {};
   this.contactSolverArr = [];
@@ -1976,8 +1974,8 @@ World.prototype.create = function(text) {
   }
   for (var i = 0; i < config.joints.length; i++) {
     var config_joint = config.joints[i];
-    var body1 = this.bodyArr[this.bodyHash[config_joint.body1]];
-    var body2 = this.bodyArr[this.bodyHash[config_joint.body2]];
+    var body1 = this.bodyArr.find((b) => b.id === config_joint.body1.id);
+    var body2 = this.bodyArr.find((b) => b.id === config_joint.body2.id);
     var joint;
     switch (config_joint.type) {
       case "AngleJoint":
@@ -2021,27 +2019,24 @@ World.prototype.create = function(text) {
   }
 };
 World.prototype.addBody = function(body) {
-  if (this.bodyHash[body.id] != void 0) {
+  if (this.bodyArr.find((b) => b.id === body.id))
     return;
-  }
-  var index = this.bodyArr.push(body) - 1;
-  this.bodyHash[body.id] = index;
+  this.bodyArr.push(body);
   body.awake(true);
   body.world = this;
   body.cacheData();
 };
 World.prototype.removeBody = function(body) {
-  if (this.bodyHash[body.id] == void 0) {
+  var index = this.bodyArr.findIndex((b) => b.id === body.id);
+  if (index === -1)
     return;
-  }
   for (var i = 0; i < body.jointArr.length; i++) {
     if (body.jointArr[i]) {
       this.removeJoint(body.jointArr[i]);
     }
   }
   body.world = null;
-  var index = this.bodyHash[body.id];
-  delete this.bodyHash[body.id];
+  console.log(this.bodyArr.length, index);
   this.bodyArr.splice(index, 1);
 };
 World.prototype.addJoint = function(joint) {
