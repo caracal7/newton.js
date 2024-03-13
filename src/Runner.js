@@ -24,7 +24,7 @@ const App   = Symbol("app");
 const Pause = Symbol("pause");
 const Events    = Symbol("events");
 
-const events    = ['beforeRenderBody', 'beforeRenderShape', 'renderFrame'];
+const events    = ['beforeRenderBody', 'beforeRenderShape', 'beforeRenderFrame', 'afterRenderFrame'];
 
 const definePrivate = (obj, name, symbol, set) =>  Object.defineProperty(obj, name, { get() { return this[symbol] }, set });
 
@@ -199,6 +199,10 @@ Runner.prototype.redraw = function() {
 
 
 Runner.prototype.drawFrame = function(frameTime = 0) {
+
+    this[Events]?.beforeRenderFrame?.forEach(callback => callback(frameTime));
+
+
 	// camera.bounds for culling
 	this.camera.bounds.set(
         this.canvasToWorld(new vec2(0, this.renderer.height)),
@@ -322,7 +326,7 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
 		}
 	}
 
-    this[Events]?.renderFrame?.forEach(callback => callback(frameTime));
+    this[Events]?.afterRenderFrame?.forEach(callback => callback(frameTime));
 
     this.renderer.endDynamic();
 }

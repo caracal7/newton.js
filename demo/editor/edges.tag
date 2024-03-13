@@ -43,18 +43,18 @@
             if(!IS_TOUCH) this.edge_hover = findEdge(world);
         }
 
-        this.renderFrame = () => {
+        this.afterRenderFrame = () => {
             if(this.edge_selected) drawEdge(this.edge_selected, SELECTED_COLOR);
             if(this.edge_hover && this.edge_hover.edgeId !== this.edge_selected?.edgeId) drawEdge(this.edge_hover, HOVER_COLOR)
         }
 
         this.interaction.on('mousemove', this.mousemove);
         this.interaction.on('mouseup', this.mouseup);
-        this.state.runner.on('renderFrame', this.renderFrame);
+        this.state.runner.on('afterRenderFrame', this.afterRenderFrame);
     }
     disconnected() {
         this.interaction.off('mousemove', this.mousemove);
         this.interaction.off('mouseup', this.mouseup);
-        this.state.runner.off('renderFrame', this.renderFrame);
+        this.state.runner.off('afterRenderFrame', this.afterRenderFrame);
         this.state.runner.redraw();
     }

@@ -2511,7 +2511,7 @@ function bodyColor(body) {
 var App = Symbol("app");
 var Pause = Symbol("pause");
 var Events = Symbol("events");
-var events = ["beforeRenderBody", "beforeRenderShape", "renderFrame"];
+var events = ["beforeRenderBody", "beforeRenderShape", "beforeRenderFrame", "afterRenderFrame"];
 var definePrivate = (obj, name, symbol, set) => Object.defineProperty(obj, name, { get() {
   return this[symbol];
 }, set });
@@ -2653,7 +2653,8 @@ Runner.prototype.redraw = function() {
   this.drawFrame(0);
 };
 Runner.prototype.drawFrame = function(frameTime = 0) {
-  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
+  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l;
+  (_b = (_a = this[Events]) == null ? void 0 : _a.beforeRenderFrame) == null ? void 0 : _b.forEach((callback) => callback(frameTime));
   this.camera.bounds.set(
     this.canvasToWorld(new vec22(0, this.renderer.height)),
     this.canvasToWorld(new vec22(this.renderer.width, 0))
@@ -2682,7 +2683,7 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
           outline: "#000",
           body: bodyColor(body)
         };
-        (_b = (_a = this[Events]) == null ? void 0 : _a.beforeRenderBody) == null ? void 0 : _b.forEach((callback) => callback(body, body_colors));
+        (_d = (_c = this[Events]) == null ? void 0 : _c.beforeRenderBody) == null ? void 0 : _d.forEach((callback) => callback(body, body_colors));
         for (var k = 0; k < body.shapeArr.length; k++) {
           var shape = body.shapeArr[k];
           if (!shape.visible)
@@ -2691,7 +2692,7 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
             outline: body_colors.outline,
             body: body_colors.body
           };
-          (_d = (_c = this[Events]) == null ? void 0 : _c.beforeRenderShape) == null ? void 0 : _d.forEach((callback) => callback(shape, shape_colors));
+          (_f = (_e = this[Events]) == null ? void 0 : _e.beforeRenderShape) == null ? void 0 : _f.forEach((callback) => callback(shape, shape_colors));
           this.renderer.drawShape(shape, true, PIXEL_UNIT, shape_colors.outline, shape_colors.body);
         }
       }
@@ -2721,7 +2722,7 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
           outline: "#000",
           body: bodyColor(body)
         };
-        (_f = (_e = this[Events]) == null ? void 0 : _e.beforeRenderBody) == null ? void 0 : _f.forEach((callback) => callback(body, body_colors));
+        (_h = (_g = this[Events]) == null ? void 0 : _g.beforeRenderBody) == null ? void 0 : _h.forEach((callback) => callback(body, body_colors));
         for (var k = 0; k < body.shapeArr.length; k++) {
           var shape = body.shapeArr[k];
           if (!shape.visible)
@@ -2730,7 +2731,7 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
             outline: body_colors.outline,
             body: body_colors.body
           };
-          (_h = (_g = this[Events]) == null ? void 0 : _g.beforeRenderShape) == null ? void 0 : _h.forEach((callback) => callback(shape, shape_colors));
+          (_j = (_i = this[Events]) == null ? void 0 : _i.beforeRenderShape) == null ? void 0 : _j.forEach((callback) => callback(shape, shape_colors));
           this.renderer.drawShape(shape, false, PIXEL_UNIT, shape_colors.outline, shape_colors.body);
           var expand = PIXEL_UNIT * 3;
           this.dirtyBounds.addBounds(Bounds.expand(shape.bounds, expand, expand));
@@ -2757,7 +2758,7 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
       }
     }
   }
-  (_j = (_i = this[Events]) == null ? void 0 : _i.renderFrame) == null ? void 0 : _j.forEach((callback) => callback(frameTime));
+  (_l = (_k = this[Events]) == null ? void 0 : _k.afterRenderFrame) == null ? void 0 : _l.forEach((callback) => callback(frameTime));
   this.renderer.endDynamic();
 };
 Runner.prototype.worldToCanvas = function(p) {
