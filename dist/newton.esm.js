@@ -678,6 +678,32 @@ Shape.TYPE_CIRCLE = 0;
 Shape.TYPE_SEGMENT = 1;
 Shape.TYPE_POLY = 2;
 Shape.NUM_TYPES = 3;
+Shape.prototype.translateTo = function(pos) {
+  switch (this.type) {
+    case Shape.TYPE_CIRCLE:
+      console.warn("Shape.TYPE_CIRCLE.translateTo: TODO tests", pos);
+      this.c.copy(this.body.getLocalPoint(pos));
+      break;
+    case Shape.TYPE_SEGMENT:
+      console.warn("Shape.TYPE_SEGMENT.translateTo: TODO tests", pos);
+      var delta = vec22.sub(pos, this.centroid());
+      var wa = vec22.add(this.ta, delta);
+      var wb = vec22.add(this.ta, delta);
+      this.a.copy(this.body.getLocalPoint(wa));
+      this.b.copy(this.body.getLocalPoint(wb));
+      break;
+    case Shape.TYPE_POLY:
+      var delta = vec22.sub(pos, this.centroid());
+      for (var j = 0; j < this.tverts.length; j++) {
+        var wv = vec22.add(this.tverts[j], delta);
+        this.verts[j].copy(this.body.getLocalPoint(wv));
+      }
+      break;
+  }
+  this.finishVerts();
+  this.body.resetMassData();
+  this.body.cacheData();
+};
 Shape.prototype.translateWithDelta = function(delta) {
   switch (this.type) {
     case Shape.TYPE_CIRCLE:
