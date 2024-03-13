@@ -75,7 +75,7 @@ const Body = function(type, pos, angle) {
 	// Shape list for this body
 	this.shapeArr = [];
 
-	// Joint hash for this body
+	// Joint list and hash for this body
 	this.jointArr = [];
 	this.jointHash = {};
 
@@ -391,10 +391,7 @@ Body.prototype.isCollidable = function(other) {
 
 	for (var i = 0; i < this.jointArr.length; i++) {
 		var joint = this.jointArr[i];
-		if (!joint) {
-			continue;
-		}
-
+		if (!joint) continue;
 		if (!joint.collideConnected && other.jointHash[joint.id] != undefined) {
 			return false;
 		}

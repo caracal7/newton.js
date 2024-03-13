@@ -196,48 +196,40 @@ World.prototype.removeBody = function(body) {
 	}
 
 	body.world = null;
-
-	console.log(this.bodyArr.length, index)
 	this.bodyArr.splice(index, 1);
 }
 
 World.prototype.addJoint = function(joint) {
-	if (this.jointHash[joint.id] != undefined) {
-		return;
-	}
+	if (this.jointHash[joint.id] != undefined) return;
+
+	this.jointHash[joint.id] = joint;
+	joint.body1.jointHash[joint.id] = joint;
+	joint.body2.jointHash[joint.id] = joint;
+
+	this.jointArr.push(joint);
+	joint.body1.jointArr.push(joint);
+	joint.body2.jointArr.push(joint);
 
 	joint.body1.awake(true);
 	joint.body2.awake(true);
-
-	var index = this.jointArr.push(joint) - 1;
-	this.jointHash[joint.id] = index;
-
-	var index = joint.body1.jointArr.push(joint) - 1;
-	joint.body1.jointHash[joint.id] = index;
-
-	var index = joint.body2.jointArr.push(joint) - 1;
-	joint.body2.jointHash[joint.id] = index;
 }
 
 World.prototype.removeJoint = function(joint) {
-	if (this.jointHash[joint.id] == undefined) {
-		return;
-	}
+	if (this.jointHash[joint.id] == undefined) return;
+
+	delete this.jointHash[joint.id];
+	delete joint.body1.jointHash[joint.id];
+	delete joint.body2.jointHash[joint.id];
+
+	var index = this.jointArr.findIndex(j => j.id ===joint.id);
+	this.jointArr.splice(index, 1);
+	var index = joint.body1.jointArr.findIndex(j => j.id ===joint.id);
+	joint.body1.jointArr.splice(index, 1);
+	var index = joint.body2.jointArr.findIndex(j => j.id ===joint.id);
+	joint.body2.jointArr.splice(index, 1);
 
 	joint.body1.awake(true);
 	joint.body2.awake(true);
-
-	var index = joint.body1.jointHash[joint.id];
-	delete joint.body1.jointHash[joint.id];
-	joint.body1.jointArr.splice(index, 1);// delete joint.body1.jointArr[index];
-
-	var index = joint.body2.jointHash[joint.id];
-	delete joint.body2.jointHash[joint.id];
-	joint.body2.jointArr.splice(index, 1);// delete joint.body2.jointArr[index];
-
-	var index = this.jointHash[joint.id];
-	delete this.jointHash[joint.id];
-	this.jointArr.splice(index, 1);//delete this.jointArr[index];
 }
 
 World.prototype.findShapeByPoint = function(p, refShape) {
@@ -328,7 +320,6 @@ World.prototype.jointById = function(id) {
 	if (index != undefined) {
 		return this.jointArr[index];
 	}
-
 	return null;
 }
 
