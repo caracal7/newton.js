@@ -399,6 +399,15 @@ Body.prototype.isCollidable = function(other) {
 	return true;
 }
 
+Body.prototype.translateWithDelta = function(delta) {
+	var p = this.xf.t.duplicate();
+	p.x += delta.x;
+	p.y += delta.y;
+	this.setTransform(p, this.a);
+	this.resetJointAnchors();
+	this.cacheData();
+}
+
 export {
 	Body
 }

@@ -601,8 +601,6 @@ const App = function() {
 						}
 					}
 
-		console.log('delta', delta)
-
 					for (var i = 0; i < selectedFeatureArr.length; i++) {
 						var shape = selectedFeatureArr[i];
 						var body = shape.body;

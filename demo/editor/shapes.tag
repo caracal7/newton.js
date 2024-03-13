@@ -33,13 +33,11 @@
                 var delta = new Newton.vec2(world.x - this.lastPos.x, world.y - this.lastPos.y);
                 this.selected.translateWithDelta(delta);
                 this.lastPos = world;
-                if(this.selected.body.isStatic()) this.state.runner.redraw();
-            } else {
-                this.hovered = this.state.runner.world.findShapeByPoint(world);
             }
+            this.hovered = this.state.runner.world.findShapeByPoint(world);
         }
 
-        this.beforeRenderFrame = (shape, colors) => this.hovered && this.state.runner.initFrame();
+        this.beforeRenderFrame = () => this.state.runner.initFrame();
 
         this.beforeRenderShape = (shape, colors) => {
             if(shape === this.selected) {
