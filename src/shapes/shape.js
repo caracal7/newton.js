@@ -71,6 +71,7 @@ Shape.prototype.translateTo = function(pos) {
 	}
 	this.finishVerts();
 	this.body.resetMassData();
+	this.body.awake(true);
 	this.body.cacheData();
 }
 
@@ -95,6 +96,7 @@ Shape.prototype.translateWithDelta = function(delta) {
 	}
 	this.finishVerts();
 	this.body.resetMassData();
+	this.body.awake(true);
 	this.body.cacheData();
 }
 

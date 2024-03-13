@@ -406,6 +406,7 @@ Body.prototype.translateWithDelta = function(delta) {
 	p.y += delta.y;
 	this.setTransform(p, this.a);
 	this.resetJointAnchors();
+	this.awake(true);
 	this.cacheData();
 }
 
