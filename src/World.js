@@ -207,7 +207,7 @@ World.prototype.removeBody = function(body) {
 
 	var index = this.bodyHash[body.id];
 	delete this.bodyHash[body.id];
-	delete this.bodyArr[index];
+	this.bodyArr.splice(index, 1);
 }
 
 World.prototype.addJoint = function(joint) {
@@ -238,15 +238,15 @@ World.prototype.removeJoint = function(joint) {
 
 	var index = joint.body1.jointHash[joint.id];
 	delete joint.body1.jointHash[joint.id];
-	delete joint.body1.jointArr[index];
+	joint.body1.jointArr.splice(index, 1);// delete joint.body1.jointArr[index];
 
 	var index = joint.body2.jointHash[joint.id];
 	delete joint.body2.jointHash[joint.id];
-	delete joint.body2.jointArr[index];
+	joint.body2.jointArr.splice(index, 1);// delete joint.body2.jointArr[index];
 
 	var index = this.jointHash[joint.id];
 	delete this.jointHash[joint.id];
-	delete this.jointArr[index];
+	this.jointArr.splice(index, 1);//delete this.jointArr[index];
 }
 
 World.prototype.findShapeByPoint = function(p, refShape) {
