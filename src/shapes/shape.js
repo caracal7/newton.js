@@ -17,7 +17,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import { Bounds } from './../utils/math.js';
+import { Bounds, vec2 } from './../utils/math.js';
 
 const Shape = function(type) {
 	if (arguments.length == 0)
@@ -46,6 +46,30 @@ Shape.TYPE_CIRCLE = 0;
 Shape.TYPE_SEGMENT = 1;
 Shape.TYPE_POLY = 2;
 Shape.NUM_TYPES = 3;
+
+Shape.prototype.translateWithDelta = function(delta) {
+	switch (this.type) {
+		case Shape.TYPE_CIRCLE:
+			var wc = vec2.add(this.tc, delta);
+			this.c.copy(this.body.getLocalPoint(wc));
+		break;
+		case Shape.TYPE_SEGMENT:
+			var wa = vec2.add(this.ta, delta);
+			var wb = vec2.add(this.ta, delta);
+			this.a.copy(this.body.getLocalPoint(wa));
+			this.b.copy(this.body.getLocalPoint(wb));
+		break;
+		case Shape.TYPE_POLY:
+			for (var j = 0; j < this.tverts.length; j++) {
+				var wv = vec2.add(this.tverts[j], delta);
+				this.verts[j].copy(this.body.getLocalPoint(wv));
+			}
+		break;
+	}
+	this.finishVerts();
+	this.body.resetMassData();
+	this.body.cacheData();
+}
 
 export {
 	Shape

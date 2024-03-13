@@ -50,22 +50,28 @@ function Interaction(runner, settings) {
     	var p = this.runner.canvasToWorld(pos);
     	// If we picked shape then create mouse joint
     	var body = this.runner.world.findBodyByPoint(p);
-    	if (this.settings.pick && body) {
-    		this.mouseBody.p.copy(p);
-    		this.mouseBody.syncTransform();
-    		this.mouseJoint = new MouseJoint(this.mouseBody, body, p);
-    		this.mouseJoint.maxForce = body.m * 1000;
-    		this.runner.world.addJoint(this.mouseJoint);
-    	}
 
-    	this.state.mousePositionOld.x = pos.x;
-    	this.state.mousePositionOld.y = pos.y;
-
+        var block = false;
         if(this[Events]?.mousedown?.length) {
-            this[Events].mousedown.forEach(callback => callback(body, pos, p));
+            this[Events].mousedown.forEach(callback => {
+                var b = callback(body, pos, p);
+                if(b) block = true;
+            });
             if(this.runner.pause) this.runner.drawFrame(0);
         }
-
+        if(block) {
+        	this.state.mouseDown = false;
+        } else {
+            if (this.settings.pick && body) {
+        		this.mouseBody.p.copy(p);
+        		this.mouseBody.syncTransform();
+        		this.mouseJoint = new MouseJoint(this.mouseBody, body, p);
+        		this.mouseJoint.maxForce = body.m * 1000;
+        		this.runner.world.addJoint(this.mouseJoint);
+        	}
+        	this.state.mousePositionOld.x = pos.x;
+        	this.state.mousePositionOld.y = pos.y;
+        }
     	event.preventDefault();
     };
     //------------------------------ mousemove
@@ -78,7 +84,6 @@ function Interaction(runner, settings) {
         ) return this.mouseleave(event);
 
     	if (this.state.mouseDown) {
-
     		if (this.mouseJoint) {
     			this.mouseBody.p.copy(this.runner.canvasToWorld(pos));
     			this.mouseBody.syncTransform();
@@ -120,7 +125,7 @@ function Interaction(runner, settings) {
     };
     //------------------------------ mousewheel
     this.mousewheel = event => {
-        if(!settings.zoom) return event.preventDefault();
+        if(!this.settings.zoom) return event.preventDefault();
 
     	var wheelDeltaX = 0;
     	var wheelDeltaY = 0;
@@ -176,7 +181,7 @@ function Interaction(runner, settings) {
     }
     //------------------------------ touchmove
     this.touchmove = event => {
-        if(!settings.zoom) return event.preventDefault();
+        if(!this.settings.zoom) return event.preventDefault();
 
         if (event.touches.length === 2) {
             this.state.pointerDownMoving = true;

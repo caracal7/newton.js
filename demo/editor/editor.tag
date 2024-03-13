@@ -22,8 +22,17 @@
 <@edges  runner=state.runner if(state.selection_type == 'Edges')/>
 
 <!state>
-    selection_type: 'Bodies',
+    selection_type: 'Shapes',
     runner: undefined
+
+<!class>
+    connected() {
+        this.state.runner.interaction.settings.pick = false;
+    }
+
+    disconnected() {
+        this.state.runner.interaction.settings.pick = true;
+    }
 
 <!style>
     *, :host {

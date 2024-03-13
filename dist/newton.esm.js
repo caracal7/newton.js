@@ -678,6 +678,29 @@ Shape.TYPE_CIRCLE = 0;
 Shape.TYPE_SEGMENT = 1;
 Shape.TYPE_POLY = 2;
 Shape.NUM_TYPES = 3;
+Shape.prototype.translateWithDelta = function(delta) {
+  switch (this.type) {
+    case Shape.TYPE_CIRCLE:
+      var wc = vec22.add(this.tc, delta);
+      this.c.copy(this.body.getLocalPoint(wc));
+      break;
+    case Shape.TYPE_SEGMENT:
+      var wa = vec22.add(this.ta, delta);
+      var wb = vec22.add(this.ta, delta);
+      this.a.copy(this.body.getLocalPoint(wa));
+      this.b.copy(this.body.getLocalPoint(wb));
+      break;
+    case Shape.TYPE_POLY:
+      for (var j = 0; j < this.tverts.length; j++) {
+        var wv = vec22.add(this.tverts[j], delta);
+        this.verts[j].copy(this.body.getLocalPoint(wv));
+      }
+      break;
+  }
+  this.finishVerts();
+  this.body.resetMassData();
+  this.body.cacheData();
+};
 
 // src/utils/collision.js
 var collision = {};
@@ -2773,7 +2796,11 @@ Runner.prototype.off = function(event, callback) {
 var SELECTABLE_LINE_DIST_THREHOLD = pixel2meter(isAppleMobileDevice() ? 8 : 4);
 var Events2 = Symbol("events");
 var events2 = ["mousedown", "mouseup", "mousemove"];
-function Interaction(runner) {
+function Interaction(runner, settings) {
+  this.settings = Object.assign({
+    pick: true,
+    zoom: true
+  }, settings || {});
   this.runner = runner;
   this.runner.interaction = this;
   this.SELECTABLE_LINE_DIST_THREHOLD = SELECTABLE_LINE_DIST_THREHOLD;
@@ -2800,19 +2827,28 @@ function Interaction(runner) {
     this.removeJoint();
     var p = this.runner.canvasToWorld(pos);
     var body = this.runner.world.findBodyByPoint(p);
-    if (body) {
-      this.mouseBody.p.copy(p);
-      this.mouseBody.syncTransform();
-      this.mouseJoint = new MouseJoint(this.mouseBody, body, p);
-      this.mouseJoint.maxForce = body.m * 1e3;
-      this.runner.world.addJoint(this.mouseJoint);
-    }
-    this.state.mousePositionOld.x = pos.x;
-    this.state.mousePositionOld.y = pos.y;
+    var block = false;
     if ((_b = (_a = this[Events2]) == null ? void 0 : _a.mousedown) == null ? void 0 : _b.length) {
-      this[Events2].mousedown.forEach((callback) => callback(body, pos, p));
+      this[Events2].mousedown.forEach((callback) => {
+        var b = callback(body, pos, p);
+        if (b)
+          block = true;
+      });
       if (this.runner.pause)
         this.runner.drawFrame(0);
+    }
+    if (block) {
+      this.state.mouseDown = false;
+    } else {
+      if (this.settings.pick && body) {
+        this.mouseBody.p.copy(p);
+        this.mouseBody.syncTransform();
+        this.mouseJoint = new MouseJoint(this.mouseBody, body, p);
+        this.mouseJoint.maxForce = body.m * 1e3;
+        this.runner.world.addJoint(this.mouseJoint);
+      }
+      this.state.mousePositionOld.x = pos.x;
+      this.state.mousePositionOld.y = pos.y;
     }
     event.preventDefault();
   };
@@ -2869,6 +2905,8 @@ function Interaction(runner) {
     event.preventDefault();
   };
   this.mousewheel = (event) => {
+    if (!this.settings.zoom)
+      return event.preventDefault();
     var wheelDeltaX = 0;
     var wheelDeltaY = 0;
     if (event.detail) {
@@ -2911,6 +2949,8 @@ function Interaction(runner) {
     }
   };
   this.touchmove = (event) => {
+    if (!this.settings.zoom)
+      return event.preventDefault();
     if (event.touches.length === 2) {
       this.state.pointerDownMoving = true;
       var touch1 = this.getTouchPosition(event.touches[0]);
