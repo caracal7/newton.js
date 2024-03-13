@@ -2573,16 +2573,6 @@ function Runner(renderer, app) {
     scroll: new vec22(0, 0)
   }, app.camera || {});
   this.dirtyBounds = new Bounds();
-  this.onResize = () => {
-    this.renderer.resize();
-    this.dirtyBoundsToFullscreen();
-    this.static_outdated = true;
-    if (this[Pause])
-      this.drawFrame(0);
-  };
-  window.addEventListener("resize", this.onResize);
-  window.addEventListener("orientationchange", this.onResize);
-  this.onResize();
   collision.init();
   this.world = new World();
   this.resetScene();
@@ -2599,6 +2589,16 @@ function Runner(renderer, app) {
     else
       this[Pause] = true;
   });
+  this.onResize = () => {
+    this.renderer.resize();
+    this.dirtyBoundsToFullscreen();
+    this.static_outdated = true;
+    if (this[Pause])
+      this.drawFrame(0);
+  };
+  window.addEventListener("resize", this.onResize);
+  window.addEventListener("orientationchange", this.onResize);
+  this.onResize();
   this.start();
 }
 Runner.prototype.start = function() {
@@ -2671,7 +2671,7 @@ Runner.prototype.render = function(frameTime) {
   stats.timeDrawFrame = Date.now() - t0;
 };
 Runner.prototype.redraw = function() {
-  this.runner.dirtyBoundsToFullscreen();
+  this.dirtyBoundsToFullscreen();
   this.static_outdated = true;
   this.drawFrame(0);
 };
@@ -2803,13 +2803,23 @@ Runner.prototype.dirtyBoundsToFullscreen = function() {
   );
 };
 Runner.prototype.scaleCameraToBounds = function() {
-  console.log(this.camera);
-  var dx = this.camera.bounds.maxs.x - this.camera.bounds.mins.x;
-  var dy = this.camera.bounds.maxs.y - this.camera.bounds.mins.y;
-  console.log(dx, dy, dx / meter2pixel(1), dy / meter2pixel(1));
-  this.camera.scale = Math.min(dx / meter2pixel(1), dy / meter2pixel(1));
-  this.runner.dirtyBoundsToFullscreen();
-  this.runner.initFrame();
+  this.dirtyBoundsToFullscreen();
+  console.log(JSON.stringify(this.dirtyBounds));
+  var v = new vec22(
+    this.dirtyBounds.maxs.x - this.dirtyBounds.mins.x,
+    this.dirtyBounds.maxs.y - this.dirtyBounds.mins.y
+  );
+  var ww = v.x * this.camera.scale / 0.5;
+  var wh = v.y * this.camera.scale / 0.5;
+  console.log("v", v);
+  console.log("ww", ww);
+  console.log("wh", wh);
+  console.log("this.renderer.width", this.renderer.width);
+  console.log("this.renderer.height", this.renderer.height);
+  console.log("w", ww / v.x);
+  console.log("h", wh / v.y);
+  console.log("this.camera.scale", this.camera.scale);
+  this.redraw();
 };
 Runner.prototype.on = function(event, callback) {
   if (!events.includes(event))

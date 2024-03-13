@@ -59,17 +59,7 @@ function Runner(renderer, app) {
 
     this.dirtyBounds = new Bounds; // dirty bounds in world space
 
-    this.onResize = () => {
-        this.renderer.resize();
-        this.dirtyBoundsToFullscreen();
-        this.static_outdated = true;
-        if(this[Pause]) this.drawFrame(0);
-    }
 
-    window.addEventListener('resize', this.onResize);
-    window.addEventListener('orientationchange', this.onResize);
-
-    this.onResize();
 
     collision.init();
     this.world = new World();
@@ -87,6 +77,17 @@ function Runner(renderer, app) {
         if(!value) this.start();
         else this[Pause] = true;
     })
+
+    this.onResize = () => {
+        this.renderer.resize();
+        this.dirtyBoundsToFullscreen();
+        this.static_outdated = true;
+        if(this[Pause]) this.drawFrame(0);
+    }
+
+    window.addEventListener('resize', this.onResize);
+    window.addEventListener('orientationchange', this.onResize);
+    this.onResize();
 
     this.start();
 }
@@ -113,8 +114,6 @@ Runner.prototype.resetScene = function() {
     this[App].init(this.world);
     this.initFrame();
 }
-
-
 
 Runner.prototype.initFrame = function() {
     this.time = {
@@ -178,13 +177,11 @@ Runner.prototype.render = function(frameTime) {
     stats.timeDrawFrame = Date.now() - t0;
 }
 
-
 Runner.prototype.redraw = function() {
-    this.runner.dirtyBoundsToFullscreen();
+    this.dirtyBoundsToFullscreen();
 	this.static_outdated = true;
     this.drawFrame(0);
 }
-
 
 Runner.prototype.drawFrame = function(frameTime = 0) {
 
@@ -318,17 +315,15 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
     this.renderer.endDynamic();
 }
 
-
-
 Runner.prototype.worldToCanvas = function(p) {
     return new vec2(
-        this.renderer.width * 0.5 + (p.x * (this.camera.scale * meter2pixel(1)) - this.camera.origin.x),
-        this.renderer.height * 0.5      - (p.y * (this.camera.scale * meter2pixel(1)) - this.camera.origin.y));
+        this.renderer.width  * 0.5 + (p.x * (this.camera.scale * meter2pixel(1)) - this.camera.origin.x),
+        this.renderer.height * 0.5 - (p.y * (this.camera.scale * meter2pixel(1)) - this.camera.origin.y));
 }
 
 Runner.prototype.canvasToWorld = function(p) {
     return new vec2(
-        (this.camera.origin.x + (p.x - this.renderer.width * 0.5)) / (this.camera.scale * meter2pixel(1)),
+        (this.camera.origin.x + (p.x - this.renderer.width * 0.5))  / (this.camera.scale * meter2pixel(1)),
         (this.camera.origin.y - (p.y - this.renderer.height * 0.5)) / (this.camera.scale * meter2pixel(1)));
 }
 
@@ -340,17 +335,40 @@ Runner.prototype.dirtyBoundsToFullscreen = function() {
 }
 
 Runner.prototype.scaleCameraToBounds  = function() {
-    console.log(this.camera)
+    //return;
+    this.dirtyBoundsToFullscreen();
+    console.log(JSON.stringify(this.dirtyBounds));
 
-//    console.log(this.dirtyBounds, meter2pixel(1))
-//    console.log(this.camera.bounds.maxs.x, this.camera.bounds.mins.x )
-    var dx = this.camera.bounds.maxs.x - this.camera.bounds.mins.x;
-    var dy = this.camera.bounds.maxs.y - this.camera.bounds.mins.y;
-    console.log(dx, dy, dx / meter2pixel(1), dy / meter2pixel(1))
+    //var dx = this.worldToCanvas(this.dirtyBounds.maxs.x - this.dirtyBounds.mins.x);
+    //var dy = this.worldToCanvas(this.dirtyBounds.maxs.y - this.dirtyBounds.mins.y);
+    //dx *=  (this.renderer.width * 0.5) / meter2pixel(1);
+    //dy *=  (this.renderer.height * 0.5) / meter2pixel(1);
 
-    this.camera.scale = Math.min(dx / meter2pixel(1), dy / meter2pixel(1));
-    this.runner.dirtyBoundsToFullscreen();
-    this.runner.initFrame();
+    var v = new vec2(
+        (this.dirtyBounds.maxs.x - this.dirtyBounds.mins.x),
+        (this.dirtyBounds.maxs.y - this.dirtyBounds.mins.y)
+    );
+
+    var ww = v.x * this.camera.scale / 0.5;
+    var wh = v.y * this.camera.scale / 0.5;
+
+    console.log('v', v)
+    console.log('ww', ww)
+    console.log('wh', wh )
+    console.log('this.renderer.width', this.renderer.width)
+    console.log('this.renderer.height', this.renderer.height)
+    console.log('w',  ww / v.x)
+    console.log('h',  wh / v.y)
+
+
+
+//    this.camera.scale = Math.min(v.x, v.y);
+
+    console.log('this.camera.scale', this.camera.scale)
+
+//    this.camera.scale = Math.min(ww / v.x, wh / v.y);
+
+    this.redraw();
 }
 
 Runner.prototype.on = function(event, callback) {
