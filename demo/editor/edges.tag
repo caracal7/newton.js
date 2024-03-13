@@ -2,14 +2,13 @@
     runner: undefined
 
 <!static>
-
+    const IS_TOUCH = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
 
 <!class>
     connected() {
         const LINE_WIDTH = this.state.runner.PIXEL_UNIT * 3;
         const HOVER_COLOR = '#FFFF00';
         const SELECTED_COLOR = '#FF0000';
-        const IS_TOUCH = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
 
         this.interaction = this.state.runner.interaction;
 
@@ -35,8 +34,8 @@
             this.state.runner.dirtyBounds.expand(LINE_WIDTH, LINE_WIDTH);
         }
 
-        this.mouseup = (body, screen, world, move) => {
-            if(!move) this.edge_selected = findEdge(world);
+        this.mouseup = (body, screen, world, isMoved) => {
+            if(!isMoved) this.edge_selected = findEdge(world);
         };
 
         this.mousemove = (screen, world) => {

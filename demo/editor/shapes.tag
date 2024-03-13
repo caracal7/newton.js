@@ -3,17 +3,18 @@
 <!state>
     runner: undefined
 
+<!static>
+    const IS_TOUCH = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
+
 <!class>
     connected() {
         const HOVER_COLOR = '#FFFF00';
         const SELECTED_COLOR = '#FF0000';
-        const IS_TOUCH = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
-
 
         this.interaction = this.state.runner.interaction;
 
-        this.mouseup = (body, screen, world, move) => {
-            if(!move) {
+        this.mouseup = (body, screen, world, isMoved) => {
+            if(!isMoved) {
                 this.selected = body && this.state.runner.world.findShapeByPoint(world);
                 this.state.runner.redraw();
             }
@@ -38,9 +39,7 @@
             }
         }
 
-        this.beforeRenderFrame = (shape, colors) => {
-            if(this.hovered) this.state.runner.initFrame();
-        };
+        this.beforeRenderFrame = (shape, colors) => this.hovered && this.state.runner.initFrame();
 
         this.beforeRenderShape = (shape, colors) => {
             if(shape === this.selected) {

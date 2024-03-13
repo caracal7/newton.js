@@ -5,8 +5,8 @@
     connected() {
         this.interaction = this.state.runner.interaction;
 
-        this.mouseup = (body, screen, world, move) => {
-            if(!move) {
+        this.mouseup = (body, screen, world, isMoved) => {
+            if(!isMoved) {
                 this.selected = body;
                 this.state.runner.redraw();
             }
