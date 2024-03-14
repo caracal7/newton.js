@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------------------------------
 
 import { Joint } from './joint.js';
-import { vec2, vec3, mat3 } from './../utils/math.js';
+import { vec2, vec3, mat3, Clamp } from './../utils/math.js';
 
 const WeldJoint = function(body1, body2, anchor) {
 	Joint.call(this, Joint.TYPE_WELD, body1, body2, false);
@@ -279,7 +279,7 @@ WeldJoint.prototype.solvePositionConstraints = function() {
 		var c2 = body2.a - body1.a;
 		var correction = vec3.fromVec2(
 			vec2.truncate(c1, Joint.MAX_LINEAR_CORRECTION),
-			Math.clamp(c2, -Joint.MAX_ANGULAR_CORRECTION, Joint.MAX_ANGULAR_CORRECTION));
+			Clamp(c2, -Joint.MAX_ANGULAR_CORRECTION, Joint.MAX_ANGULAR_CORRECTION));
 
 		// Compute lambda for position constraint
 		// Solve J * invM * JT * lambda = -C / dt

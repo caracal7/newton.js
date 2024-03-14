@@ -17,7 +17,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import { vec2, Transform, Bounds } from './utils/math.js';
+import { vec2, Transform, Bounds, Clamp } from './utils/math.js';
 
 const Body = function(type, pos, angle) {
 	if (Body.id_counter == undefined) {
@@ -287,8 +287,8 @@ Body.prototype.updateVelocity = function(gravity, dt, damping) {
 	// v2 = exp(-c * dt) * v1
 	// Taylor expansion:
 	// v2 = (1.0f - c * dt) * v1
-	this.v.scale(Math.clamp(1 - dt * (damping + this.linearDamping), 0, 1));
-	this.w *= Math.clamp(1 - dt * (damping + this.angularDamping), 0, 1);
+	this.v.scale(Clamp(1 - dt * (damping + this.linearDamping), 0, 1));
+	this.w *= Clamp(1 - dt * (damping + this.angularDamping), 0, 1);
 
 	this.f.set(0, 0);
 	this.t = 0;

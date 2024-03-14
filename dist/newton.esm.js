@@ -9,12 +9,9 @@ function Contact(p, n, d, hash) {
 }
 
 // src/utils/math.js
-Math.clamp = function(v, min, max) {
+function Clamp(v, min, max) {
   return v < min ? min : v > max ? max : v;
-};
-Math.log2 = function(a) {
-  return Math.log(a) / Math.log(2);
-};
+}
 function deg2rad(deg) {
   return deg / 180 * Math.PI;
 }
@@ -1619,8 +1616,8 @@ Body.prototype.cacheData = function() {
 Body.prototype.updateVelocity = function(gravity, dt, damping) {
   this.v = vec22.mad(this.v, vec22.mad(gravity, this.f, this.m_inv), dt);
   this.w = this.w + this.t * this.i_inv * dt;
-  this.v.scale(Math.clamp(1 - dt * (damping + this.linearDamping), 0, 1));
-  this.w *= Math.clamp(1 - dt * (damping + this.angularDamping), 0, 1);
+  this.v.scale(Clamp(1 - dt * (damping + this.linearDamping), 0, 1));
+  this.w *= Clamp(1 - dt * (damping + this.angularDamping), 0, 1);
   this.f.set(0, 0);
   this.t = 0;
 };
@@ -1850,7 +1847,7 @@ ContactSolver.prototype.solveVelocityConstraints = function() {
     var lambda_t = -con.emt * vec22.dot(t, rv);
     var lambda_t_max = con.lambda_n_acc * this.u;
     var lambda_t_old = con.lambda_t_acc;
-    con.lambda_t_acc = Math.clamp(lambda_t_old + lambda_t, -lambda_t_max, lambda_t_max);
+    con.lambda_t_acc = Clamp(lambda_t_old + lambda_t, -lambda_t_max, lambda_t_max);
     lambda_t = con.lambda_t_acc - lambda_t_old;
     var impulse = new vec22(lambda_n * n.x - lambda_t * n.y, lambda_t * n.x + lambda_n * n.y);
     body1.v.mad(impulse, -m1_inv);
@@ -1877,7 +1874,7 @@ ContactSolver.prototype.solvePositionConstraints = function() {
     var p2 = vec22.add(body2.p, r2);
     var dp = vec22.sub(p2, p1);
     var c = vec22.dot(dp, n) + con.d;
-    var correction = Math.clamp(ContactSolver.BAUMGARTE * (c + ContactSolver.COLLISION_SLOP), -ContactSolver.MAX_LINEAR_CORRECTION, 0);
+    var correction = Clamp(ContactSolver.BAUMGARTE * (c + ContactSolver.COLLISION_SLOP), -ContactSolver.MAX_LINEAR_CORRECTION, 0);
     if (correction == 0)
       continue;
     max_penetration = Math.max(max_penetration, -c);
@@ -2576,6 +2573,10 @@ function Runner(renderer, app) {
     scale: 1,
     minScale: 0.5,
     maxScale: 8,
+    minX: -999999,
+    maxX: 999999,
+    minY: -999999,
+    maxY: 999999,
     bounds: new Bounds(),
     scroll: new vec22(0, 0)
   }, app.camera || {});
@@ -2822,7 +2823,7 @@ Runner.prototype.scaleCameraToBounds = function(bounds, max = false, extend_minm
     if (scale < this.camera.minScale)
       this.camera.minScale = scale;
   }
-  this.camera.scale = Math.clamp(scale, this.camera.minScale, this.camera.maxScale);
+  this.camera.scale = Clamp(scale, this.camera.minScale, this.camera.maxScale);
   this.redraw();
 };
 Runner.prototype.scaleCameraToWorld = function(max = false, extend_minmax = false) {
@@ -2978,7 +2979,7 @@ function Interaction(runner, settings) {
     }
     var ds = -wheelDeltaY * 1e-3;
     var oldViewScale = this.runner.camera.scale;
-    this.runner.camera.scale = Math.clamp(oldViewScale + ds, this.runner.camera.minScale, this.runner.camera.maxScale);
+    this.runner.camera.scale = Clamp(oldViewScale + ds, this.runner.camera.minScale, this.runner.camera.maxScale);
     ds = this.runner.camera.scale - oldViewScale;
     ds *= meter2pixel(1);
     var p = this.runner.canvasToWorld(this.getMousePosition(event));
@@ -3014,7 +3015,7 @@ function Interaction(runner, settings) {
       if (touch1.x < 0 || touch1.x > this.runner.renderer.width || touch1.y < 0 || touch1.y > this.runner.renderer.height || touch2.x < 0 || touch2.x > this.runner.renderer.width || touch2.y < 0 || touch2.y > this.runner.renderer.height)
         return this.mouseleave(event);
       var scale = distance(touch1.x, touch1.y, touch2.x, touch2.y) / this.state.touchDist;
-      var threhold = Math.clamp(scale - 1, -0.1, 0.1);
+      var threhold = Clamp(scale - 1, -0.1, 0.1);
       var gestureScale = this.state.gestureStartScale * (scale - threhold);
       var v1 = vec22.sub(touch1, this.state.touchPosOld[0]);
       var v2 = vec22.sub(touch2, this.state.touchPosOld[1]);
@@ -3023,7 +3024,7 @@ function Interaction(runner, settings) {
       if (d1 > 0 || d2 > 0) {
         var touchScaleCenter = this.runner.canvasToWorld(vec22.lerp(touch1, touch2, d1 / (d1 + d2)));
         var oldScale = this.runner.camera.scale;
-        this.runner.camera.scale = Math.clamp(gestureScale, this.runner.camera.minScale, this.runner.camera.maxScale);
+        this.runner.camera.scale = Clamp(gestureScale, this.runner.camera.minScale, this.runner.camera.maxScale);
         var ds = this.runner.camera.scale - oldScale;
         ds *= meter2pixel(1);
         this.scrollView(-(v1.x + v2.x) * 0.5 + touchScaleCenter.x * ds, (v1.y + v2.y) * 0.5 + touchScaleCenter.y * ds);
@@ -3193,7 +3194,7 @@ RopeJoint2.prototype.solvePositionConstraints = function() {
   var dist = d.length();
   var u = vec22.scale(d, 1 / dist);
   var c = dist - this.maxDistance;
-  var correction = Math.clamp(c, 0, Joint.MAX_LINEAR_CORRECTION);
+  var correction = Clamp(c, 0, Joint.MAX_LINEAR_CORRECTION);
   var s1 = vec22.cross(r1, u);
   var s2 = vec22.cross(r2, u);
   var em_inv = body1.m_inv + body2.m_inv + body1.i_inv * s1 * s1 + body2.i_inv * s2 * s2;
@@ -3364,7 +3365,7 @@ WeldJoint2.prototype.solvePositionConstraints = function() {
     var c2 = body2.a - body1.a;
     var correction = vec3.fromVec2(
       vec22.truncate(c1, Joint.MAX_LINEAR_CORRECTION),
-      Math.clamp(c2, -Joint.MAX_ANGULAR_CORRECTION, Joint.MAX_ANGULAR_CORRECTION)
+      Clamp(c2, -Joint.MAX_ANGULAR_CORRECTION, Joint.MAX_ANGULAR_CORRECTION)
     );
     var lambda_dt = em_inv.solve(correction.neg());
     var lambda_dt_xy = new vec22(lambda_dt.x, lambda_dt.y);
@@ -3529,7 +3530,7 @@ WheelJoint2.prototype.solveVelocityConstraints = function() {
     var cdot = body2.w - body1.w - this.motorSpeed;
     var lambda = -this.motorEm * cdot;
     var motorLambdaOld = this.motorLambda_acc;
-    this.motorLambda_acc = Math.clamp(this.motorLambda_acc + lambda, -this.maxMotorImpulse, this.maxMotorImpulse);
+    this.motorLambda_acc = Clamp(this.motorLambda_acc + lambda, -this.maxMotorImpulse, this.maxMotorImpulse);
     lambda = this.motorLambda_acc - motorLambdaOld;
     body1.w -= lambda * body1.i_inv;
     body2.w += lambda * body2.i_inv;
@@ -3554,7 +3555,7 @@ WheelJoint2.prototype.solvePositionConstraints = function() {
   var r1_d = vec22.add(r1, d);
   var n = vec22.rotate(this.n_local, body1.a);
   var c = vec22.dot(n, d);
-  var correction = Math.clamp(c, -Joint.MAX_LINEAR_CORRECTION, Joint.MAX_LINEAR_CORRECTION);
+  var correction = Clamp(c, -Joint.MAX_LINEAR_CORRECTION, Joint.MAX_LINEAR_CORRECTION);
   var s1 = vec22.cross(r1_d, n);
   var s2 = vec22.cross(r2, n);
   var em_inv = body1.m_inv + body2.m_inv + body1.i_inv * s1 * s1 + body2.i_inv * s2 * s2;
@@ -3624,7 +3625,7 @@ AngleJoint2.prototype.solvePositionConstraints = function() {
   var body1 = this.body1;
   var body2 = this.body2;
   var c = body2.a - body1.a - this.refAngle;
-  var correction = Math.clamp(c, -Joint.MAX_ANGULAR_CORRECTION, Joint.MAX_ANGULAR_CORRECTION);
+  var correction = Clamp(c, -Joint.MAX_ANGULAR_CORRECTION, Joint.MAX_ANGULAR_CORRECTION);
   var lambda_dt = this.em * -correction;
   body1.a -= lambda_dt * body1.i_inv;
   body2.a += lambda_dt * body2.i_inv;
@@ -3746,7 +3747,7 @@ DistanceJoint2.prototype.solvePositionConstraints = function() {
   var dist = d.length();
   var u = vec22.scale(d, 1 / dist);
   var c = dist - this.restLength;
-  var correction = Math.clamp(c, -Joint.MAX_LINEAR_CORRECTION, Joint.MAX_LINEAR_CORRECTION);
+  var correction = Clamp(c, -Joint.MAX_LINEAR_CORRECTION, Joint.MAX_LINEAR_CORRECTION);
   var s1 = vec22.cross(r1, u);
   var s2 = vec22.cross(r2, u);
   var em_inv = body1.m_inv + body2.m_inv + body1.i_inv * s1 * s1 + body2.i_inv * s2 * s2;
@@ -3892,7 +3893,7 @@ RevoluteJoint2.prototype.solveVelocityConstraints = function() {
     var cdot = body2.w - body1.w - this.motorSpeed;
     var lambda = -this.em2 * cdot;
     var motorLambdaOld = this.motorLambda_acc;
-    this.motorLambda_acc = Math.clamp(this.motorLambda_acc + lambda, -this.maxMotorImpulse, this.maxMotorImpulse);
+    this.motorLambda_acc = Clamp(this.motorLambda_acc + lambda, -this.maxMotorImpulse, this.maxMotorImpulse);
     lambda = this.motorLambda_acc - motorLambdaOld;
     body1.w -= lambda * body1.i_inv;
     body2.w += lambda * body2.i_inv;
@@ -3949,18 +3950,18 @@ RevoluteJoint2.prototype.solvePositionConstraints = function() {
     var da = body2.a - body1.a - this.refAngle;
     var angularImpulseDt = 0;
     if (this.limitState == Joint.LIMIT_STATE_EQUAL_LIMITS) {
-      var c = Math.clamp(da - this.limitLowerAngle, -Joint.MAX_ANGULAR_CORRECTION, Joint.MAX_ANGULAR_CORRECTION);
+      var c = Clamp(da - this.limitLowerAngle, -Joint.MAX_ANGULAR_CORRECTION, Joint.MAX_ANGULAR_CORRECTION);
       angularError = Math.abs(c);
       angularImpulseDt = -this.em2 * c;
     } else if (this.limitState == Joint.LIMIT_STATE_AT_LOWER) {
       var c = da - this.limitLowerAngle;
       angularError = -c;
-      c = Math.clamp(c + Joint.ANGULAR_SLOP, -Joint.MAX_ANGULAR_CORRECTION, 0);
+      c = Clamp(c + Joint.ANGULAR_SLOP, -Joint.MAX_ANGULAR_CORRECTION, 0);
       angularImpulseDt = -this.em2 * c;
     } else if (this.limitState == Joint.LIMIT_STATE_AT_UPPER) {
       var c = da - this.limitUpperAngle;
       angularError = c;
-      c = Math.clamp(c - Joint.ANGULAR_SLOP, 0, Joint.MAX_ANGULAR_CORRECTION);
+      c = Clamp(c - Joint.ANGULAR_SLOP, 0, Joint.MAX_ANGULAR_CORRECTION);
       angularImpulseDt = -this.em2 * c;
     }
     body1.a -= angularImpulseDt * body1.i_inv;
@@ -4085,8 +4086,8 @@ PrismaticJoint2.prototype.solvePositionConstraints = function() {
   var c1 = vec22.dot(n, d);
   var c2 = body2.a - body1.a - this.da;
   var correction = new vec22();
-  correction.x = Math.clamp(c1, -Joint.MAX_LINEAR_CORRECTION, Joint.MAX_LINEAR_CORRECTION);
-  correction.y = Math.clamp(c2, -Joint.MAX_ANGULAR_CORRECTION, Joint.MAX_ANGULAR_CORRECTION);
+  correction.x = Clamp(c1, -Joint.MAX_LINEAR_CORRECTION, Joint.MAX_LINEAR_CORRECTION);
+  correction.y = Clamp(c2, -Joint.MAX_ANGULAR_CORRECTION, Joint.MAX_ANGULAR_CORRECTION);
   var s1 = vec22.cross(r1_d, n);
   var s2 = vec22.cross(r2, n);
   var s1_i = s1 * body1.i_inv;

@@ -19,7 +19,7 @@
 
 import { addEvent, ready, isAppleMobileDevice } from './base.js';
 
-import { pixel2meter, meter2pixel, vec2, Bounds } from './utils/math.js';
+import { pixel2meter, meter2pixel, vec2, Bounds, Clamp } from './utils/math.js';
 
 import { DemoCircles } from "./demo/demo_circles.js";
 import { DemoCar } from "./demo/demo_car.js";
@@ -628,7 +628,7 @@ const App = function() {
 		// Zoom in and out using vertical mouse wheel
 		var ds = -wheelDeltaY * 0.001;
 		var oldViewScale = camera.scale;
-		camera.scale = Math.clamp(oldViewScale + ds, camera.minScale, camera.maxScale);
+		camera.scale = Clamp(oldViewScale + ds, camera.minScale, camera.maxScale);
 		ds = camera.scale - oldViewScale;
 		ds *= meter2pixel(1);
 
@@ -643,7 +643,7 @@ const App = function() {
 		camera.origin.x -= dx;
 
 		// Clamp view origin limit
-		//camera.origin.y = Math.clamp(camera.origin.y, 0, 0);
+		//camera.origin.y = Clamp(camera.origin.y, 0, 0);
 
 		// Set dirtyBounds to full screen
 		dirtyBounds.set(canvasToWorld(new vec2(0, domCanvas.height)), canvasToWorld(new vec2(domCanvas.width, 0)));
@@ -700,7 +700,7 @@ const App = function() {
 				var touchScaleCenter = canvasToWorld(vec2.lerp(touchPos[0], touchPos[1], d1 / (d1 + d2)));
 
 				var oldScale = camera.scale;
-				camera.scale  = Math.clamp(gestureScale, camera.minScale, camera.maxScale);
+				camera.scale  = Clamp(gestureScale, camera.minScale, camera.maxScale);
 				var ds = camera.scale  - oldScale;
 				ds *= meter2pixel(1);
 
@@ -727,7 +727,7 @@ const App = function() {
 	}
 
 	function onGestureChange(ev) {
-		var threhold = Math.clamp(ev.scale - 1, -0.1, 0.1);
+		var threhold = Clamp(ev.scale - 1, -0.1, 0.1);
 		gestureScale = gestureStartScale * (ev.scale - threhold);
 
 		ev.preventDefault();

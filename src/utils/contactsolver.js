@@ -37,7 +37,7 @@
 // NOTE: lambda is an impulse in constraint space.
 //-------------------------------------------------------------------------------------------------
 
-import { vec2 } from './math.js';
+import { vec2, Clamp } from './math.js';
 
 function ContactSolver(shape1, shape2) {
 	// Contact shapes
@@ -189,7 +189,7 @@ ContactSolver.prototype.solveVelocityConstraints = function() {
 
 		// Accumulate and clamp
 		var lambda_t_old = con.lambda_t_acc;
-		con.lambda_t_acc = Math.clamp(lambda_t_old + lambda_t, -lambda_t_max, lambda_t_max);
+		con.lambda_t_acc = Clamp(lambda_t_old + lambda_t, -lambda_t_max, lambda_t_max);
 		lambda_t = con.lambda_t_acc - lambda_t_old;
 
 		// Apply the final impulses
@@ -233,7 +233,7 @@ ContactSolver.prototype.solvePositionConstraints = function() {
 
 		// Position constraint
 		var c = vec2.dot(dp, n) + con.d;
-		var correction = Math.clamp(ContactSolver.BAUMGARTE * (c + ContactSolver.COLLISION_SLOP), -ContactSolver.MAX_LINEAR_CORRECTION, 0);
+		var correction = Clamp(ContactSolver.BAUMGARTE * (c + ContactSolver.COLLISION_SLOP), -ContactSolver.MAX_LINEAR_CORRECTION, 0);
 		if (correction == 0)
 			continue;
 

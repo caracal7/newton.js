@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------------------------------
 
 import { Joint } from './joint.js';
-import { vec2 } from './../utils/math.js';
+import { vec2, Clamp } from './../utils/math.js';
 
 const AngleJoint = function(body1, body2) {
 	Joint.call(this, Joint.TYPE_ANGLE, body1, body2, true);
@@ -109,7 +109,7 @@ AngleJoint.prototype.solvePositionConstraints = function() {
 
 	// Position (angle) constraint
 	var c = body2.a - body1.a - this.refAngle;
-	var correction = Math.clamp(c, -Joint.MAX_ANGULAR_CORRECTION, Joint.MAX_ANGULAR_CORRECTION);
+	var correction = Clamp(c, -Joint.MAX_ANGULAR_CORRECTION, Joint.MAX_ANGULAR_CORRECTION);
 
 	// Compute lambda for position (angle) constraint
 	// Solve J * invM * JT * lambda = -C / dt

@@ -6,7 +6,7 @@ import { Body }         from "./Body.js";
 import { Shape }        from "./shapes/shape.js";
 import { stats }        from "./utils/stats.js";
 import { MouseJoint }   from "./joints/joint_mouse.js";
-import { Bounds, pixel2meter, meter2pixel, vec2 } from './utils/math.js';
+import { Bounds, pixel2meter, meter2pixel, vec2, Clamp } from './utils/math.js';
 
 const HELPER_JOINT_ANCHOR_RADIUS = pixel2meter(2.5);
 const PIXEL_UNIT = pixel2meter(1);
@@ -20,8 +20,8 @@ function bodyColor(body) {
 }
 
 //  Private variables
-const App   = Symbol("app");
-const Pause = Symbol("pause");
+const App       = Symbol("app");
+const Pause     = Symbol("pause");
 const Events    = Symbol("events");
 
 const events    = ['beforeRenderBody', 'beforeRenderShape', 'beforeRenderFrame', 'afterRenderFrame'];
@@ -53,6 +53,10 @@ function Runner(renderer, app) {
         scale: 1,
         minScale: 0.5,
         maxScale: 8.0,
+        minX: -999999,
+        maxX: 999999,
+        minY: -999999,
+        maxY: 999999,
         bounds: new Bounds,
         scroll: new vec2(0, 0)
     }, app.camera || {});
@@ -344,7 +348,7 @@ Runner.prototype.scaleCameraToBounds  = function(bounds, max = false, extend_min
          this.camera.scale = scale;
          if(scale > this.camera.maxScale) this.camera.maxScale = scale;
          if(scale < this.camera.minScale) this.camera.minScale = scale;
-    } this.camera.scale = Math.clamp(scale, this.camera.minScale, this.camera.maxScale);
+    } this.camera.scale = Clamp(scale, this.camera.minScale, this.camera.maxScale);
     this.redraw();
 }
 

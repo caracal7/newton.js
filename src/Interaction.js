@@ -1,8 +1,8 @@
-import { Body }                         from "./Body.js";
-import { vec2, meter2pixel, distance }  from './utils/math.js';
-import { MouseJoint }                   from "./joints/joint_mouse.js";
-import { pixel2meter }                  from './utils/math.js';
-import { isAppleMobileDevice }          from './utils/util.js';
+import { Body }                                 from "./Body.js";
+import { vec2, meter2pixel, distance, Clamp }   from './utils/math.js';
+import { MouseJoint }                           from "./joints/joint_mouse.js";
+import { pixel2meter }                          from './utils/math.js';
+import { isAppleMobileDevice }                  from './utils/util.js';
 
 const SELECTABLE_LINE_DIST_THREHOLD = pixel2meter(isAppleMobileDevice() ? 8 : 4);
 
@@ -147,7 +147,7 @@ function Interaction(runner, settings) {
     	// Zoom in and out using vertical mouse wheel
     	var ds = -wheelDeltaY * 0.001;
     	var oldViewScale = this.runner.camera.scale;
-    	this.runner.camera.scale = Math.clamp(oldViewScale + ds, this.runner.camera.minScale, this.runner.camera.maxScale);
+    	this.runner.camera.scale = Clamp(oldViewScale + ds, this.runner.camera.minScale, this.runner.camera.maxScale);
     	ds = this.runner.camera.scale - oldViewScale;
     	ds *= meter2pixel(1);
     	// Adjust view origin for focused zoom in and out
@@ -197,7 +197,7 @@ function Interaction(runner, settings) {
             ) return this.mouseleave(event);
 
             var scale = distance(touch1.x, touch1.y, touch2.x, touch2.y) / this.state.touchDist;
-            var threhold = Math.clamp(scale - 1, -0.1, 0.1);
+            var threhold = Clamp(scale - 1, -0.1, 0.1);
         	var gestureScale = this.state.gestureStartScale * (scale - threhold);
 
             var v1 = vec2.sub(touch1, this.state.touchPosOld[0]);
@@ -209,7 +209,7 @@ function Interaction(runner, settings) {
             if (d1 > 0 || d2 > 0) {
                 var touchScaleCenter = this.runner.canvasToWorld(vec2.lerp(touch1, touch2, d1 / (d1 + d2)));
                 var oldScale = this.runner.camera.scale;
-                this.runner.camera.scale  = Math.clamp(gestureScale, this.runner.camera.minScale, this.runner.camera.maxScale);
+                this.runner.camera.scale  = Clamp(gestureScale, this.runner.camera.minScale, this.runner.camera.maxScale);
                 var ds = this.runner.camera.scale  - oldScale;
                 ds *= meter2pixel(1);
                 this.scrollView(-(v1.x + v2.x) * 0.5 + touchScaleCenter.x * ds, (v1.y + v2.y) * 0.5 + touchScaleCenter.y * ds);

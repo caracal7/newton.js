@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------------------------------
 
 import { Joint } from './joint.js';
-import { vec2, vec3, mat2, mat3 } from './../utils/math.js';
+import { vec2, vec3, mat2, mat3, Clamp } from './../utils/math.js';
 
 const RevoluteJoint = function(body1, body2, anchor) {
 	Joint.call(this, Joint.TYPE_REVOLUTE, body1, body2, false);
@@ -212,7 +212,7 @@ RevoluteJoint.prototype.solveVelocityConstraints = function() {
 		var cdot = body2.w - body1.w - this.motorSpeed;
 		var lambda = -this.em2 * cdot;
 		var motorLambdaOld = this.motorLambda_acc;
-		this.motorLambda_acc = Math.clamp(this.motorLambda_acc + lambda, -this.maxMotorImpulse, this.maxMotorImpulse);
+		this.motorLambda_acc = Clamp(this.motorLambda_acc + lambda, -this.maxMotorImpulse, this.maxMotorImpulse);
 		lambda = this.motorLambda_acc - motorLambdaOld;
 
 		// Apply motor constraint impulses
@@ -313,7 +313,7 @@ RevoluteJoint.prototype.solvePositionConstraints = function() {
 		var angularImpulseDt = 0;
 
 		if (this.limitState == Joint.LIMIT_STATE_EQUAL_LIMITS) {
-			var c = Math.clamp(da - this.limitLowerAngle, -Joint.MAX_ANGULAR_CORRECTION, Joint.MAX_ANGULAR_CORRECTION);
+			var c = Clamp(da - this.limitLowerAngle, -Joint.MAX_ANGULAR_CORRECTION, Joint.MAX_ANGULAR_CORRECTION);
 
 			angularError = Math.abs(c);
 			angularImpulseDt = -this.em2 * c;
@@ -322,14 +322,14 @@ RevoluteJoint.prototype.solvePositionConstraints = function() {
 			var c = da - this.limitLowerAngle;
 
 			angularError = -c;
-			c = Math.clamp(c + Joint.ANGULAR_SLOP, -Joint.MAX_ANGULAR_CORRECTION, 0);
+			c = Clamp(c + Joint.ANGULAR_SLOP, -Joint.MAX_ANGULAR_CORRECTION, 0);
 			angularImpulseDt = -this.em2 * c;
 		}
 		else if (this.limitState == Joint.LIMIT_STATE_AT_UPPER) {
 			var c = da - this.limitUpperAngle;
 
 			angularError = c;
-			c = Math.clamp(c - Joint.ANGULAR_SLOP, 0, Joint.MAX_ANGULAR_CORRECTION);
+			c = Clamp(c - Joint.ANGULAR_SLOP, 0, Joint.MAX_ANGULAR_CORRECTION);
 			angularImpulseDt = -this.em2 * c;
 		}
 

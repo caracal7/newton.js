@@ -50,7 +50,7 @@
 //-------------------------------------------------------------------------------------------------
 
 import { Joint } from './joint.js';
-import { vec2 } from './../utils/math.js';
+import { vec2, Clamp } from './../utils/math.js';
 
 const WheelJoint = function(body1, body2, anchor1, anchor2) {
 	Joint.call(this, Joint.TYPE_WHEEL, body1, body2, true);
@@ -294,7 +294,7 @@ WheelJoint.prototype.solveVelocityConstraints = function() {
 		var lambda = -this.motorEm * cdot;
 
 		var motorLambdaOld = this.motorLambda_acc;
-		this.motorLambda_acc = Math.clamp(this.motorLambda_acc + lambda, -this.maxMotorImpulse, this.maxMotorImpulse);
+		this.motorLambda_acc = Clamp(this.motorLambda_acc + lambda, -this.maxMotorImpulse, this.maxMotorImpulse);
 		lambda = this.motorLambda_acc - motorLambdaOld;
 
 		// Apply motor impulses
@@ -345,7 +345,7 @@ WheelJoint.prototype.solvePositionConstraints = function() {
 
 	// Position constraint
 	var c = vec2.dot(n, d);
-	var correction = Math.clamp(c, -Joint.MAX_LINEAR_CORRECTION, Joint.MAX_LINEAR_CORRECTION);
+	var correction = Clamp(c, -Joint.MAX_LINEAR_CORRECTION, Joint.MAX_LINEAR_CORRECTION);
 
 	// Compute lambda for position constraint
 	// Solve J * invM * JT * lambda = -C / dt

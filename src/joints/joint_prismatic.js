@@ -45,7 +45,7 @@
 //-------------------------------------------------------------------------------------------------
 
 import { Joint } from './joint.js';
-import { vec2, mat2 } from './../utils/math.js';
+import { vec2, mat2, Clamp } from './../utils/math.js';
 
 const PrismaticJoint = function(body1, body2, anchor1, anchor2) {
 	Joint.call(this, Joint.TYPE_PRISMATIC, body1, body2, true);
@@ -206,8 +206,8 @@ PrismaticJoint.prototype.solvePositionConstraints = function() {
 	var c1 = vec2.dot(n, d);
 	var c2 = body2.a - body1.a - this.da;
 	var correction = new vec2;
-	correction.x = Math.clamp(c1, -Joint.MAX_LINEAR_CORRECTION, Joint.MAX_LINEAR_CORRECTION);
-	correction.y = Math.clamp(c2, -Joint.MAX_ANGULAR_CORRECTION, Joint.MAX_ANGULAR_CORRECTION);
+	correction.x = Clamp(c1, -Joint.MAX_LINEAR_CORRECTION, Joint.MAX_LINEAR_CORRECTION);
+	correction.y = Clamp(c2, -Joint.MAX_ANGULAR_CORRECTION, Joint.MAX_ANGULAR_CORRECTION);
 
 	// Compute impulse for position constraint
 	// Solve J * invM * JT * lambda = -C / dt

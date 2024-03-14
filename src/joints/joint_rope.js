@@ -32,7 +32,7 @@
 //-------------------------------------------------------------------------------------------------
 
 import { Joint } from './joint.js';
-import { vec2 } from './../utils/math.js';
+import { vec2, Clamp } from './../utils/math.js';
 
 const RopeJoint = function(body1, body2, anchor1, anchor2) {
 	Joint.call(this, Joint.TYPE_ROPE, body1, body2, true);
@@ -182,7 +182,7 @@ RopeJoint.prototype.solvePositionConstraints = function() {
 
 	// Position constraint
 	var c = dist - this.maxDistance;
-	var correction = Math.clamp(c, 0, Joint.MAX_LINEAR_CORRECTION);
+	var correction = Clamp(c, 0, Joint.MAX_LINEAR_CORRECTION);
 
 	// Compute lambda for correction
 	// Solve J * invM * JT * lambda = -C / dt

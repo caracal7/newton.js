@@ -32,7 +32,7 @@
 //-------------------------------------------------------------------------------------------------
 
 import { Joint } from './joint.js';
-import { vec2 } from './../utils/math.js';
+import { vec2, Clamp } from './../utils/math.js';
 
 const DistanceJoint = function(body1, body2, anchor1, anchor2) {
 	Joint.call(this, Joint.TYPE_DISTANCE, body1, body2, true);
@@ -224,7 +224,7 @@ DistanceJoint.prototype.solvePositionConstraints = function() {
 
 	// Position constraint
 	var c = dist - this.restLength;
-	var correction = Math.clamp(c, -Joint.MAX_LINEAR_CORRECTION, Joint.MAX_LINEAR_CORRECTION);
+	var correction = Clamp(c, -Joint.MAX_LINEAR_CORRECTION, Joint.MAX_LINEAR_CORRECTION);
 
 	// Compute lambda for correction
 	// Solve J * invM * JT * lambda = -C / dt
@@ -398,7 +398,7 @@ MaxDistanceJoint.prototype.solvePositionConstraints = function() {
 	else if (dist > this.maxDist) {
 		c = dist - this.maxDist;
 	}
-	var correction = Math.clamp(c, -Joint.MAX_LINEAR_CORRECTION, Joint.MAX_LINEAR_CORRECTION);
+	var correction = Clamp(c, -Joint.MAX_LINEAR_CORRECTION, Joint.MAX_LINEAR_CORRECTION);
 
 	// compute lambda for position constraint
 	// solve J * invM * JT * lambda = -C / dt
