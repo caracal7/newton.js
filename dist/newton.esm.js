@@ -2802,23 +2802,16 @@ Runner.prototype.dirtyBoundsToFullscreen = function() {
     this.canvasToWorld(new vec22(this.renderer.width, 0))
   );
 };
-Runner.prototype.scaleCameraToBounds = function() {
-  this.dirtyBoundsToFullscreen();
-  console.log(JSON.stringify(this.dirtyBounds));
-  var v = new vec22(
-    this.dirtyBounds.maxs.x - this.dirtyBounds.mins.x,
-    this.dirtyBounds.maxs.y - this.dirtyBounds.mins.y
+Runner.prototype.scaleCameraToBounds = function(max = false) {
+  var world_bounds = new Bounds();
+  for (var i = 0; i < this.world.bodyArr.length; i++)
+    for (var j = 0; j < this.world.bodyArr[i].shapeArr.length; j++)
+      world_bounds.addBounds(this.world.bodyArr[i].shapeArr[j].bounds);
+  var scale = new vec22(
+    this.renderer.width / meter2pixel(1) / (world_bounds.maxs.x - world_bounds.mins.x),
+    this.renderer.height / meter2pixel(1) / (world_bounds.maxs.y - world_bounds.mins.y)
   );
-  var ww = v.x * this.camera.scale / 0.5;
-  var wh = v.y * this.camera.scale / 0.5;
-  console.log("v", v);
-  console.log("ww", ww);
-  console.log("wh", wh);
-  console.log("this.renderer.width", this.renderer.width);
-  console.log("this.renderer.height", this.renderer.height);
-  console.log("w", ww / v.x);
-  console.log("h", wh / v.y);
-  console.log("this.camera.scale", this.camera.scale);
+  this.camera.scale = Math[max ? "max" : "min"](scale.x, scale.y);
   this.redraw();
 };
 Runner.prototype.on = function(event, callback) {
