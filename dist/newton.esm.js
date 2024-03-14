@@ -3081,8 +3081,16 @@ Interaction.prototype.getTouchPosition = function(event) {
   return new vec22(event.clientX - rect.left, event.clientY - rect.top);
 };
 Interaction.prototype.scrollView = function(dx, dy) {
-  this.runner.camera.origin.x += dx;
-  this.runner.camera.origin.y += dy;
+  var x = this.runner.camera.origin.x + dx;
+  var y = this.runner.camera.origin.y + dy;
+  var scale = this.runner.camera.scale * meter2pixel(1);
+  var wx = x / scale;
+  var wy = y / scale;
+  var rx = this.runner.renderer.width * 0.5 / scale;
+  var ry = this.runner.renderer.height * 0.5 / scale;
+  console.log(wx.toFixed(2), rx.toFixed(2), (-rx - wx).toFixed(2), this.runner.camera.minX);
+  this.runner.camera.origin.x = x;
+  this.runner.camera.origin.y = y;
   this.runner.dirtyBoundsToFullscreen();
   this.runner.static_outdated = true;
 };
