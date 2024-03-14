@@ -17,16 +17,16 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import { Shape } 			from './shapes/shape.js';
-import { ShapeCircle } 		from './shapes/shape_circle.js';
-import { ShapeSegment } 	from './shapes/shape_segment.js';
-import { ShapePoly } 		from './shapes/shape_poly.js';
-import { Body } 			from './Body.js';
-import { Joint } 			from './joints/joint.js';
-import { ContactSolver } 	from "./utils/contactsolver.js";
-import { collision } 		from "./utils/collision.js";
-import { deg2rad, vec2 } 	from './utils/math.js';
-import { stats } 			from "./utils/stats.js";
+import { Shape } 				from './shapes/shape.js';
+import { ShapeCircle } 			from './shapes/shape_circle.js';
+import { ShapeSegment } 		from './shapes/shape_segment.js';
+import { ShapePoly } 			from './shapes/shape_poly.js';
+import { Body } 				from './Body.js';
+import { Joint } 				from './joints/joint.js';
+import { ContactSolver } 		from "./utils/contactsolver.js";
+import { collision } 			from "./utils/collision.js";
+import { Bounds,deg2rad, vec2 } from './utils/math.js';
+import { stats } 				from "./utils/stats.js";
 
 function World() {
 	this.bodyArr = [];
@@ -750,6 +750,13 @@ World.prototype.step = function(dt, vel_iteration, pos_iteration, warmStarting, 
 	}
 }
 
+World.prototype.getBounds = function() {
+	var bounds = new Bounds();
+	for (var i = 0; i < this.bodyArr.length; i++)
+		for (var j = 0; j < this.bodyArr[i].shapeArr.length; j++)
+            bounds.addBounds(this.bodyArr[i].shapeArr[j].bounds);
+	return bounds
+}
 export {
 	World
 }

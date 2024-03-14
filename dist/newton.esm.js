@@ -2455,6 +2455,13 @@ World.prototype.step = function(dt, vel_iteration, pos_iteration, warmStarting, 
     }
   }
 };
+World.prototype.getBounds = function() {
+  var bounds = new Bounds();
+  for (var i = 0; i < this.bodyArr.length; i++)
+    for (var j = 0; j < this.bodyArr[i].shapeArr.length; j++)
+      bounds.addBounds(this.bodyArr[i].shapeArr[j].bounds);
+  return bounds;
+};
 
 // src/joints/joint_mouse.js
 var MouseJoint = function(mouseBody, body, anchor) {
@@ -2802,17 +2809,24 @@ Runner.prototype.dirtyBoundsToFullscreen = function() {
     this.canvasToWorld(new vec22(this.renderer.width, 0))
   );
 };
-Runner.prototype.scaleCameraToBounds = function(max = false) {
-  var world_bounds = new Bounds();
-  for (var i = 0; i < this.world.bodyArr.length; i++)
-    for (var j = 0; j < this.world.bodyArr[i].shapeArr.length; j++)
-      world_bounds.addBounds(this.world.bodyArr[i].shapeArr[j].bounds);
+Runner.prototype.scaleCameraToBounds = function(bounds, max = false, extend_minmax = false) {
   var scale = new vec22(
-    this.renderer.width / meter2pixel(1) / (world_bounds.maxs.x - world_bounds.mins.x),
-    this.renderer.height / meter2pixel(1) / (world_bounds.maxs.y - world_bounds.mins.y)
+    this.renderer.width / meter2pixel(1) / (bounds.maxs.x - bounds.mins.x),
+    this.renderer.height / meter2pixel(1) / (bounds.maxs.y - bounds.mins.y)
   );
-  this.camera.scale = Math[max ? "max" : "min"](scale.x, scale.y);
+  var scale = Math[max ? "max" : "min"](scale.x, scale.y);
+  if (extend_minmax) {
+    this.camera.scale = scale;
+    if (scale > this.camera.maxScale)
+      this.camera.maxScale = scale;
+    if (scale < this.camera.minScale)
+      this.camera.minScale = scale;
+  }
+  this.camera.scale = Math.clamp(scale, this.camera.minScale, this.camera.maxScale);
   this.redraw();
+};
+Runner.prototype.scaleCameraToWorld = function(max = false, extend_minmax = false) {
+  this.scaleCameraToBounds(this.world.getBounds(), max, extend_minmax);
 };
 Runner.prototype.on = function(event, callback) {
   if (!events.includes(event))
