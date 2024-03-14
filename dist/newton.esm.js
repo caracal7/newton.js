@@ -2811,7 +2811,7 @@ Runner.prototype.dirtyBoundsToFullscreen = function() {
     this.canvasToWorld(new vec22(this.renderer.width, 0))
   );
 };
-Runner.prototype.scaleCameraToBounds = function(bounds, extend_minmax = false) {
+Runner.prototype.fitCameraToBounds = function(bounds, extend_minmax = false) {
   var scale = new vec22(
     this.renderer.width / meter2pixel(1) / (bounds.maxs.x - bounds.mins.x),
     this.renderer.height / meter2pixel(1) / (bounds.maxs.y - bounds.mins.y)
@@ -2827,8 +2827,8 @@ Runner.prototype.scaleCameraToBounds = function(bounds, extend_minmax = false) {
   this.camera.scale = Clamp(scale, this.camera.minScale, this.camera.maxScale);
   this.redraw();
 };
-Runner.prototype.scaleCameraToWorld = function(extend_minmax = false) {
-  this.scaleCameraToBounds(this.world.getBounds(), extend_minmax);
+Runner.prototype.fitCameraToWorld = function(extend_minmax = false) {
+  this.fitCameraToBounds(this.world.getBounds(), extend_minmax);
 };
 Runner.prototype.on = function(event, callback) {
   if (!events.includes(event))
@@ -3081,26 +3081,40 @@ Interaction.prototype.getTouchPosition = function(event) {
   var rect = this.runner.renderer.canvas.getBoundingClientRect();
   return new vec22(event.clientX - rect.left, event.clientY - rect.top);
 };
-Interaction.prototype.fitCameraToBounds = function(dx, dy) {
-};
-Interaction.prototype.scrollView = function(dx, dy) {
-  var x = this.runner.camera.origin.x + dx;
-  var y = this.runner.camera.origin.y + dy;
+Interaction.prototype.fitCameraToBounds = function(x, y) {
+  var pos = new vec22(x, y);
   var rw2 = this.runner.renderer.width * 0.5;
   var rh2 = this.runner.renderer.height * 0.5;
   var scale = this.runner.camera.scale * meter2pixel(1);
-  var wx = x / scale;
-  var wy = y / scale;
-  if ((wx - this.runner.camera.minX) * scale < rw2)
-    x = rw2 + this.runner.camera.minX * scale;
-  if ((this.runner.camera.maxX - wx) * scale < rw2)
-    x = this.runner.camera.maxX * scale - rw2;
-  if ((wy - this.runner.camera.minY) * scale < rh2)
-    y = rh2 + this.runner.camera.minY * scale;
-  if ((this.runner.camera.maxY - wy) * scale < rh2)
-    y = this.runner.camera.maxY * scale - rh2;
-  this.runner.camera.origin.x = x;
-  this.runner.camera.origin.y = y;
+  var wx = pos.x / scale;
+  var wy = pos.y / scale;
+  var minX = (wx - this.runner.camera.minX) * scale < rw2;
+  var maxX = (this.runner.camera.maxX - wx) * scale < rw2;
+  var minY = (wy - this.runner.camera.minY) * scale < rh2;
+  var maxY = (this.runner.camera.maxY - wy) * scale < rh2;
+  if (minX && maxX)
+    pos.x = (this.runner.camera.maxX + this.runner.camera.minX) * 0.5 * scale;
+  else {
+    if (minX)
+      pos.x = rw2 + this.runner.camera.minX * scale;
+    if (maxX)
+      pos.x = this.runner.camera.maxX * scale - rw2;
+  }
+  if (minY && maxY)
+    pos.y = (this.runner.camera.maxY + this.runner.camera.minY) * 0.5 * scale;
+  else {
+    if (minY)
+      pos.y = rh2 + this.runner.camera.minY * scale;
+    if (maxY)
+      pos.y = this.runner.camera.maxY * scale - rh2;
+  }
+  return pos;
+};
+Interaction.prototype.scrollView = function(dx, dy) {
+  this.runner.camera.origin = this.fitCameraToBounds(
+    this.runner.camera.origin.x + dx,
+    this.runner.camera.origin.y + dy
+  );
   this.runner.dirtyBoundsToFullscreen();
   this.runner.static_outdated = true;
 };

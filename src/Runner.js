@@ -339,7 +339,7 @@ Runner.prototype.dirtyBoundsToFullscreen = function() {
     );
 }
 
-Runner.prototype.scaleCameraToBounds  = function(bounds, extend_minmax = false) {
+Runner.prototype.fitCameraToBounds  = function(bounds, extend_minmax = false) {
     var scale = new vec2(
         this.renderer.width  / meter2pixel(1) / (bounds.maxs.x - bounds.mins.x),
         this.renderer.height / meter2pixel(1) / (bounds.maxs.y - bounds.mins.y)
@@ -353,8 +353,8 @@ Runner.prototype.scaleCameraToBounds  = function(bounds, extend_minmax = false) 
     this.redraw();
 }
 
-Runner.prototype.scaleCameraToWorld  = function(extend_minmax = false) {
-    this.scaleCameraToBounds(this.world.getBounds(), extend_minmax)
+Runner.prototype.fitCameraToWorld  = function(extend_minmax = false) {
+    this.fitCameraToBounds(this.world.getBounds(), extend_minmax)
 }
 
 Runner.prototype.on = function(event, callback) {
