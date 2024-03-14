@@ -51,12 +51,12 @@ function Runner(renderer, app) {
     this.camera = Object.assign({
         origin: new vec2(0, 0),
         scale: 1,
-        minScale: 0.5,
+        minScale: 0.1,
         maxScale: 8.0,
-        minX: -999999,
-        maxX: 999999,
-        minY: -999999,
-        maxY: 999999,
+        minX: -Infinity,
+        maxX: Infinity,
+        minY: -Infinity,
+        maxY: Infinity,
         fit: true,
         bounds: new Bounds,
         scroll: new vec2(0, 0)
@@ -337,6 +337,14 @@ Runner.prototype.dirtyBoundsToFullscreen = function() {
         this.canvasToWorld(new vec2(0, this.renderer.height)),
         this.canvasToWorld(new vec2(this.renderer.width, 0))
     );
+}
+
+Runner.prototype.moveCameraTo  = function(x, y) {
+    this.camera.origin.x = x * this.camera.scale * meter2pixel(1);
+    this.camera.origin.y = y * this.camera.scale * meter2pixel(1);
+    this.dirtyBoundsToFullscreen();
+    this.static_outdated = true;
+    if(this.pause) this.drawFrame(0);
 }
 
 Runner.prototype.fitCameraToBounds  = function(bounds, extend_minmax = false) {
