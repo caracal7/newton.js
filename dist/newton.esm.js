@@ -2814,29 +2814,18 @@ Runner.prototype.dirtyBoundsToFullscreen = function() {
 Runner.prototype.moveCameraTo = function(x, y) {
   this.camera.origin.x = x * this.camera.scale * meter2pixel(1);
   this.camera.origin.y = y * this.camera.scale * meter2pixel(1);
-  this.dirtyBoundsToFullscreen();
-  this.static_outdated = true;
-  if (this.pause)
-    this.drawFrame(0);
+  this.redraw();
 };
-Runner.prototype.fitCameraToBounds = function(bounds, extend_minmax = false) {
+Runner.prototype.fitCameraToBounds = function(bounds, max = false) {
   var scale = new vec22(
     this.renderer.width / meter2pixel(1) / (bounds.maxs.x - bounds.mins.x),
     this.renderer.height / meter2pixel(1) / (bounds.maxs.y - bounds.mins.y)
   );
-  var scale = Math[this.camera.fit ? "max" : "min"](scale.x, scale.y);
-  if (extend_minmax) {
-    this.camera.scale = scale;
-    if (scale > this.camera.maxScale)
-      this.camera.maxScale = scale;
-    if (scale < this.camera.minScale)
-      this.camera.minScale = scale;
-  }
-  this.camera.scale = Clamp(scale, this.camera.minScale, this.camera.maxScale);
-  this.redraw();
+  this.camera.scale = Math[max ? "max" : "min"](scale.x, scale.y);
+  this.moveCameraTo((bounds.maxs.x + bounds.mins.x) * 0.5, (bounds.maxs.y + bounds.mins.y) * 0.5);
 };
-Runner.prototype.fitCameraToWorld = function(extend_minmax = false) {
-  this.fitCameraToBounds(this.world.getBounds(), extend_minmax);
+Runner.prototype.fitCameraToWorld = function(max = false) {
+  this.fitCameraToBounds(this.world.getBounds(), max);
 };
 Runner.prototype.on = function(event, callback) {
   if (!events.includes(event))
@@ -3104,7 +3093,7 @@ Interaction.prototype.fitCameraToBounds = function(x, y) {
     pos.x = (this.runner.camera.maxX + this.runner.camera.minX) * 0.5 * scale;
   else {
     if (minX)
-      pos.x = rw2 + this.runner.camera.minX * scale;
+      pos.x = this.runner.camera.minX * scale + rw2;
     if (maxX)
       pos.x = this.runner.camera.maxX * scale - rw2;
   }
@@ -3112,7 +3101,7 @@ Interaction.prototype.fitCameraToBounds = function(x, y) {
     pos.y = (this.runner.camera.maxY + this.runner.camera.minY) * 0.5 * scale;
   else {
     if (minY)
-      pos.y = rh2 + this.runner.camera.minY * scale;
+      pos.y = this.runner.camera.minY * scale + rh2;
     if (maxY)
       pos.y = this.runner.camera.maxY * scale - rh2;
   }

@@ -293,12 +293,12 @@ Interaction.prototype.fitCameraToBounds = function(x, y) {
 
     if(minX && maxX) pos.x = (this.runner.camera.maxX + this.runner.camera.minX) * 0.5 * scale;
     else {
-        if(minX) pos.x = rw2 + this.runner.camera.minX * scale;
+        if(minX) pos.x = this.runner.camera.minX * scale + rw2;
         if(maxX) pos.x = this.runner.camera.maxX * scale - rw2;
     }
     if(minY && maxY) pos.y = (this.runner.camera.maxY + this.runner.camera.minY) * 0.5 * scale;
     else {
-        if(minY) pos.y = rh2 + this.runner.camera.minY * scale;
+        if(minY) pos.y = this.runner.camera.minY * scale + rh2;
         if(maxY) pos.y = this.runner.camera.maxY * scale - rh2;
     }
     return pos;
