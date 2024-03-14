@@ -2577,6 +2577,7 @@ function Runner(renderer, app) {
     maxX: 999999,
     minY: -999999,
     maxY: 999999,
+    fit: true,
     bounds: new Bounds(),
     scroll: new vec22(0, 0)
   }, app.camera || {});
@@ -2810,12 +2811,12 @@ Runner.prototype.dirtyBoundsToFullscreen = function() {
     this.canvasToWorld(new vec22(this.renderer.width, 0))
   );
 };
-Runner.prototype.scaleCameraToBounds = function(bounds, max = false, extend_minmax = false) {
+Runner.prototype.scaleCameraToBounds = function(bounds, extend_minmax = false) {
   var scale = new vec22(
     this.renderer.width / meter2pixel(1) / (bounds.maxs.x - bounds.mins.x),
     this.renderer.height / meter2pixel(1) / (bounds.maxs.y - bounds.mins.y)
   );
-  var scale = Math[max ? "max" : "min"](scale.x, scale.y);
+  var scale = Math[this.camera.fit ? "max" : "min"](scale.x, scale.y);
   if (extend_minmax) {
     this.camera.scale = scale;
     if (scale > this.camera.maxScale)
@@ -2826,8 +2827,8 @@ Runner.prototype.scaleCameraToBounds = function(bounds, max = false, extend_minm
   this.camera.scale = Clamp(scale, this.camera.minScale, this.camera.maxScale);
   this.redraw();
 };
-Runner.prototype.scaleCameraToWorld = function(max = false, extend_minmax = false) {
-  this.scaleCameraToBounds(this.world.getBounds(), max, extend_minmax);
+Runner.prototype.scaleCameraToWorld = function(extend_minmax = false) {
+  this.scaleCameraToBounds(this.world.getBounds(), extend_minmax);
 };
 Runner.prototype.on = function(event, callback) {
   if (!events.includes(event))
@@ -3080,15 +3081,24 @@ Interaction.prototype.getTouchPosition = function(event) {
   var rect = this.runner.renderer.canvas.getBoundingClientRect();
   return new vec22(event.clientX - rect.left, event.clientY - rect.top);
 };
+Interaction.prototype.fitCameraToBounds = function(dx, dy) {
+};
 Interaction.prototype.scrollView = function(dx, dy) {
   var x = this.runner.camera.origin.x + dx;
   var y = this.runner.camera.origin.y + dy;
+  var rw2 = this.runner.renderer.width * 0.5;
+  var rh2 = this.runner.renderer.height * 0.5;
   var scale = this.runner.camera.scale * meter2pixel(1);
   var wx = x / scale;
   var wy = y / scale;
-  var rx = this.runner.renderer.width * 0.5 / scale;
-  var ry = this.runner.renderer.height * 0.5 / scale;
-  console.log(wx.toFixed(2), rx.toFixed(2), (-rx - wx).toFixed(2), this.runner.camera.minX);
+  if ((wx - this.runner.camera.minX) * scale < rw2)
+    x = rw2 + this.runner.camera.minX * scale;
+  if ((this.runner.camera.maxX - wx) * scale < rw2)
+    x = this.runner.camera.maxX * scale - rw2;
+  if ((wy - this.runner.camera.minY) * scale < rh2)
+    y = rh2 + this.runner.camera.minY * scale;
+  if ((this.runner.camera.maxY - wy) * scale < rh2)
+    y = this.runner.camera.maxY * scale - rh2;
   this.runner.camera.origin.x = x;
   this.runner.camera.origin.y = y;
   this.runner.dirtyBoundsToFullscreen();

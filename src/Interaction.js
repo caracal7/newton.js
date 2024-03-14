@@ -277,23 +277,29 @@ Interaction.prototype.getTouchPosition = function(event) {
 	return new vec2(event.clientX - rect.left, event.clientY - rect.top);
 }
 
+Interaction.prototype.fitCameraToBounds = function(dx, dy) {
+
+}
+
 Interaction.prototype.scrollView = function(dx, dy) {
     var x = this.runner.camera.origin.x + dx;
     var y = this.runner.camera.origin.y + dy;
 
+    var rw2  = this.runner.renderer.width * 0.5;
+    var rh2  = this.runner.renderer.height * 0.5;
 
     var scale = this.runner.camera.scale * meter2pixel(1);
     var wx  = x / scale;
     var wy  = y / scale;
-    var rx  = this.runner.renderer.width * 0.5 / scale;
-    var ry  = this.runner.renderer.height * 0.5 / scale;
 
-    console.log(wx.toFixed(2), rx.toFixed(2), (-rx -wx).toFixed(2), this.runner.camera.minX)
-
-//    if(-rx-wx < this.runner.camera.minX) x = this.runner.camera.minX * scale;
-//    if(wx > this.runner.camera.maxX) x = this.runner.camera.maxX * scale;
-//    if(wy < this.runner.camera.minY) y = this.runner.camera.minY * scale;
-//    if(wy > this.runner.camera.maxY) y = this.runner.camera.maxY * scale;
+//    if(this.runner.camera.fit) {
+        if((wx - this.runner.camera.minX) * scale < rw2) x = rw2 + this.runner.camera.minX * scale;
+        if((this.runner.camera.maxX - wx) * scale < rw2) x = this.runner.camera.maxX * scale - rw2;
+        if((wy - this.runner.camera.minY) * scale < rh2) y = rh2 + this.runner.camera.minY * scale;
+        if((this.runner.camera.maxY - wy) * scale < rh2) y = this.runner.camera.maxY * scale - rh2;
+/*
+    } else {
+    }*/
 
     this.runner.camera.origin.x = x;
     this.runner.camera.origin.y = y;

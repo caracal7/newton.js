@@ -57,6 +57,7 @@ function Runner(renderer, app) {
         maxX: 999999,
         minY: -999999,
         maxY: 999999,
+        fit: true,
         bounds: new Bounds,
         scroll: new vec2(0, 0)
     }, app.camera || {});
@@ -338,12 +339,12 @@ Runner.prototype.dirtyBoundsToFullscreen = function() {
     );
 }
 
-Runner.prototype.scaleCameraToBounds  = function(bounds, max = false, extend_minmax = false) {
+Runner.prototype.scaleCameraToBounds  = function(bounds, extend_minmax = false) {
     var scale = new vec2(
         this.renderer.width  / meter2pixel(1) / (bounds.maxs.x - bounds.mins.x),
         this.renderer.height / meter2pixel(1) / (bounds.maxs.y - bounds.mins.y)
     );
-    var scale = Math[max ? 'max' : 'min'](scale.x, scale.y);
+    var scale = Math[this.camera.fit ? 'max' : 'min'](scale.x, scale.y);
     if(extend_minmax) {
          this.camera.scale = scale;
          if(scale > this.camera.maxScale) this.camera.maxScale = scale;
@@ -352,8 +353,8 @@ Runner.prototype.scaleCameraToBounds  = function(bounds, max = false, extend_min
     this.redraw();
 }
 
-Runner.prototype.scaleCameraToWorld  = function(max = false, extend_minmax = false) {
-    this.scaleCameraToBounds(this.world.getBounds(), max, extend_minmax)
+Runner.prototype.scaleCameraToWorld  = function(extend_minmax = false) {
+    this.scaleCameraToBounds(this.world.getBounds(), extend_minmax)
 }
 
 Runner.prototype.on = function(event, callback) {
