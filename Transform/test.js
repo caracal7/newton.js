@@ -39,9 +39,6 @@ function rotateRig() {
     var r = 0,
         htmlCanvas = document.querySelector("#rotate2d"),
         ctx = htmlCanvas.getContext('2d'),
-        matScale = new Matrix2d().identity(),
-        matTranslate = new Matrix2d().identity(),
-        mat = new Matrix2d().identity(),
         shape = [
             [-64, -64],
             [64, -64],
@@ -49,6 +46,9 @@ function rotateRig() {
             [-64, 64],
             [-64, -64]
         ];
+    var mat = new Matrix2d().identity(),
+        matRotate = new Matrix2d().identity(),
+        matTranslate = new Matrix2d().identity();
 
     (function animate() {
         requestAnimationFrame(animate);
@@ -56,8 +56,8 @@ function rotateRig() {
         r += 1;
         r %= 360;
         matTranslate.translate(160, 100);
-        matScale.rotate(r, r);
-        mat = mat.multiply(matScale, matTranslate);
+        matRotate.rotate(r, r);
+        mat = mat.multiply(matRotate, matTranslate);
         drawShape(ctx, shape, mat);
     }());
 }

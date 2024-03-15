@@ -25,6 +25,8 @@ import { Bounds, pixel2meter, meter2pixel, vec2, deg2rad } from './utils/math.js
 
 import { CanvasRenderer } from "./renderers/CanvasRenderer.js";
 
+import { animate, animateBatch, easings } from "./utils/animate.js";
+
 export {
     Interaction,
     Runner,
@@ -57,7 +59,11 @@ export {
     vec2,
     deg2rad,
 
-    CanvasRenderer
+    CanvasRenderer,
+
+    animate,
+    animateBatch,
+    easings
 }
 
 export default {
@@ -92,5 +98,9 @@ export default {
     vec2,
     deg2rad,
 
-    CanvasRenderer
+    CanvasRenderer,
+
+    animate,
+    animateBatch,
+    easings
 }

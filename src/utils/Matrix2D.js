@@ -1,17 +1,7 @@
 
 
 function Matrix2D() {
-    this.m = [];
-    this.m[0] = [];
-    this.m[1] = [];
-    this.m[2] = [];
-};
-
-Matrix2D.prototype.log = function() {
-    var i;
-    for (i = 0; i < 3; i += 1) {
-        console.log("[" + this.m[i][0] + "," + this.m[i][1] + "," + this.m[i][2] + "]");
-    }
+    this.m = [[1,0,0],[0,1,0],[0,0,1]]; // identity
 };
 
 Matrix2D.prototype.identity = function() {
@@ -62,10 +52,12 @@ Matrix2D.prototype.scale = function(x, y) {
     return this;
 };
 
-Matrix2D.prototype.rotate = function(deg) {
-    if (deg === 0) return this.identity();
+const PI180 = Math.PI / 180;
 
-    var rad = deg * (Math.PI / 180), c = Math.cos(rad), s = Math.sin(rad);
+Matrix2D.prototype.rotate = function(deg) {
+    if(deg === 0) return this.identity();
+
+    var rad = deg * PI180, c = Math.cos(rad), s = Math.sin(rad);
 
     this.m[0][0] = c;
     this.m[0][1] = s;
@@ -83,13 +75,12 @@ Matrix2D.prototype.rotate = function(deg) {
 };
 
 Matrix2D.prototype.multiply = function(m1, m2) {
-    var x, y, z, sum, d = new Matrix2D();
-    for (x = 0; x < 3; x++) {
-        for (y = 0; y < 3; y += 1) {
+    var sum, d = new Matrix2D();
+    for (var x = 0; x < 3; x++) {
+        for (var y = 0; y < 3; y += 1) {
             sum = 0;
-            for (z = 0; z < 3; z += 1) {
+            for (var z = 0; z < 3; z += 1)
                 sum += m1.m[x][z] * m2.m[z][y];
-            }
             d.m[x][y] = sum;
         }
     }
