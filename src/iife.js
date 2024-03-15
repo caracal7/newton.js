@@ -1,3 +1,2 @@
-import * as Newton from './index.js';
-
+import Newton from './index.js';
 window.Newton = Newton;
