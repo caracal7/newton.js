@@ -48,7 +48,7 @@ function Runner(renderer, app) {
     	jointAnchorColor: "#11cf00",
     }, app.settings || {});
 
-    this.camera = Object.assign({
+    const camera = this.camera = Object.assign({
         origin: new vec2(0, 0),
         scale: 1,
         minScale: 0.1,
@@ -59,9 +59,15 @@ function Runner(renderer, app) {
         maxY: Infinity,
         fit: true,
         bounds: new Bounds,
-        scroll: new vec2(0, 0)
+        scroll: new vec2(0, 0),
+        worldOrigin: {}
     }, app.camera || {});
 
+    Object.defineProperty(this.camera.worldOrigin, 'x', { get() { return camera.origin.x / camera.scale / meter2pixel(1) } });
+    Object.defineProperty(this.camera.worldOrigin, 'y', { get() { return camera.origin.y / camera.scale / meter2pixel(1) } });
+
+
+    console.log(this.camera)
     this.dirtyBounds = new Bounds; // dirty bounds in world space
 
 

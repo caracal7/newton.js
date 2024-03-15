@@ -2568,7 +2568,7 @@ function Runner(renderer, app) {
     backgroundColor: "rgb(95, 105, 118)",
     jointAnchorColor: "#11cf00"
   }, app.settings || {});
-  this.camera = Object.assign({
+  const camera = this.camera = Object.assign({
     origin: new vec22(0, 0),
     scale: 1,
     minScale: 0.1,
@@ -2579,8 +2579,16 @@ function Runner(renderer, app) {
     maxY: Infinity,
     fit: true,
     bounds: new Bounds(),
-    scroll: new vec22(0, 0)
+    scroll: new vec22(0, 0),
+    worldOrigin: {}
   }, app.camera || {});
+  Object.defineProperty(this.camera.worldOrigin, "x", { get() {
+    return camera.origin.x / camera.scale / meter2pixel(1);
+  } });
+  Object.defineProperty(this.camera.worldOrigin, "y", { get() {
+    return camera.origin.y / camera.scale / meter2pixel(1);
+  } });
+  console.log(this.camera);
   this.dirtyBounds = new Bounds();
   collision.init();
   this.world = new World();
@@ -4316,14 +4324,14 @@ function animateBatch(callback, ease, duration = 1e3, batch) {
   var start = performance.now();
   var end = start + duration;
   var id;
-  var result = new Array(batch[0].length);
+  var interpolated = new Array(batch[0].length);
   function frame(now) {
     var delta = now - start;
     if (delta >= duration)
       return cancelAnimationFrame(id);
     var easing = ease(delta / duration);
-    batch.forEach((value, index) => result[index] = value[0] + (value[1] - value[0]) * easing);
-    callback(...result);
+    batch.forEach((value, index) => interpolated[index] = value[0] + (value[1] - value[0]) * easing);
+    callback(...interpolated);
     id = requestAnimationFrame(frame);
   }
   return id = requestAnimationFrame(frame);
