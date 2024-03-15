@@ -259,7 +259,7 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
 			var w = Math.min(Math.ceil(maxs.x), this.renderer.width) - x;
 			var h = Math.min(Math.ceil(mins.y), this.renderer.height) - y;
 
-			if (w > 0 && h > 0)  this.renderer.copyBackground(x, y, w, h, x, y, w, h);
+			if (w > 0 && h > 0) this.renderer.copyBackground(x, y, w, h, x, y, w, h);
 		}
 	}
 	else this.renderer.copyBackground(0, 0);

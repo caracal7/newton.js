@@ -553,8 +553,8 @@ Transform.prototype.untransform = function(v) {
   return new vec22(px * this.c + py * this.s, -px * this.s + py * this.c);
 };
 var Bounds = function(mins2, maxs2) {
-  this.mins = mins2 ? new vec22(mins2.x, mins2.y) : new vec22(999999, 999999);
-  this.maxs = maxs2 ? new vec22(maxs2.x, maxs2.y) : new vec22(-999999, -999999);
+  this.mins = mins2 ? new vec22(mins2.x, mins2.y) : new vec22(Infinity, Infinity);
+  this.maxs = maxs2 ? new vec22(maxs2.x, maxs2.y) : new vec22(-Infinity, -Infinity);
 };
 Bounds.prototype.toString = function() {
   return ["mins:", this.mins.toString(), "maxs:", this.maxs.toString()].join(" ");
@@ -569,11 +569,13 @@ Bounds.prototype.copy = function(b) {
   return this;
 };
 Bounds.prototype.clear = function() {
-  this.mins.set(999999, 999999);
-  this.maxs.set(-999999, -999999);
+  this.mins.set(Infinity, Infinity);
+  this.maxs.set(-Infinity, -Infinity);
   return this;
 };
 Bounds.prototype.isEmpty = function() {
+  if (this.mins.x === -Infinity || this.maxs.x === Infinity || this.mins.y === -Infinity || this.maxs.y === Infinity)
+    return true;
   if (this.mins.x > this.maxs.x || this.mins.y > this.maxs.y)
     return true;
 };
