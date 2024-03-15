@@ -2588,7 +2588,6 @@ function Runner(renderer, app) {
   Object.defineProperty(this.camera.worldOrigin, "y", { get() {
     return camera.origin.y / camera.scale / meter2pixel(1);
   } });
-  console.log(this.camera);
   this.dirtyBounds = new Bounds();
   collision.init();
   this.world = new World();
@@ -2819,13 +2818,6 @@ Runner.prototype.dirtyBoundsToFullscreen = function() {
     this.canvasToWorld(new vec22(this.renderer.width, 0))
   );
 };
-Runner.prototype.moveCameraTo = function(x, y) {
-  this.camera.origin = this.validateCameraBounds(
-    x * this.camera.scale * meter2pixel(1),
-    y * this.camera.scale * meter2pixel(1)
-  );
-  this.redraw();
-};
 Runner.prototype.fitCameraToBounds = function(bounds, max = false) {
   var scale = new vec22(
     this.renderer.width / meter2pixel(1) / (bounds.maxs.x - bounds.mins.x),
@@ -2866,15 +2858,14 @@ Runner.prototype.validateCameraBounds = function(x, y) {
   }
   return pos;
 };
-Runner.prototype.restrictCameraToWorld = function(max = false, scaleFactor = 4) {
-  var world = this.world.getBounds();
-  this.camera.minX = world.mins.x;
-  this.camera.maxX = world.maxs.x;
-  this.camera.minY = world.mins.y;
-  this.camera.maxY = world.maxs.y;
+Runner.prototype.restrictCameraToBounds = function(bounds, max = false, scaleFactor = 4) {
+  this.camera.minX = bounds.mins.x;
+  this.camera.maxX = bounds.maxs.x;
+  this.camera.minY = bounds.mins.y;
+  this.camera.maxY = bounds.maxs.y;
   var scale_v = new vec22(
-    this.renderer.width / meter2pixel(1) / (world.maxs.x - world.mins.x),
-    this.renderer.height / meter2pixel(1) / (world.maxs.y - world.mins.y)
+    this.renderer.width / meter2pixel(1) / (bounds.maxs.x - bounds.mins.x),
+    this.renderer.height / meter2pixel(1) / (bounds.maxs.y - bounds.mins.y)
   );
   this.camera.minScale = Math[max ? "max" : "min"](scale_v.x, scale_v.y);
   this.camera.maxScale = this.camera.minScale * scaleFactor;
@@ -2885,12 +2876,22 @@ Runner.prototype.restrictCameraToWorld = function(max = false, scaleFactor = 4) 
   );
   this.redraw();
 };
+Runner.prototype.restrictCameraToWorld = function(max = false, scaleFactor = 4) {
+  this.restrictCameraToBounds(this.world.getBounds(), max, scaleFactor);
+};
 Runner.prototype.resetCameraRestriction = function() {
   this.camera.minX = -Infinity;
   this.camera.maxX = Infinity;
   this.camera.minY = -Infinity;
   this.camera.minScale = 0.1;
   this.camera.maxScale = 10;
+  this.redraw();
+};
+Runner.prototype.moveCameraTo = function(x, y) {
+  this.camera.origin = this.validateCameraBounds(
+    x * this.camera.scale * meter2pixel(1),
+    y * this.camera.scale * meter2pixel(1)
+  );
   this.redraw();
 };
 Runner.prototype.on = function(event, callback) {

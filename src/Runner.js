@@ -66,11 +66,7 @@ function Runner(renderer, app) {
     Object.defineProperty(this.camera.worldOrigin, 'x', { get() { return camera.origin.x / camera.scale / meter2pixel(1) } });
     Object.defineProperty(this.camera.worldOrigin, 'y', { get() { return camera.origin.y / camera.scale / meter2pixel(1) } });
 
-
-    console.log(this.camera)
     this.dirtyBounds = new Bounds; // dirty bounds in world space
-
-
 
     collision.init();
     this.world = new World();
@@ -419,7 +415,7 @@ Runner.prototype.resetCameraRestriction = function() {
 
 Runner.prototype.moveCameraTo = function(x, y) {
     this.camera.origin = this.validateCameraBounds(
-        x, * this.camera.scale * meter2pixel(1),
+        x * this.camera.scale * meter2pixel(1),
         y * this.camera.scale * meter2pixel(1)
     );
     this.redraw();
