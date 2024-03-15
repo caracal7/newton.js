@@ -52,7 +52,7 @@ function Runner(renderer, app) {
         origin: new vec2(0, 0),
         scale: 1,
         minScale: 0.1,
-        maxScale: 8.0,
+        maxScale: 10,
         minX: -Infinity,
         maxX: Infinity,
         minY: -Infinity,
@@ -345,13 +345,7 @@ Runner.prototype.dirtyBoundsToFullscreen = function() {
     );
 }
 
-Runner.prototype.moveCameraTo  = function(x, y) {
-    this.camera.origin.x = x * this.camera.scale * meter2pixel(1);
-    this.camera.origin.y = y * this.camera.scale * meter2pixel(1);
-    this.redraw();
-}
-
-Runner.prototype.fitCameraToBounds  = function(bounds, max = false) {
+Runner.prototype.fitCameraToBounds = function(bounds, max = false) {
     var scale = new vec2(
         this.renderer.width  / meter2pixel(1) / (bounds.maxs.x - bounds.mins.x),
         this.renderer.height / meter2pixel(1) / (bounds.maxs.y - bounds.mins.y)
@@ -360,19 +354,76 @@ Runner.prototype.fitCameraToBounds  = function(bounds, max = false) {
     this.moveCameraTo((bounds.maxs.x + bounds.mins.x) * 0.5, (bounds.maxs.y + bounds.mins.y) * 0.5);
 }
 
-Runner.prototype.fitCameraToWorld  = function(max = false) {
+Runner.prototype.fitCameraToWorld = function(max = false) {
     this.fitCameraToBounds(this.world.getBounds(), max);
 }
 
-/*
-    if(extend_minmax) {
-         this.camera.scale = scale;
-         if(scale > this.camera.maxScale) this.camera.maxScale = scale;
-         if(scale < this.camera.minScale) this.camera.minScale = scale;
-    }
-    this.camera.scale = Clamp(scale, this.camera.minScale, this.camera.maxScale);
-*/
+Runner.prototype.validateCameraBounds = function(x, y) {
+    var pos = new vec2(x, y);
+    var rw2  = this.renderer.width * 0.5;
+    var rh2  = this.renderer.height * 0.5;
 
+    var scale = this.camera.scale * meter2pixel(1);
+    var wx  = pos.x / scale;
+    var wy  = pos.y / scale;
+
+    var minX = (wx - this.camera.minX) * scale < rw2;
+    var maxX = (this.camera.maxX - wx) * scale < rw2;
+    var minY = (wy - this.camera.minY) * scale < rh2;
+    var maxY = (this.camera.maxY - wy) * scale < rh2;
+
+    if(minX && maxX) pos.x = (this.camera.maxX + this.camera.minX) * 0.5 * scale;
+    else {
+        if(minX) pos.x = this.camera.minX * scale + rw2;
+        if(maxX) pos.x = this.camera.maxX * scale - rw2;
+    }
+    if(minY && maxY) pos.y = (this.camera.maxY + this.camera.minY) * 0.5 * scale;
+    else {
+        if(minY) pos.y = this.camera.minY * scale + rh2;
+        if(maxY) pos.y = this.camera.maxY * scale - rh2;
+    }
+    return pos;
+}
+
+Runner.prototype.restrictCameraToBounds = function(bounds, max = false, scaleFactor = 4) {
+    this.camera.minX = bounds.mins.x;
+    this.camera.maxX = bounds.maxs.x;
+    this.camera.minY = bounds.mins.y;
+    this.camera.maxY = bounds.maxs.y;
+    var scale_v = new vec2(
+        this.renderer.width  / meter2pixel(1) / (bounds.maxs.x - bounds.mins.x),
+        this.renderer.height / meter2pixel(1) / (bounds.maxs.y - bounds.mins.y)
+    );
+    this.camera.minScale = Math[max ? 'max' : 'min'](scale_v.x, scale_v.y);
+    this.camera.maxScale = this.camera.minScale * scaleFactor;
+    this.camera.scale    = Clamp(this.camera.scale, this.camera.minScale, this.camera.maxScale);
+    this.camera.origin = this.validateCameraBounds(
+        this.camera.origin.x,
+        this.camera.origin.y
+    );
+    this.redraw();
+}
+
+Runner.prototype.restrictCameraToWorld = function(max = false, scaleFactor = 4) {
+    this.restrictCameraToBounds(this.world.getBounds(), max, scaleFactor);
+}
+
+Runner.prototype.resetCameraRestriction = function() {
+    this.camera.minX = -Infinity;
+    this.camera.maxX =  Infinity;
+    this.camera.minY = -Infinity;
+    this.camera.minScale = 0.1;
+    this.camera.maxScale = 10;
+    this.redraw();
+}
+
+Runner.prototype.moveCameraTo = function(x, y) {
+    this.camera.origin = this.validateCameraBounds(
+        x, * this.camera.scale * meter2pixel(1),
+        y * this.camera.scale * meter2pixel(1)
+    );
+    this.redraw();
+}
 
 Runner.prototype.on = function(event, callback) {
     if(!events.includes(event)) throw `Unknown event "${event}"`;

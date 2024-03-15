@@ -2572,7 +2572,7 @@ function Runner(renderer, app) {
     origin: new vec22(0, 0),
     scale: 1,
     minScale: 0.1,
-    maxScale: 8,
+    maxScale: 10,
     minX: -Infinity,
     maxX: Infinity,
     minY: -Infinity,
@@ -2820,8 +2820,10 @@ Runner.prototype.dirtyBoundsToFullscreen = function() {
   );
 };
 Runner.prototype.moveCameraTo = function(x, y) {
-  this.camera.origin.x = x * this.camera.scale * meter2pixel(1);
-  this.camera.origin.y = y * this.camera.scale * meter2pixel(1);
+  this.camera.origin = this.validateCameraBounds(
+    x * this.camera.scale * meter2pixel(1),
+    y * this.camera.scale * meter2pixel(1)
+  );
   this.redraw();
 };
 Runner.prototype.fitCameraToBounds = function(bounds, max = false) {
@@ -2834,6 +2836,62 @@ Runner.prototype.fitCameraToBounds = function(bounds, max = false) {
 };
 Runner.prototype.fitCameraToWorld = function(max = false) {
   this.fitCameraToBounds(this.world.getBounds(), max);
+};
+Runner.prototype.validateCameraBounds = function(x, y) {
+  var pos = new vec22(x, y);
+  var rw2 = this.renderer.width * 0.5;
+  var rh2 = this.renderer.height * 0.5;
+  var scale = this.camera.scale * meter2pixel(1);
+  var wx = pos.x / scale;
+  var wy = pos.y / scale;
+  var minX = (wx - this.camera.minX) * scale < rw2;
+  var maxX = (this.camera.maxX - wx) * scale < rw2;
+  var minY = (wy - this.camera.minY) * scale < rh2;
+  var maxY = (this.camera.maxY - wy) * scale < rh2;
+  if (minX && maxX)
+    pos.x = (this.camera.maxX + this.camera.minX) * 0.5 * scale;
+  else {
+    if (minX)
+      pos.x = this.camera.minX * scale + rw2;
+    if (maxX)
+      pos.x = this.camera.maxX * scale - rw2;
+  }
+  if (minY && maxY)
+    pos.y = (this.camera.maxY + this.camera.minY) * 0.5 * scale;
+  else {
+    if (minY)
+      pos.y = this.camera.minY * scale + rh2;
+    if (maxY)
+      pos.y = this.camera.maxY * scale - rh2;
+  }
+  return pos;
+};
+Runner.prototype.restrictCameraToWorld = function(max = false, scaleFactor = 4) {
+  var world = this.world.getBounds();
+  this.camera.minX = world.mins.x;
+  this.camera.maxX = world.maxs.x;
+  this.camera.minY = world.mins.y;
+  this.camera.maxY = world.maxs.y;
+  var scale_v = new vec22(
+    this.renderer.width / meter2pixel(1) / (world.maxs.x - world.mins.x),
+    this.renderer.height / meter2pixel(1) / (world.maxs.y - world.mins.y)
+  );
+  this.camera.minScale = Math[max ? "max" : "min"](scale_v.x, scale_v.y);
+  this.camera.maxScale = this.camera.minScale * scaleFactor;
+  this.camera.scale = Clamp(this.camera.scale, this.camera.minScale, this.camera.maxScale);
+  this.camera.origin = this.validateCameraBounds(
+    this.camera.origin.x,
+    this.camera.origin.y
+  );
+  this.redraw();
+};
+Runner.prototype.resetCameraRestriction = function() {
+  this.camera.minX = -Infinity;
+  this.camera.maxX = Infinity;
+  this.camera.minY = -Infinity;
+  this.camera.minScale = 0.1;
+  this.camera.maxScale = 10;
+  this.redraw();
 };
 Runner.prototype.on = function(event, callback) {
   if (!events.includes(event))
@@ -3086,37 +3144,8 @@ Interaction.prototype.getTouchPosition = function(event) {
   var rect = this.runner.renderer.canvas.getBoundingClientRect();
   return new vec22(event.clientX - rect.left, event.clientY - rect.top);
 };
-Interaction.prototype.fitCameraToBounds = function(x, y) {
-  var pos = new vec22(x, y);
-  var rw2 = this.runner.renderer.width * 0.5;
-  var rh2 = this.runner.renderer.height * 0.5;
-  var scale = this.runner.camera.scale * meter2pixel(1);
-  var wx = pos.x / scale;
-  var wy = pos.y / scale;
-  var minX = (wx - this.runner.camera.minX) * scale < rw2;
-  var maxX = (this.runner.camera.maxX - wx) * scale < rw2;
-  var minY = (wy - this.runner.camera.minY) * scale < rh2;
-  var maxY = (this.runner.camera.maxY - wy) * scale < rh2;
-  if (minX && maxX)
-    pos.x = (this.runner.camera.maxX + this.runner.camera.minX) * 0.5 * scale;
-  else {
-    if (minX)
-      pos.x = this.runner.camera.minX * scale + rw2;
-    if (maxX)
-      pos.x = this.runner.camera.maxX * scale - rw2;
-  }
-  if (minY && maxY)
-    pos.y = (this.runner.camera.maxY + this.runner.camera.minY) * 0.5 * scale;
-  else {
-    if (minY)
-      pos.y = this.runner.camera.minY * scale + rh2;
-    if (maxY)
-      pos.y = this.runner.camera.maxY * scale - rh2;
-  }
-  return pos;
-};
 Interaction.prototype.scrollView = function(dx, dy) {
-  this.runner.camera.origin = this.fitCameraToBounds(
+  this.runner.camera.origin = this.runner.validateCameraBounds(
     this.runner.camera.origin.x + dx,
     this.runner.camera.origin.y + dy
   );
