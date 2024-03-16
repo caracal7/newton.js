@@ -707,8 +707,8 @@ Transform.prototype.untransform = function(v) {
 //-----------------------------------
 
 const Bounds = function(mins, maxs) {
-	this.mins = mins ? new vec2(mins.x, mins.y) : new vec2(999999, 999999);
-	this.maxs = maxs ? new vec2(maxs.x, maxs.y) : new vec2(-999999, -999999);
+	this.mins = mins ? new vec2(mins.x, mins.y) : new vec2(Infinity, Infinity);
+	this.maxs = maxs ? new vec2(maxs.x, maxs.y) : new vec2(-Infinity, -Infinity);
 }
 
 Bounds.prototype.toString = function() {
@@ -727,12 +727,14 @@ Bounds.prototype.copy = function(b) {
 }
 
 Bounds.prototype.clear = function() {
-	this.mins.set(999999, 999999);
-	this.maxs.set(-999999, -999999);
+	this.mins.set(Infinity, Infinity);
+	this.maxs.set(-Infinity, -Infinity);
 	return this;
 }
 
 Bounds.prototype.isEmpty = function() {
+	if (this.mins.x === -Infinity || this.maxs.x === Infinity || this.mins.y === -Infinity || this.maxs.y === Infinity)
+		return true;
 	if (this.mins.x > this.maxs.x || this.mins.y > this.maxs.y)
 		return true;
 }

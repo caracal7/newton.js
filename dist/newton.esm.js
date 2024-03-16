@@ -553,8 +553,8 @@ Transform.prototype.untransform = function(v) {
   return new vec22(px * this.c + py * this.s, -px * this.s + py * this.c);
 };
 var Bounds = function(mins2, maxs2) {
-  this.mins = mins2 ? new vec22(mins2.x, mins2.y) : new vec22(999999, 999999);
-  this.maxs = maxs2 ? new vec22(maxs2.x, maxs2.y) : new vec22(-999999, -999999);
+  this.mins = mins2 ? new vec22(mins2.x, mins2.y) : new vec22(Infinity, Infinity);
+  this.maxs = maxs2 ? new vec22(maxs2.x, maxs2.y) : new vec22(-Infinity, -Infinity);
 };
 Bounds.prototype.toString = function() {
   return ["mins:", this.mins.toString(), "maxs:", this.maxs.toString()].join(" ");
@@ -569,11 +569,13 @@ Bounds.prototype.copy = function(b) {
   return this;
 };
 Bounds.prototype.clear = function() {
-  this.mins.set(999999, 999999);
-  this.maxs.set(-999999, -999999);
+  this.mins.set(Infinity, Infinity);
+  this.maxs.set(-Infinity, -Infinity);
   return this;
 };
 Bounds.prototype.isEmpty = function() {
+  if (this.mins.x === -Infinity || this.maxs.x === Infinity || this.mins.y === -Infinity || this.maxs.y === Infinity)
+    return true;
   if (this.mins.x > this.maxs.x || this.mins.y > this.maxs.y)
     return true;
 };
@@ -2568,19 +2570,26 @@ function Runner(renderer, app) {
     backgroundColor: "rgb(95, 105, 118)",
     jointAnchorColor: "#11cf00"
   }, app.settings || {});
-  this.camera = Object.assign({
+  const camera = this.camera = Object.assign({
     origin: new vec22(0, 0),
     scale: 1,
     minScale: 0.1,
-    maxScale: 8,
+    maxScale: 10,
     minX: -Infinity,
     maxX: Infinity,
     minY: -Infinity,
     maxY: Infinity,
     fit: true,
     bounds: new Bounds(),
-    scroll: new vec22(0, 0)
+    scroll: new vec22(0, 0),
+    worldOrigin: {}
   }, app.camera || {});
+  Object.defineProperty(this.camera.worldOrigin, "x", { get() {
+    return camera.origin.x / camera.scale / meter2pixel(1);
+  } });
+  Object.defineProperty(this.camera.worldOrigin, "y", { get() {
+    return camera.origin.y / camera.scale / meter2pixel(1);
+  } });
   this.dirtyBounds = new Bounds();
   collision.init();
   this.world = new World();
@@ -2811,11 +2820,6 @@ Runner.prototype.dirtyBoundsToFullscreen = function() {
     this.canvasToWorld(new vec22(this.renderer.width, 0))
   );
 };
-Runner.prototype.moveCameraTo = function(x, y) {
-  this.camera.origin.x = x * this.camera.scale * meter2pixel(1);
-  this.camera.origin.y = y * this.camera.scale * meter2pixel(1);
-  this.redraw();
-};
 Runner.prototype.fitCameraToBounds = function(bounds, max = false) {
   var scale = new vec22(
     this.renderer.width / meter2pixel(1) / (bounds.maxs.x - bounds.mins.x),
@@ -2826,6 +2830,71 @@ Runner.prototype.fitCameraToBounds = function(bounds, max = false) {
 };
 Runner.prototype.fitCameraToWorld = function(max = false) {
   this.fitCameraToBounds(this.world.getBounds(), max);
+};
+Runner.prototype.validateCameraBounds = function(x, y) {
+  var pos = new vec22(x, y);
+  var rw2 = this.renderer.width * 0.5;
+  var rh2 = this.renderer.height * 0.5;
+  var scale = this.camera.scale * meter2pixel(1);
+  var wx = pos.x / scale;
+  var wy = pos.y / scale;
+  var minX = (wx - this.camera.minX) * scale < rw2;
+  var maxX = (this.camera.maxX - wx) * scale < rw2;
+  var minY = (wy - this.camera.minY) * scale < rh2;
+  var maxY = (this.camera.maxY - wy) * scale < rh2;
+  if (minX && maxX)
+    pos.x = (this.camera.maxX + this.camera.minX) * 0.5 * scale;
+  else {
+    if (minX)
+      pos.x = this.camera.minX * scale + rw2;
+    if (maxX)
+      pos.x = this.camera.maxX * scale - rw2;
+  }
+  if (minY && maxY)
+    pos.y = (this.camera.maxY + this.camera.minY) * 0.5 * scale;
+  else {
+    if (minY)
+      pos.y = this.camera.minY * scale + rh2;
+    if (maxY)
+      pos.y = this.camera.maxY * scale - rh2;
+  }
+  return pos;
+};
+Runner.prototype.restrictCameraToBounds = function(bounds, max = false, scaleFactor = 4) {
+  this.camera.minX = bounds.mins.x;
+  this.camera.maxX = bounds.maxs.x;
+  this.camera.minY = bounds.mins.y;
+  this.camera.maxY = bounds.maxs.y;
+  var scale_v = new vec22(
+    this.renderer.width / meter2pixel(1) / (bounds.maxs.x - bounds.mins.x),
+    this.renderer.height / meter2pixel(1) / (bounds.maxs.y - bounds.mins.y)
+  );
+  this.camera.minScale = Math[max ? "max" : "min"](scale_v.x, scale_v.y);
+  this.camera.maxScale = this.camera.minScale * scaleFactor;
+  this.camera.scale = Clamp(this.camera.scale, this.camera.minScale, this.camera.maxScale);
+  this.camera.origin = this.validateCameraBounds(
+    this.camera.origin.x,
+    this.camera.origin.y
+  );
+  this.redraw();
+};
+Runner.prototype.restrictCameraToWorld = function(max = false, scaleFactor = 4) {
+  this.restrictCameraToBounds(this.world.getBounds(), max, scaleFactor);
+};
+Runner.prototype.resetCameraRestriction = function() {
+  this.camera.minX = -Infinity;
+  this.camera.maxX = Infinity;
+  this.camera.minY = -Infinity;
+  this.camera.minScale = 0.1;
+  this.camera.maxScale = 10;
+  this.redraw();
+};
+Runner.prototype.moveCameraTo = function(x, y) {
+  this.camera.origin = this.validateCameraBounds(
+    x * this.camera.scale * meter2pixel(1),
+    y * this.camera.scale * meter2pixel(1)
+  );
+  this.redraw();
 };
 Runner.prototype.on = function(event, callback) {
   if (!events.includes(event))
@@ -3078,37 +3147,8 @@ Interaction.prototype.getTouchPosition = function(event) {
   var rect = this.runner.renderer.canvas.getBoundingClientRect();
   return new vec22(event.clientX - rect.left, event.clientY - rect.top);
 };
-Interaction.prototype.fitCameraToBounds = function(x, y) {
-  var pos = new vec22(x, y);
-  var rw2 = this.runner.renderer.width * 0.5;
-  var rh2 = this.runner.renderer.height * 0.5;
-  var scale = this.runner.camera.scale * meter2pixel(1);
-  var wx = pos.x / scale;
-  var wy = pos.y / scale;
-  var minX = (wx - this.runner.camera.minX) * scale < rw2;
-  var maxX = (this.runner.camera.maxX - wx) * scale < rw2;
-  var minY = (wy - this.runner.camera.minY) * scale < rh2;
-  var maxY = (this.runner.camera.maxY - wy) * scale < rh2;
-  if (minX && maxX)
-    pos.x = (this.runner.camera.maxX + this.runner.camera.minX) * 0.5 * scale;
-  else {
-    if (minX)
-      pos.x = this.runner.camera.minX * scale + rw2;
-    if (maxX)
-      pos.x = this.runner.camera.maxX * scale - rw2;
-  }
-  if (minY && maxY)
-    pos.y = (this.runner.camera.maxY + this.runner.camera.minY) * 0.5 * scale;
-  else {
-    if (minY)
-      pos.y = this.runner.camera.minY * scale + rh2;
-    if (maxY)
-      pos.y = this.runner.camera.maxY * scale - rh2;
-  }
-  return pos;
-};
 Interaction.prototype.scrollView = function(dx, dy) {
-  this.runner.camera.origin = this.fitCameraToBounds(
+  this.runner.camera.origin = this.runner.validateCameraBounds(
     this.runner.camera.origin.x + dx,
     this.runner.camera.origin.y + dy
   );
@@ -4316,14 +4356,14 @@ function animateBatch(callback, ease, duration = 1e3, batch) {
   var start = performance.now();
   var end = start + duration;
   var id;
-  var result = new Array(batch[0].length);
+  var interpolated = new Array(batch[0].length);
   function frame(now) {
     var delta = now - start;
     if (delta >= duration)
       return cancelAnimationFrame(id);
     var easing = ease(delta / duration);
-    batch.forEach((value, index) => result[index] = value[0] + (value[1] - value[0]) * easing);
-    callback(...result);
+    batch.forEach((value, index) => interpolated[index] = value[0] + (value[1] - value[0]) * easing);
+    callback(...interpolated);
     id = requestAnimationFrame(frame);
   }
   return id = requestAnimationFrame(frame);

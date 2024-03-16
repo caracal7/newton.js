@@ -34,13 +34,13 @@ function animateBatch(callback, ease, duration = 1000, batch) {
     var start = performance.now();
     var end = start + duration;
     var id;
-    var result = new Array(batch[0].length);
+    var interpolated = new Array(batch[0].length);
     function frame(now) {
         var delta = now - start;
         if (delta >= duration) return cancelAnimationFrame(id);
         var easing = ease(delta / duration);
-        batch.forEach((value, index) => result[index] = value[0] + (value[1] - value[0]) * easing);
-        callback(...result);
+        batch.forEach((value, index) => interpolated[index] = value[0] + (value[1] - value[0]) * easing);
+        callback(...interpolated);
         id = requestAnimationFrame(frame);
     }
     return id = requestAnimationFrame(frame);
