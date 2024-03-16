@@ -10,18 +10,19 @@
 <@editor if(state.edit) runner=state.runner @play/>
 <canvas/>
 
-<!import Newton     from ../dist/newton.esm.js>
+<!import Newton         from ../dist/newton.esm.js>
 
-<!import Car        from examples/car.js>
-<!import Compound   from examples/compound.js>
-<!import Bounce     from examples/bounce.js>
-<!import Circles    from examples/circles.js>
-<!import Crank      from examples/crank.js>
-<!import Pyramid    from examples/pyramid.js>
-<!import RagDoll    from examples/ragdoll.js>
-<!import Rope       from examples/rope.js>
-<!import Web        from examples/web.js>
-<!import SeeSaw     from examples/seesaw.js>
+<!import Car            from examples/car.js>
+<!import Compound       from examples/compound.js>
+<!import Bounce         from examples/bounce.js>
+<!import Circles        from examples/circles.js>
+<!import Crank          from examples/crank.js>
+<!import Pyramid        from examples/pyramid.js>
+<!import RagDoll        from examples/ragdoll.js>
+<!import Rope           from examples/rope.js>
+<!import Web            from examples/web.js>
+<!import SeeSaw         from examples/seesaw.js>
+<!import NewtonsCradle  from examples/matter.newtonsCradle.js>
 
 <!tag @controls         controls>
 <!tag @editor           editor/editor>
@@ -61,12 +62,12 @@
     connected() {
         const { Runner, CanvasRenderer, Interaction } = Newton;
 
-        const firstApp      = Car(Newton);
+        const firstApp      = NewtonsCradle(Newton);
         const renderer      = new CanvasRenderer(Newton, this.$('canvas'));
         const runner        = new Runner(renderer, firstApp);
         const interaction   = new Interaction(runner);
 
-        this.state.demos = { Car, Compound, Bounce, Circles, Crank, Pyramid, RagDoll, Rope, Web, SeeSaw };
+        this.state.demos = { Car, Compound, Bounce, Circles, Crank, Pyramid, RagDoll, Rope, Web, SeeSaw, 'Matter - Newtons Cradle':NewtonsCradle };
         this.state.runner = runner;
         this.render();
     }
