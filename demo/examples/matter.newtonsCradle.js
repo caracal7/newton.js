@@ -1,9 +1,10 @@
 
 
 function newtonsCradle(Newton, world, staticBody, xx, yy, number, size, length, e = 1) {
+    var body;
     for (var i = 0; i < number; i++) {
         var separation = 1.9;
-		const body = new Newton.Body(Newton.Body.DYNAMIC, new Newton.vec2(
+		body = new Newton.Body(Newton.Body.DYNAMIC, new Newton.vec2(
 			xx + i * (size * separation),
 			yy - length
 		));
@@ -15,6 +16,7 @@ function newtonsCradle(Newton, world, staticBody, xx, yy, number, size, length, 
 		body.resetMassData();
 		world.addBody(body);
 
+
 		var joint = new Newton.RopeJoint(staticBody, body,
 			new Newton.vec2(xx + i * (size * separation), yy),
 			new Newton.vec2(xx + i * (size * separation), yy - length),
@@ -23,7 +25,9 @@ function newtonsCradle(Newton, world, staticBody, xx, yy, number, size, length, 
 		world.addJoint(joint);
 
     }
-    return newtonsCradle;
+    body.v.x = 3;
+
+    console.log(body);
 };
 
 
