@@ -2968,7 +2968,7 @@ function Interaction(runner, settings) {
         this.mouseBody.p.copy(p);
         this.mouseBody.syncTransform();
         this.mouseJoint = new MouseJoint(this.mouseBody, body, p);
-        this.mouseJoint.maxForce = body.m * 1e3;
+        this.mouseJoint.maxForce = body.m * 5e4;
         this.runner.world.addJoint(this.mouseJoint);
       }
       this.state.mousePositionOld.x = pos.x;
