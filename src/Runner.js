@@ -218,6 +218,14 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
 		}
 	}
 
+
+    for (var i = 0; i < this.world.bodyArr.length; i++) {
+        var body = this.world.bodyArr[i];
+        this.renderer.updateBody(body);
+    }
+
+
+
 	// Update whole background canvas if we needed
 	if (this.static_outdated) {
 		this.static_outdated = false;

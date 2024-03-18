@@ -335,7 +335,6 @@ function TwoRenderer(Newton, canvas) {
 	rect.noStroke();
 	this.stage.add(rect);
 
-
 	this.resize();
 };
 
@@ -345,27 +344,64 @@ TwoRenderer.prototype.resize = function() {
 	this.two.renderer.setSize(this.width, this.height);
 }
 
+
+
+
+TwoRenderer.prototype.createCircle = function(body_group, shape) {
+	const circle = this.two.makeCircle(0, 0, shape.r);
+	circle.fill = '#FF8000';
+	circle.stroke = 'orangered';
+	circle.linewidth = 0.1;
+	const line = this.two.makeLine(0, 0, 0, shape.r);
+	line.linewidth = 0.1;
+	line.stroke = "rgba(255, 0, 0, 0.5)";
+	body_group.add(circle, line);
+}
+
+TwoRenderer.prototype.createPolygon = function(body_group, shape) {
+
+	const poly = this.two.makePath(...shape.verts.reduce((a, v) => a.concat([v.x,v.y]), []));
+	poly.linewidth = 0.1;
+	//poly.translation = new Two.Vector(60, 60);
+	poly.stroke = "#cccccc";
+	poly.fill = "#ececec";
+
+	body_group.add(poly);
+
+
+}
+
+
 TwoRenderer.prototype.addBody = function(body) {
+	body.render_group = this.two.makeGroup();
+	body.render_group.position.set(body.p.x, body.p.y);
+	this.stage.add(body.render_group);
+
 	for (var k = 0; k < body.shapeArr.length; k++) {
 		var shape = body.shapeArr[k];
 		switch (shape.type) {
 			case this.Newton.Shape.TYPE_CIRCLE:
-				shape.render_entity = this.two.makeCircle(shape.tc.x * 100, shape.tc.y * 100, shape.r * 100);
-				// The object returned has many stylable properties:
-				shape.render_entity.fill = '#FF8000';
-				// And accepts all valid CSS color:
-				shape.render_entity.stroke = 'orangered';
-				shape.render_entity.linewidth = 5;
-				this.stage.add(shape.render_entity);
+				this.createCircle(body.render_group, shape);
 				break;
 			case this.Newton.Shape.TYPE_SEGMENT:
+				console.log('TYPE_SEGMENT');
 				break;
 			case this.Newton.Shape.TYPE_POLY:
-
+				console.log('TYPE_POLY');
+				this.createPolygon(body.render_group, shape);
 				break;
 		}
 	}
 	this.two.update();
+}
+
+TwoRenderer.prototype.removeBody = function(body) {
+	body.render_group.remove();
+}
+
+TwoRenderer.prototype.updateBody = function(body) {
+	body.render_group.position.set(body.p.x, body.p.y);
+	body.render_group.rotation = body.a;
 }
 
 
@@ -379,7 +415,8 @@ TwoRenderer.prototype.drawShape = function(shape, isStatic, lineWidth, outlineCo
 			drawSegment(isStatic ? this.bg.ctx : this.fg.ctx, shape.ta, shape.tb, shape.r, lineWidth, outlineColor, fillColor, this.Newton);
 			break;
 		case this.Newton.Shape.TYPE_POLY:
-			if (shape.convexity) drawPolygon(isStatic ? this.bg.ctx : this.fg.ctx, shape.tverts, lineWidth, outlineColor, fillColor);
+			if (shape.convexity)
+			     drawPolygon(isStatic ? this.bg.ctx : this.fg.ctx, shape.tverts, lineWidth, outlineColor, fillColor);
 			else drawPolygon(isStatic ? this.bg.ctx : this.fg.ctx, shape.tverts, lineWidth, outlineColor, fillColor);
 			break;
 	}

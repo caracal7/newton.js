@@ -53,11 +53,8 @@ World.prototype.clear = function() {
     Body.id_counter = 0;
     Joint.id_counter = 0;
 
-	for (var i = 0; i < this.bodyArr.length; i++) {
-		if (this.bodyArr[i]) {
-			this.removeBody(this.bodyArr[i]);
-		}
-	}
+	while (this.bodyArr.length)
+		this.removeBody(this.bodyArr[this.bodyArr.length-1]);
 
 	this.bodyArr = [];
 
@@ -182,7 +179,7 @@ World.prototype.addBody = function(body) {
 	this.bodyArr.push(body);
 
 	this.renderer.addBody(body);
-	
+
 	body.awake(true);
 	body.world = this;
 	body.cacheData();

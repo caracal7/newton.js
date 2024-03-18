@@ -264,7 +264,7 @@ function addZUI(renderer) {
     var distance = 0;
     var dragging = false;
 
-    zui.addLimits(0.06, 8);
+    zui.addLimits(0.06, 20);
 
     domElement.addEventListener('mousedown', mousedown, false);
     domElement.addEventListener('mousewheel', mousewheel, false);

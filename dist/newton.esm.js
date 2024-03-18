@@ -1917,11 +1917,8 @@ World.prototype.clear = function() {
   Shape.id_counter = 0;
   Body.id_counter = 0;
   Joint.id_counter = 0;
-  for (var i = 0; i < this.bodyArr.length; i++) {
-    if (this.bodyArr[i]) {
-      this.removeBody(this.bodyArr[i]);
-    }
-  }
+  while (this.bodyArr.length)
+    this.removeBody(this.bodyArr[this.bodyArr.length - 1]);
   this.bodyArr = [];
   this.jointArr = [];
   this.jointHash = {};
@@ -2718,6 +2715,10 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
       }
     }
   }
+  for (var i = 0; i < this.world.bodyArr.length; i++) {
+    var body = this.world.bodyArr[i];
+    this.renderer.updateBody(body);
+  }
   if (this.static_outdated) {
     this.static_outdated = false;
     this.renderer.beginStatic(this.camera, this.settings.backgroundColor);
@@ -2956,7 +2957,7 @@ function addZUI(renderer) {
   var touches = {};
   var distance2 = 0;
   var dragging = false;
-  zui.addLimits(0.06, 8);
+  zui.addLimits(0.06, 20);
   domElement.addEventListener("mousedown", mousedown, false);
   domElement.addEventListener("mousewheel", mousewheel, false);
   domElement.addEventListener("wheel", mousewheel, false);
@@ -8482,24 +8483,50 @@ TwoRenderer.prototype.resize = function() {
   this.height = this.canvas.offsetHeight;
   this.two.renderer.setSize(this.width, this.height);
 };
+TwoRenderer.prototype.createCircle = function(body_group, shape) {
+  const circle = this.two.makeCircle(0, 0, shape.r);
+  circle.fill = "#FF8000";
+  circle.stroke = "orangered";
+  circle.linewidth = 0.1;
+  const line = this.two.makeLine(0, 0, 0, shape.r);
+  line.linewidth = 0.1;
+  line.stroke = "rgba(255, 0, 0, 0.5)";
+  body_group.add(circle, line);
+};
+TwoRenderer.prototype.createPolygon = function(body_group, shape) {
+  const poly = this.two.makePath(...shape.verts.reduce((a, v) => a.concat([v.x, v.y]), []));
+  poly.linewidth = 0.1;
+  poly.stroke = "#cccccc";
+  poly.fill = "#ececec";
+  body_group.add(poly);
+};
 TwoRenderer.prototype.addBody = function(body) {
+  body.render_group = this.two.makeGroup();
+  body.render_group.position.set(body.p.x, body.p.y);
+  this.stage.add(body.render_group);
   for (var k = 0; k < body.shapeArr.length; k++) {
     var shape = body.shapeArr[k];
     switch (shape.type) {
       case this.Newton.Shape.TYPE_CIRCLE:
-        shape.render_entity = this.two.makeCircle(shape.tc.x * 100, shape.tc.y * 100, shape.r * 100);
-        shape.render_entity.fill = "#FF8000";
-        shape.render_entity.stroke = "orangered";
-        shape.render_entity.linewidth = 5;
-        this.stage.add(shape.render_entity);
+        this.createCircle(body.render_group, shape);
         break;
       case this.Newton.Shape.TYPE_SEGMENT:
+        console.log("TYPE_SEGMENT");
         break;
       case this.Newton.Shape.TYPE_POLY:
+        console.log("TYPE_POLY");
+        this.createPolygon(body.render_group, shape);
         break;
     }
   }
   this.two.update();
+};
+TwoRenderer.prototype.removeBody = function(body) {
+  body.render_group.remove();
+};
+TwoRenderer.prototype.updateBody = function(body) {
+  body.render_group.position.set(body.p.x, body.p.y);
+  body.render_group.rotation = body.a;
 };
 TwoRenderer.prototype.drawShape = function(shape, isStatic, lineWidth, outlineColor, fillColor) {
   return;
