@@ -8,7 +8,8 @@
     <button class="edit" @click=edit text("Edit")/>
 </header>
 <@editor if(state.edit) runner=state.runner @play/>
-<canvas/>
+
+<main/>
 
 <!import Newton         from ../dist/newton.esm.js>
 
@@ -60,10 +61,10 @@
     }
 
     connected() {
-        const { Runner, CanvasRenderer, Interaction } = Newton;
+        const { Runner, TwoRenderer, Interaction } = Newton;
 
         const firstApp      = NewtonsCradle(Newton);
-        const renderer      = new CanvasRenderer(Newton, this.$('canvas'));
+        const renderer      = new TwoRenderer(Newton, this.$('main'));
         const runner        = new Runner(renderer, firstApp);
         const interaction   = new Interaction(runner);
 

@@ -28,7 +28,8 @@ import { collision } 			from "./utils/collision.js";
 import { Bounds,deg2rad, vec2 } from './utils/math.js';
 import { stats } 				from "./utils/stats.js";
 
-function World() {
+function World(renderer) {
+	this.renderer = renderer;
 	this.bodyArr = [];
 
 	this.jointArr = [];
@@ -179,6 +180,9 @@ World.prototype.create = function(text) {
 World.prototype.addBody = function(body) {
 	if (this.bodyArr.find(b => b.id ===body.id)) return;
 	this.bodyArr.push(body);
+
+	this.renderer.addBody(body);
+	
 	body.awake(true);
 	body.world = this;
 	body.cacheData();
@@ -187,6 +191,8 @@ World.prototype.addBody = function(body) {
 World.prototype.removeBody = function(body) {
 	var index = this.bodyArr.findIndex(b => b.id ===body.id);
 	if(index === -1) return;
+
+	this.renderer.removeBody(body);
 
 	// Remove linked joint
 	for (var i = 0; i < body.jointArr.length; i++) {

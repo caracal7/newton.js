@@ -25,9 +25,7 @@ function newtonsCradle(Newton, world, staticBody, xx, yy, number, size, length, 
 		world.addJoint(joint);
 
     }
-    body.v.x = 3;
-
-    console.log(body);
+    body.v.x = 5;
 };
 
 
@@ -42,7 +40,7 @@ export default Newton => {
 		world.addBody(staticBody);
 
 		newtonsCradle(Newton, world, staticBody, -5, 10, 5, 0.3, 2);
-		newtonsCradle(Newton, world, staticBody, 0, 10, 8, 0.5, 5,  0.8);
+		newtonsCradle(Newton, world, staticBody,  0, 10, 8, 0.5, 5, 0.8);
 
 	}
 

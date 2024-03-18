@@ -69,7 +69,7 @@ function Runner(renderer, app) {
     this.dirtyBounds = new Bounds; // dirty bounds in world space
 
     collision.init();
-    this.world = new World();
+    this.world = new World(renderer);
 
     this.resetScene();
 

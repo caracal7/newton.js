@@ -112,11 +112,11 @@ Body.prototype.serialize = function() {
 	}
 
 	return {
-		"type": ["static", "kinetic", "dynamic"][this.type],
-		"name": this.name,
-		"position": this.xf.t,
-		"angle": this.xf.a,
-		"shapes": shapes
+		type: 		["static", "kinetic", "dynamic"][this.type],
+		name: 		this.name,
+		position: 	this.xf.t,
+		angle: 		this.xf.a,
+		shapes: 	shapes
 	};
 }
 
@@ -133,9 +133,7 @@ Body.prototype.isKinetic = function() {
 }
 
 Body.prototype.setType = function(type) {
-	if (type == this.type) {
-		return;
-	}
+	if (type == this.type) return;
 
 	this.f.set(0, 0);
 	this.v.set(0, 0);

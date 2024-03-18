@@ -32,3 +32,12 @@ button.edit {
     vertical-align: middle;
     cursor: pointer;
 }
+
+main {
+    position:absolute;
+    width: 100%;
+    height: calc(100% - 42px);
+    border: 10px solid red;
+    bottom: 0;
+    overflow: hidden;
+}
