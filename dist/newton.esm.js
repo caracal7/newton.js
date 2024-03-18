@@ -661,11 +661,6 @@ Bounds.expand = function(b, ax, ay) {
   b.expand(ax, ay);
   return b;
 };
-function distance(x1, y1, x2, y2) {
-  var dx = x1 - x2;
-  var dy = y1 - y2;
-  return Math.sqrt(dx * dx + dy * dy);
-}
 
 // src/shapes/shape.js
 var Shape = function(type) {
@@ -2950,189 +2945,111 @@ function Interaction(runner, settings) {
   this.mouseBody = new Body(Body.KINETIC);
   this.mouseBody.resetMassData();
   this.runner.world.addBody(this.mouseBody);
-  this.mousedown = (event) => {
-    var _a, _b;
-    var pos = this.getMousePosition(event);
-    this.state.mouseDown = true;
-    this.state.pointerDownMoving = false;
-    this.state.mouseDownPosition.x = pos.x;
-    this.state.mouseDownPosition.y = pos.y;
-    this.removeJoint();
-    var p = this.runner.canvasToWorld(pos);
-    var body = this.runner.world.findBodyByPoint(p);
-    var block = false;
-    if ((_b = (_a = this[Events2]) == null ? void 0 : _a.mousedown) == null ? void 0 : _b.length) {
-      this[Events2].mousedown.forEach((callback) => {
-        var b = callback(body, pos, p);
-        if (b)
-          block = true;
-      });
-      if (this.runner.pause)
-        this.runner.drawFrame(0);
-    }
-    if (block) {
-      this.state.mouseDown = false;
-    } else {
-      if (this.settings.pick && body) {
-        this.mouseBody.p.copy(p);
-        this.mouseBody.syncTransform();
-        this.mouseJoint = new MouseJoint(this.mouseBody, body, p);
-        this.mouseJoint.maxForce = body.m * 5e4;
-        this.runner.world.addJoint(this.mouseJoint);
-      }
-      this.state.mousePositionOld.x = pos.x;
-      this.state.mousePositionOld.y = pos.y;
-    }
-    event.preventDefault();
-  };
-  this.mousemove = (event) => {
-    var _a, _b;
-    var pos = this.getMousePosition(event);
-    if (pos.x < 0 || pos.x > this.runner.renderer.width || pos.y < 0 || pos.y > this.runner.renderer.height)
-      return this.mouseleave(event);
-    if (this.state.mouseDown) {
-      if (this.mouseJoint) {
-        this.mouseBody.p.copy(this.runner.canvasToWorld(pos));
-        this.mouseBody.syncTransform();
-      } else {
-        var dx = pos.x - this.state.mousePositionOld.x;
-        var dy = pos.y - this.state.mousePositionOld.y;
-        if (dx || dy) {
-          this.scrollView(-dx, dy);
-          this.state.mousePositionOld.x = pos.x;
-          this.state.mousePositionOld.y = pos.y;
-          this.state.pointerDownMoving = true;
-        }
-      }
-      ;
-      if (this.runner.pause)
-        this.runner.drawFrame(0);
-    }
-    ;
-    if ((_b = (_a = this[Events2]) == null ? void 0 : _a.mousemove) == null ? void 0 : _b.length) {
-      var p = this.runner.canvasToWorld(pos);
-      this[Events2].mousemove.forEach((callback) => callback(pos, p));
-      if (this.runner.pause)
-        this.runner.drawFrame(0);
-    }
-    ;
-    event.preventDefault();
-  };
-  this.mouseup = this.mouseleave = (event) => {
-    var _a, _b;
-    if ((_b = (_a = this[Events2]) == null ? void 0 : _a.mouseup) == null ? void 0 : _b.length) {
-      var pos = this.getMousePosition(event);
-      var p = this.runner.canvasToWorld(pos);
-      this[Events2].mouseup.forEach((callback) => callback(
-        event.type == "mouseleave" ? void 0 : this.runner.world.findBodyByPoint(p),
-        pos,
-        p,
-        this.state.pointerDownMoving
-      ));
-    }
-    ;
-    this.state.mouseDown = false;
-    this.removeJoint();
-    if (this.runner.pause)
-      this.runner.drawFrame(0);
-    event.preventDefault();
-  };
-  this.mousewheel = (event) => {
-    if (!this.settings.zoom)
-      return event.preventDefault();
-    var wheelDeltaX = 0;
-    var wheelDeltaY = 0;
-    if (event.detail) {
-      if (event.axis == event.HORIZONTAL_AXIS)
-        wheelDeltaX = -40 * event.detail;
-      else
-        wheelDeltaY = -40 * event.detail;
-    } else if (event.wheelDeltaX) {
-      wheelDeltaX = event.wheelDeltaX;
-      wheelDeltaY = event.wheelDeltaY;
-    } else if (event.wheelDelta) {
-      wheelDeltaY = event.wheelDelta;
-    }
-    var ds = -wheelDeltaY * 1e-3;
-    var oldViewScale = this.runner.camera.scale;
-    this.runner.camera.scale = Clamp(oldViewScale + ds, this.runner.camera.minScale, this.runner.camera.maxScale);
-    ds = this.runner.camera.scale - oldViewScale;
-    ds *= meter2pixel(1);
-    var p = this.runner.canvasToWorld(this.getMousePosition(event));
-    var dx = wheelDeltaX * 0.2;
-    this.scrollView(p.x * ds - dx, p.y * ds);
-    if (this.runner.pause)
-      this.runner.drawFrame(0);
-    event.preventDefault();
-  };
-  this.touchstart = (event) => {
-    this.removeJoint();
-    if (event.touches.length === 2) {
-      this.state.pointerDownMoving = false;
-      this.state.gestureStartScale = this.runner.camera.scale;
-      this.state.touchPosOld[0] = this.getTouchPosition(event.touches[0]);
-      this.state.touchPosOld[1] = this.getTouchPosition(event.touches[1]);
-      this.state.touchDist = distance(
-        this.state.touchPosOld[0].x,
-        this.state.touchPosOld[0].y,
-        this.state.touchPosOld[1].x,
-        this.state.touchPosOld[1].y
-      );
-      event.preventDefault();
-    }
-  };
-  this.touchmove = (event) => {
-    if (!this.settings.zoom)
-      return event.preventDefault();
-    if (event.touches.length === 2) {
-      this.state.pointerDownMoving = true;
-      var touch1 = this.getTouchPosition(event.touches[0]);
-      var touch2 = this.getTouchPosition(event.touches[1]);
-      if (touch1.x < 0 || touch1.x > this.runner.renderer.width || touch1.y < 0 || touch1.y > this.runner.renderer.height || touch2.x < 0 || touch2.x > this.runner.renderer.width || touch2.y < 0 || touch2.y > this.runner.renderer.height)
-        return this.mouseleave(event);
-      var scale = distance(touch1.x, touch1.y, touch2.x, touch2.y) / this.state.touchDist;
-      var threhold = Clamp(scale - 1, -0.1, 0.1);
-      var gestureScale = this.state.gestureStartScale * (scale - threhold);
-      var v1 = vec22.sub(touch1, this.state.touchPosOld[0]);
-      var v2 = vec22.sub(touch2, this.state.touchPosOld[1]);
-      var d1 = v1.length();
-      var d2 = v2.length();
-      if (d1 > 0 || d2 > 0) {
-        var touchScaleCenter = this.runner.canvasToWorld(vec22.lerp(touch1, touch2, d1 / (d1 + d2)));
-        var oldScale = this.runner.camera.scale;
-        this.runner.camera.scale = Clamp(gestureScale, this.runner.camera.minScale, this.runner.camera.maxScale);
-        var ds = this.runner.camera.scale - oldScale;
-        ds *= meter2pixel(1);
-        this.scrollView(-(v1.x + v2.x) * 0.5 + touchScaleCenter.x * ds, (v1.y + v2.y) * 0.5 + touchScaleCenter.y * ds);
-      }
-      this.state.touchPosOld[0] = touch1;
-      this.state.touchPosOld[1] = touch2;
-      if (this.runner.pause)
-        this.runner.drawFrame(0);
-    }
-    event.preventDefault();
-  };
-  this.touchHandler = (event) => {
-    if (event.touches.length <= 1) {
-      var type = {
-        touchstart: "mousedown",
-        touchmove: "mousemove",
-        touchend: "mouseup"
-      }[event.type] || "";
-      var first = event.changedTouches[0];
-      var simulatedEvent = document.createEvent("MouseEvent");
-      simulatedEvent.initMouseEvent(type, true, true, window, 1, first.screenX, first.screenY, first.clientX, first.clientY, false, false, false, false, 0, null);
-      first.target.dispatchEvent(simulatedEvent);
-    } else if (this[event.type])
-      this[event.type](event);
-    event.preventDefault();
-  };
-  ["mousedown", "mousemove", "mouseup", "mouseleave", "mousewheel"].forEach((event) => this.runner.renderer.canvas.addEventListener(event, this[event]));
-  this.runner.renderer.canvas.addEventListener("touchstart", this.touchHandler);
-  this.runner.renderer.canvas.addEventListener("touchmove", this.touchHandler);
-  this.runner.renderer.canvas.addEventListener("touchend", this.touchHandler);
-  this.runner.renderer.canvas.addEventListener("touchcancel", this.touchHandler);
   this[Events2] = {};
+  addZUI(this.runner.renderer);
+}
+function addZUI(renderer) {
+  const { Two: Two2, two, stage } = renderer;
+  var domElement = two.renderer.domElement;
+  var zui = new Two2.ZUI(stage);
+  var mouse = new Two2.Vector();
+  var touches = {};
+  var distance2 = 0;
+  var dragging = false;
+  zui.addLimits(0.06, 8);
+  domElement.addEventListener("mousedown", mousedown, false);
+  domElement.addEventListener("mousewheel", mousewheel, false);
+  domElement.addEventListener("wheel", mousewheel, false);
+  domElement.addEventListener("touchstart", touchstart, false);
+  domElement.addEventListener("touchmove", touchmove, false);
+  domElement.addEventListener("touchend", touchend, false);
+  domElement.addEventListener("touchcancel", touchend, false);
+  function mousedown(e) {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+    window.addEventListener("mousemove", mousemove, false);
+    window.addEventListener("mouseup", mouseup, false);
+  }
+  function mousemove(e) {
+    var dx = e.clientX - mouse.x;
+    var dy = e.clientY - mouse.y;
+    if (dragging) {
+    } else {
+      zui.translateSurface(dx, dy);
+    }
+    mouse.set(e.clientX, e.clientY);
+  }
+  function mouseup(e) {
+    window.removeEventListener("mousemove", mousemove, false);
+    window.removeEventListener("mouseup", mouseup, false);
+  }
+  function mousewheel(e) {
+    var dy = (e.wheelDeltaY || -e.deltaY) / 1e3;
+    zui.zoomBy(dy, e.clientX, e.clientY);
+    e.preventDefault();
+  }
+  function touchstart(e) {
+    switch (e.touches.length) {
+      case 2:
+        pinchstart(e);
+        break;
+      case 1:
+        panstart(e);
+        break;
+    }
+    e.preventDefault();
+  }
+  function touchmove(e) {
+    switch (e.touches.length) {
+      case 2:
+        pinchmove(e);
+        break;
+      case 1:
+        panmove(e);
+        break;
+    }
+    e.preventDefault();
+  }
+  function touchend(e) {
+    touches = {};
+    var touch = e.touches[0];
+    if (touch) {
+      mouse.x = touch.clientX;
+      mouse.y = touch.clientY;
+    }
+    e.preventDefault();
+  }
+  function panstart(e) {
+    var touch = e.touches[0];
+    mouse.x = touch.clientX;
+    mouse.y = touch.clientY;
+  }
+  function panmove(e) {
+    var touch = e.touches[0];
+    var dx = touch.clientX - mouse.x;
+    var dy = touch.clientY - mouse.y;
+    zui.translateSurface(dx, dy);
+    mouse.set(touch.clientX, touch.clientY);
+  }
+  function pinchstart(e) {
+    var a = e.touches[0];
+    var b = e.touches[1];
+    var dx = b.clientX - a.clientX;
+    var dy = b.clientY - a.clientY;
+    distance2 = Math.sqrt(dx * dx + dy * dy);
+    mouse.x = dx / 2 + a.clientX;
+    mouse.y = dy / 2 + a.clientY;
+  }
+  function pinchmove(e) {
+    var a = e.touches[0];
+    var b = e.touches[1];
+    var dx = b.clientX - a.clientX;
+    var dy = b.clientY - a.clientY;
+    var d = Math.sqrt(dx * dx + dy * dy);
+    var delta = d - distance2;
+    zui.zoomBy(delta / 250, mouse.x, mouse.y);
+    distance2 = d;
+  }
 }
 Interaction.prototype.destroy = function() {
   ["mousedown", "mousemove", "mouseup", "mouseleave", "mousewheel"].forEach((event) => this.runner.renderer.canvas.removeEventListener(event, this[event]));
@@ -8274,6 +8191,182 @@ var Two = (() => {
 })().default;
 var two_min_default = Two;
 
+// src/renderers/ZUI.js
+var Surface = class {
+  constructor(object) {
+    this.object = object;
+  }
+  limits(min, max) {
+    const min_exists = typeof min !== "undefined";
+    const max_exists = typeof max !== "undefined";
+    if (!max_exists && !min_exists)
+      return { min: this.min, max: this.max };
+    this.min = min_exists ? min : this.min;
+    this.max = max_exists ? max : this.max;
+    return this;
+  }
+  apply(px, py, s) {
+    this.object.translation.set(px, py);
+    this.object.scale = s;
+    return this;
+  }
+};
+var _ZUI = class _ZUI {
+  constructor(group, domElement) {
+    this.limits = {
+      scale: _ZUI.Limit.clone(),
+      x: _ZUI.Limit.clone(),
+      y: _ZUI.Limit.clone()
+    };
+    this.viewport = domElement || document.body;
+    this.viewportOffset = {
+      top: 0,
+      left: 0,
+      matrix: new two_min_default.Matrix()
+    };
+    this.surfaceMatrix = new two_min_default.Matrix();
+    this.surfaces = [];
+    this.reset();
+    this.updateSurface();
+    this.add(new Surface(group));
+  }
+  static Clamp(v, min, max) {
+    return Math.min(Math.max(v, min), max);
+  }
+  static TranslateMatrix(m, x, y) {
+    m.elements[2] += x;
+    m.elements[5] += y;
+    return m;
+  }
+  static PositionToScale(pos) {
+    return Math.exp(pos);
+  }
+  static ScaleToPosition(scale) {
+    return Math.log(scale);
+  }
+  add(surface) {
+    this.surfaces.push(surface);
+    const limits = surface.limits();
+    this.addLimits(limits.min, limits.max);
+    return this;
+  }
+  addLimits(min, max) {
+    if (typeof min !== "undefined") {
+      if (this.limits.scale.min) {
+        this.limits.scale.min = Math.max(min, this.limits.scale.min);
+      } else {
+        this.limits.scale.min = min;
+      }
+    }
+    if (typeof max === "undefined")
+      return this;
+    if (this.limits.scale.max) {
+      this.limits.scale.max = Math.min(max, this.limits.scale.max);
+    } else {
+      this.limits.scale.max = max;
+    }
+    return this;
+  }
+  clientToSurface(a, b, c) {
+    this.updateOffset();
+    const m = this.surfaceMatrix.inverse();
+    let x, y, z;
+    if (arguments.length === 1) {
+      const v = a;
+      x = typeof v.x === "number" ? v.x : 0;
+      y = typeof v.y === "number" ? v.y : 0;
+      z = typeof v.z === "number" ? v.z : 1;
+    } else {
+      x = typeof a === "number" ? a : 0;
+      y = typeof b === "number" ? b : 0;
+      z = typeof c === "number" ? c : 1;
+    }
+    const n = this.viewportOffset.matrix.inverse().multiply(x, y, z);
+    const r = m.multiply(n[0], n[1], n[2]);
+    return { x: r[0], y: r[1], z: r[2] };
+  }
+  surfaceToClient(a, b, c) {
+    this.updateOffset();
+    const vo = this.viewportOffset.matrix.clone();
+    let x, y, z;
+    if (arguments.length === 1) {
+      const v = a;
+      x = typeof v.x === "number" ? v.x : 0;
+      y = typeof v.y === "number" ? v.y : 0;
+      z = typeof v.z === "number" ? v.z : 1;
+    } else {
+      x = typeof a === "number" ? a : 0;
+      y = typeof b === "number" ? b : 0;
+      z = typeof c === "number" ? c : 1;
+    }
+    const sm = this.surfaceMatrix.multiply(x, y, z);
+    const r = vo.multiply(sm[0], sm[1], sm[2]);
+    return { x: r[0], y: r[1], z: r[2] };
+  }
+  zoomBy(byF, clientX, clientY) {
+    const s = _ZUI.PositionToScale(this.zoom + byF);
+    this.zoomSet(s, clientX, clientY);
+    return this;
+  }
+  zoomSet(zoom, clientX, clientY) {
+    const newScale = this.fitToLimits(zoom);
+    this.zoom = _ZUI.ScaleToPosition(newScale);
+    if (newScale === this.scale)
+      return this;
+    const sf = this.clientToSurface(clientX, clientY);
+    const scaleBy = newScale / this.scale;
+    this.surfaceMatrix.scale(scaleBy);
+    this.scale = newScale;
+    const c = this.surfaceToClient(sf);
+    const dx = clientX - c.x;
+    const dy = clientY - c.y;
+    this.translateSurface(dx, dy);
+    return this;
+  }
+  translateSurface(x, y) {
+    _ZUI.TranslateMatrix(this.surfaceMatrix, x, y);
+    this.updateSurface();
+    return this;
+  }
+  updateOffset() {
+    const rect = this.viewport.getBoundingClientRect();
+    this.viewportOffset.left = rect.left - document.body.scrollLeft;
+    this.viewportOffset.top = rect.top - document.body.scrollTop;
+    this.viewportOffset.matrix.identity().translate(this.viewportOffset.left, this.viewportOffset.top);
+    return this;
+  }
+  updateSurface() {
+    const e = this.surfaceMatrix.elements;
+    for (let i = 0; i < this.surfaces.length; i++) {
+      this.surfaces[i].apply(e[2], e[5], e[0]);
+    }
+    return this;
+  }
+  reset() {
+    this.zoom = 0;
+    this.scale = 1;
+    this.surfaceMatrix.identity();
+    return this;
+  }
+  fitToLimits(s) {
+    return _ZUI.Clamp(s, this.limits.scale.min, this.limits.scale.max);
+  }
+};
+__publicField(_ZUI, "Surface", Surface);
+__publicField(_ZUI, "Limit", {
+  min: -Infinity,
+  max: Infinity,
+  clone: function() {
+    const result = {};
+    for (let k in this) {
+      result[k] = this[k];
+    }
+    return result;
+  }
+});
+var ZUI = _ZUI;
+var ZUI_default = ZUI;
+
 // src/renderers/TwoRenderer.js
 function drawLine2(ctx, p1, p2, lineWidth, strokeStyle) {
   ctx.beginPath();
@@ -8370,22 +8463,18 @@ function drawPolygon2(ctx, verts, lineWidth, strokeStyle, fillStyle) {
 function TwoRenderer(Newton, canvas) {
   this.Newton = Newton;
   this.canvas = canvas;
-  var two = this.two = new two_min_default({}).appendTo(canvas);
-  var radius = 50;
-  var x = two.width * 0.5;
-  var y = two.height * 0.5 - radius * 1.25;
-  var circle = two.makeCircle(x, y, radius);
-  y = two.height * 0.5 + radius * 1.25;
-  var width = 100;
-  var height = 100;
-  var rect = two.makeRectangle(x, y, width, height);
-  circle.fill = "#FF8000";
-  circle.stroke = "orangered";
-  circle.linewidth = 5;
+  two_min_default.ZUI = ZUI_default;
+  this.Two = two_min_default;
+  var two = this.two = new two_min_default({
+    autostart: true
+  }).appendTo(canvas);
+  this.stage = new two_min_default.Group();
+  this.two.add(this.stage);
+  var rect = two.makeRectangle(two.width * 0.5, two.height * 0.5, 100, 100);
   rect.fill = "rgb(0, 200, 255)";
   rect.opacity = 0.75;
   rect.noStroke();
-  two.update();
+  this.stage.add(rect);
   this.resize();
 }
 TwoRenderer.prototype.resize = function() {
@@ -8402,6 +8491,7 @@ TwoRenderer.prototype.addBody = function(body) {
         shape.render_entity.fill = "#FF8000";
         shape.render_entity.stroke = "orangered";
         shape.render_entity.linewidth = 5;
+        this.stage.add(shape.render_entity);
         break;
       case this.Newton.Shape.TYPE_SEGMENT:
         break;

@@ -37,7 +37,7 @@ function Interaction(runner, settings) {
     this.mouseBody = new Body(Body.KINETIC);
     this.mouseBody.resetMassData();
     this.runner.world.addBody(this.mouseBody);
-
+    /*
     //------------------------------ mousedown
     this.mousedown = event => {
         var pos = this.getMousePosition(event);
@@ -238,6 +238,7 @@ function Interaction(runner, settings) {
     	else if (this[event.type]) this[event.type](event);
     	event.preventDefault();
     }
+
     //-------------------------------------------------------------------
     ["mousedown", "mousemove", "mouseup", "mouseleave", "mousewheel"]
         .forEach(event => this.runner.renderer.canvas.addEventListener(event, this[event]));
@@ -246,8 +247,140 @@ function Interaction(runner, settings) {
     this.runner.renderer.canvas.addEventListener("touchmove",   this.touchHandler);
     this.runner.renderer.canvas.addEventListener("touchend",    this.touchHandler);
     this.runner.renderer.canvas.addEventListener("touchcancel", this.touchHandler);
-
+    */
     this[Events] = {};
+
+    addZUI(this.runner.renderer);
+}
+
+
+function addZUI(renderer) {
+    const { Two, two, stage } = renderer;
+
+    var domElement = two.renderer.domElement;
+    var zui = new Two.ZUI(stage);
+    var mouse = new Two.Vector();
+    var touches = {};
+    var distance = 0;
+    var dragging = false;
+
+    zui.addLimits(0.06, 8);
+
+    domElement.addEventListener('mousedown', mousedown, false);
+    domElement.addEventListener('mousewheel', mousewheel, false);
+    domElement.addEventListener('wheel', mousewheel, false);
+
+    domElement.addEventListener('touchstart', touchstart, false);
+    domElement.addEventListener('touchmove', touchmove, false);
+    domElement.addEventListener('touchend', touchend, false);
+    domElement.addEventListener('touchcancel', touchend, false);
+
+    function mousedown(e) {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+        /*
+        var rect = shape.getBoundingClientRect();
+        dragging = mouse.x > rect.left && mouse.x < rect.right
+            && mouse.y > rect.top && mouse.y < rect.bottom;
+        */
+        window.addEventListener('mousemove', mousemove, false);
+        window.addEventListener('mouseup', mouseup, false);
+    }
+
+    function mousemove(e) {
+        var dx = e.clientX - mouse.x;
+        var dy = e.clientY - mouse.y;
+        if (dragging) {
+            //shape.position.x += dx / zui.scale;
+            //shape.position.y += dy / zui.scale;
+        } else {
+            zui.translateSurface(dx, dy);
+        }
+        mouse.set(e.clientX, e.clientY);
+    }
+
+    function mouseup(e) {
+        window.removeEventListener('mousemove', mousemove, false);
+        window.removeEventListener('mouseup', mouseup, false);
+    }
+
+    function mousewheel(e) {
+        var dy = (e.wheelDeltaY || - e.deltaY) / 1000;
+        zui.zoomBy(dy, e.clientX, e.clientY);
+        e.preventDefault();
+    }
+
+    function touchstart(e) {
+        switch (e.touches.length) {
+            case 2:
+                pinchstart(e);
+                break;
+            case 1:
+                panstart(e)
+                break;
+        }
+        e.preventDefault();
+    }
+
+    function touchmove(e) {
+        switch (e.touches.length) {
+            case 2:
+                pinchmove(e);
+                break;
+            case 1:
+                panmove(e)
+                break;
+        }
+        e.preventDefault();
+    }
+
+    function touchend(e) {
+        touches = {};
+        var touch = e.touches[ 0 ];
+        if (touch) {  // Pass through for panning after pinching
+            mouse.x = touch.clientX;
+            mouse.y = touch.clientY;
+        }
+        e.preventDefault();
+    }
+
+    function panstart(e) {
+        var touch = e.touches[ 0 ];
+        mouse.x = touch.clientX;
+        mouse.y = touch.clientY;
+    }
+
+    function panmove(e) {
+        var touch = e.touches[ 0 ];
+        var dx = touch.clientX - mouse.x;
+        var dy = touch.clientY - mouse.y;
+        zui.translateSurface(dx, dy);
+        mouse.set(touch.clientX, touch.clientY);
+    }
+
+    function pinchstart(e) {
+        var a = e.touches[ 0 ];
+        var b = e.touches[ 1 ];
+        var dx = b.clientX - a.clientX;
+        var dy = b.clientY - a.clientY;
+        distance = Math.sqrt(dx * dx + dy * dy);
+        mouse.x = dx / 2 + a.clientX;
+        mouse.y = dy / 2 + a.clientY;
+    }
+
+    function pinchmove(e) {
+        var a = e.touches[ 0 ];
+        var b = e.touches[ 1 ];
+        //console.log('pinchmove', e.touches);
+
+        var dx = b.clientX - a.clientX;
+        var dy = b.clientY - a.clientY;
+        var d = Math.sqrt(dx * dx + dy * dy);
+        var delta = d - distance;
+        zui.zoomBy(delta / 250, mouse.x, mouse.y);
+        distance = d;
+    }
+
 }
 
 Interaction.prototype.destroy = function() {

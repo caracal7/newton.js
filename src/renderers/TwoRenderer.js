@@ -18,6 +18,7 @@
 */
 
 import Two from './two.min.js';
+import ZUI from './ZUI.js';
 
 var ARROW_TYPE_NONE = 0;
 var ARROW_TYPE_NORMAL = 1;
@@ -319,33 +320,20 @@ function drawPolygon(ctx, verts, lineWidth, strokeStyle, fillStyle) {
 function TwoRenderer(Newton, canvas) {
 	this.Newton = Newton;
     this.canvas = canvas;
+	Two.ZUI = ZUI;
+	this.Two = Two;
 
-	var two = this.two = new Two({}).appendTo(canvas);
+	var two = this.two = new Two({
+		autostart: true
+	}).appendTo(canvas);
+	this.stage = new Two.Group();
+	this.two.add(this.stage);
 
-
-	// Two.js has convenient methods to make shapes and insert them into the scene.
-	var radius = 50;
-	var x = two.width * 0.5;
-	var y = two.height * 0.5 - radius * 1.25;
-	var circle = two.makeCircle(x, y, radius);
-
-	y = two.height * 0.5 + radius * 1.25;
-	var width = 100;
-	var height = 100;
-	var rect = two.makeRectangle(x, y, width, height);
-
-	// The object returned has many stylable properties:
-	circle.fill = '#FF8000';
-	// And accepts all valid CSS color:
-	circle.stroke = 'orangered';
-	circle.linewidth = 5;
-
+	var rect = two.makeRectangle(two.width * 0.5, two.height * 0.5, 100, 100);
 	rect.fill = 'rgb(0, 200, 255)';
 	rect.opacity = 0.75;
 	rect.noStroke();
-
-	// Don’t forget to tell two to draw everything to the screen
-	two.update();
+	this.stage.add(rect);
 
 
 	this.resize();
@@ -363,13 +351,12 @@ TwoRenderer.prototype.addBody = function(body) {
 		switch (shape.type) {
 			case this.Newton.Shape.TYPE_CIRCLE:
 				shape.render_entity = this.two.makeCircle(shape.tc.x * 100, shape.tc.y * 100, shape.r * 100);
-
 				// The object returned has many stylable properties:
 				shape.render_entity.fill = '#FF8000';
 				// And accepts all valid CSS color:
 				shape.render_entity.stroke = 'orangered';
 				shape.render_entity.linewidth = 5;
-
+				this.stage.add(shape.render_entity);
 				break;
 			case this.Newton.Shape.TYPE_SEGMENT:
 				break;
