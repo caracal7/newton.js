@@ -43,8 +43,8 @@ export default Newton => {
 		b1.addShape(new ShapeBox(0, 0, 1, 1));
 		b1.resetMassData();
 		world.addBody(b1);
-        var b2 = new Body(Body.STATIC);
-		b2.addShape(new ShapeBox(5, 5, 1, 1));
+        var b2 = new Body(Body.STATIC, new Newton.vec2(5, 5));
+		b2.addShape(new ShapeBox(0, 0, 1, 1));
 		b2.resetMassData();
 		world.addBody(b2);
 

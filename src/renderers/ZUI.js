@@ -146,7 +146,6 @@ class ZUI {
     }
 
     zoomBy(byF, clientX = 0, clientY = 0) {
-        console.log(clientX, clientY)
         const s = ZUI.PositionToScale(this.zoom + byF);
         this.zoomSet(s, clientX, clientY);
         return this;
@@ -180,12 +179,19 @@ class ZUI {
     }
 
     updateOffset() {
+
+        this.viewportOffset.matrix
+            .identity()
+            .translate(0, 0);
+        /*
         const rect = this.viewport.getBoundingClientRect();
-        this.viewportOffset.left = rect.left - document.body.scrollLeft;  // this.viewport вместо document.body
-        this.viewportOffset.top  = rect.top  - document.body.scrollTop;
+        console.log(rect)
+        this.viewportOffset.left = rect.left;
+        this.viewportOffset.top  = rect.top;
         this.viewportOffset.matrix
             .identity()
             .translate(this.viewportOffset.left, this.viewportOffset.top);
+        */
         return this;
     }
 

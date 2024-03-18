@@ -2985,7 +2985,8 @@ function addZUI(renderer) {
   }
   function mousewheel(e) {
     var dy = (e.wheelDeltaY || -e.deltaY) / 1e3;
-    zui.zoomBy(dy, e.clientX, e.clientY);
+    var rect = domElement.getBoundingClientRect();
+    zui.zoomBy(dy, e.clientX - rect.left, e.clientY - rect.top);
     e.preventDefault();
   }
   function touchstart(e) {
@@ -3045,18 +3046,19 @@ function addZUI(renderer) {
     var b = e.touches[1];
     var dx = b.clientX - a.clientX;
     var dy = b.clientY - a.clientY;
+    var mx = dx / 2 + a.clientX;
+    var my = dy / 2 + a.clientY;
+    zui.translateSurface(mx - mouse.x, my - mouse.y);
+    mouse.x = mx;
+    mouse.y = my;
     var d = Math.sqrt(dx * dx + dy * dy);
     var delta = d - distance2;
-    zui.zoomBy(delta / 250, mouse.x, mouse.y);
+    var rect = domElement.getBoundingClientRect();
+    zui.zoomBy(delta / 250, mouse.x - rect.left, mouse.y - rect.top);
     distance2 = d;
   }
 }
 Interaction.prototype.destroy = function() {
-  ["mousedown", "mousemove", "mouseup", "mouseleave", "mousewheel"].forEach((event) => this.runner.renderer.canvas.removeEventListener(event, this[event]));
-  this.runner.renderer.canvas.removeEventListener("touchstart", this.touchHandler);
-  this.runner.renderer.canvas.removeEventListener("touchmove", this.touchHandler);
-  this.runner.renderer.canvas.removeEventListener("touchend", this.touchHandler);
-  this.runner.renderer.canvas.removeEventListener("touchcancel", this.touchHandler);
   this.removeJoint();
   this.runner.world.removeBody(this.mouseBody);
 };
@@ -4107,7 +4109,7 @@ PrismaticJoint2.prototype.getReactionTorque = function(dt_inv) {
 };
 
 // src/renderers/CanvasRenderer.js
-function drawLine(ctx, p1, p2, lineWidth, strokeStyle) {
+function drawLine2(ctx, p1, p2, lineWidth, strokeStyle) {
   ctx.beginPath();
   ctx.moveTo(p1.x, p1.y);
   ctx.lineTo(p2.x, p2.y);
@@ -4115,7 +4117,7 @@ function drawLine(ctx, p1, p2, lineWidth, strokeStyle) {
   ctx.strokeStyle = strokeStyle;
   ctx.stroke();
 }
-function drawBox(ctx, center, rvec, uvec, lineWidth, strokeStyle, fillStyle, Newton) {
+function drawBox2(ctx, center, rvec, uvec, lineWidth, strokeStyle, fillStyle, Newton) {
   ctx.beginPath();
   var l = Newton.vec2.sub(center, rvec);
   var r = Newton.vec2.add(center, rvec);
@@ -4139,7 +4141,7 @@ function drawBox(ctx, center, rvec, uvec, lineWidth, strokeStyle, fillStyle, New
     ctx.stroke();
   }
 }
-function drawCircle(ctx, center, radius, angle, lineWidth, strokeStyle, fillStyle, Newton) {
+function drawCircle2(ctx, center, radius, angle, lineWidth, strokeStyle, fillStyle, Newton) {
   ctx.beginPath();
   ctx.arc(center.x, center.y, radius, 0, Math.PI * 2, false);
   if (fillStyle) {
@@ -4157,7 +4159,7 @@ function drawCircle(ctx, center, radius, angle, lineWidth, strokeStyle, fillStyl
     ctx.stroke();
   }
 }
-function drawSegment(ctx, a, b, radius, lineWidth, strokeStyle, fillStyle, Newton) {
+function drawSegment2(ctx, a, b, radius, lineWidth, strokeStyle, fillStyle, Newton) {
   ctx.beginPath();
   var dn = Newton.vec2.normalize(Newton.vec2.perp(Newton.vec2.sub(b, a)));
   var start_angle = dn.toAngle();
@@ -4181,7 +4183,7 @@ function drawSegment(ctx, a, b, radius, lineWidth, strokeStyle, fillStyle, Newto
     ctx.stroke();
   }
 }
-function drawPolygon(ctx, verts, lineWidth, strokeStyle, fillStyle) {
+function drawPolygon2(ctx, verts, lineWidth, strokeStyle, fillStyle) {
   ctx.beginPath();
   ctx.moveTo(verts[0].x, verts[0].y);
   for (var i = 0; i < verts.length; i++) {
@@ -4217,16 +4219,16 @@ function CanvasRenderer(Newton, canvas) {
 CanvasRenderer.prototype.drawShape = function(shape, isStatic, lineWidth, outlineColor, fillColor) {
   switch (shape.type) {
     case this.Newton.Shape.TYPE_CIRCLE:
-      drawCircle(isStatic ? this.bg.ctx : this.fg.ctx, shape.tc, shape.r, shape.body.a, lineWidth, outlineColor, fillColor, this.Newton);
+      drawCircle2(isStatic ? this.bg.ctx : this.fg.ctx, shape.tc, shape.r, shape.body.a, lineWidth, outlineColor, fillColor, this.Newton);
       break;
     case this.Newton.Shape.TYPE_SEGMENT:
-      drawSegment(isStatic ? this.bg.ctx : this.fg.ctx, shape.ta, shape.tb, shape.r, lineWidth, outlineColor, fillColor, this.Newton);
+      drawSegment2(isStatic ? this.bg.ctx : this.fg.ctx, shape.ta, shape.tb, shape.r, lineWidth, outlineColor, fillColor, this.Newton);
       break;
     case this.Newton.Shape.TYPE_POLY:
       if (shape.convexity)
-        drawPolygon(isStatic ? this.bg.ctx : this.fg.ctx, shape.tverts, lineWidth, outlineColor, fillColor);
+        drawPolygon2(isStatic ? this.bg.ctx : this.fg.ctx, shape.tverts, lineWidth, outlineColor, fillColor);
       else
-        drawPolygon(isStatic ? this.bg.ctx : this.fg.ctx, shape.tverts, lineWidth, outlineColor, fillColor);
+        drawPolygon2(isStatic ? this.bg.ctx : this.fg.ctx, shape.tverts, lineWidth, outlineColor, fillColor);
       break;
   }
 };
@@ -4262,12 +4264,12 @@ CanvasRenderer.prototype.resize = function() {
 CanvasRenderer.prototype.drawHelperJointAnchors = function(p1, p2, radius, lineWidth, jointAnchorColor) {
   var rvec = new this.Newton.vec2(radius, 0);
   var uvec = new this.Newton.vec2(0, radius);
-  drawBox(this.fg.ctx, p1, rvec, uvec, 0, "", jointAnchorColor, this.Newton);
-  drawBox(this.fg.ctx, p2, rvec, uvec, 0, "", jointAnchorColor, this.Newton);
-  drawLine(this.fg.ctx, p1, p2, lineWidth, jointAnchorColor);
+  drawBox2(this.fg.ctx, p1, rvec, uvec, 0, "", jointAnchorColor, this.Newton);
+  drawBox2(this.fg.ctx, p2, rvec, uvec, 0, "", jointAnchorColor, this.Newton);
+  drawLine2(this.fg.ctx, p1, p2, lineWidth, jointAnchorColor);
 };
 CanvasRenderer.prototype.drawLine = function(p1, p2, lineWidth, strokeStyle) {
-  drawLine(this.fg.ctx, p1, p2, lineWidth, strokeStyle);
+  drawLine2(this.fg.ctx, p1, p2, lineWidth, strokeStyle);
 };
 
 // src/renderers/two.min.js
@@ -8310,7 +8312,6 @@ var _ZUI = class _ZUI {
     return { x: r[0], y: r[1], z: r[2] };
   }
   zoomBy(byF, clientX = 0, clientY = 0) {
-    console.log(clientX, clientY);
     const s = _ZUI.PositionToScale(this.zoom + byF);
     this.zoomSet(s, clientX, clientY);
     return this;
@@ -8336,10 +8337,7 @@ var _ZUI = class _ZUI {
     return this;
   }
   updateOffset() {
-    const rect = this.viewport.getBoundingClientRect();
-    this.viewportOffset.left = rect.left - document.body.scrollLeft;
-    this.viewportOffset.top = rect.top - document.body.scrollTop;
-    this.viewportOffset.matrix.identity().translate(this.viewportOffset.left, this.viewportOffset.top);
+    this.viewportOffset.matrix.identity().translate(0, 0);
     return this;
   }
   updateSurface() {
@@ -8373,98 +8371,6 @@ var ZUI = _ZUI;
 var ZUI_default = ZUI;
 
 // src/renderers/TwoRenderer.js
-function drawLine2(ctx, p1, p2, lineWidth, strokeStyle) {
-  ctx.beginPath();
-  ctx.moveTo(p1.x, p1.y);
-  ctx.lineTo(p2.x, p2.y);
-  ctx.lineWidth = lineWidth;
-  ctx.strokeStyle = strokeStyle;
-  ctx.stroke();
-}
-function drawBox2(ctx, center, rvec, uvec, lineWidth, strokeStyle, fillStyle, Newton) {
-  ctx.beginPath();
-  var l = Newton.vec2.sub(center, rvec);
-  var r = Newton.vec2.add(center, rvec);
-  var lb = Newton.vec2.sub(l, uvec);
-  var lt = Newton.vec2.add(l, uvec);
-  var rb = Newton.vec2.sub(r, uvec);
-  var rt = Newton.vec2.add(r, uvec);
-  ctx.moveTo(lb.x, lb.y);
-  ctx.lineTo(rb.x, rb.y);
-  ctx.lineTo(rt.x, rt.y);
-  ctx.lineTo(lt.x, lt.y);
-  ctx.lineTo(lb.x, lb.y);
-  ctx.closePath();
-  if (fillStyle) {
-    ctx.fillStyle = fillStyle;
-    ctx.fill();
-  }
-  if (strokeStyle) {
-    ctx.lineWidth = lineWidth;
-    ctx.strokeStyle = strokeStyle;
-    ctx.stroke();
-  }
-}
-function drawCircle2(ctx, center, radius, angle, lineWidth, strokeStyle, fillStyle, Newton) {
-  ctx.beginPath();
-  ctx.arc(center.x, center.y, radius, 0, Math.PI * 2, false);
-  if (fillStyle) {
-    ctx.fillStyle = fillStyle;
-    ctx.fill();
-  }
-  if (strokeStyle) {
-    if (typeof angle == "number") {
-      ctx.moveTo(center.x, center.y);
-      var rt = Newton.vec2.add(center, Newton.vec2.scale(Newton.vec2.rotation(angle), radius));
-      ctx.lineTo(rt.x, rt.y);
-    }
-    ctx.lineWidth = lineWidth;
-    ctx.strokeStyle = strokeStyle;
-    ctx.stroke();
-  }
-}
-function drawSegment2(ctx, a, b, radius, lineWidth, strokeStyle, fillStyle, Newton) {
-  ctx.beginPath();
-  var dn = Newton.vec2.normalize(Newton.vec2.perp(Newton.vec2.sub(b, a)));
-  var start_angle = dn.toAngle();
-  ctx.arc(a.x, a.y, radius, start_angle, start_angle + Math.PI, false);
-  var ds = Newton.vec2.scale(dn, -radius);
-  var bp = Newton.vec2.add(b, ds);
-  ctx.lineTo(bp.x, bp.y);
-  start_angle += Math.PI;
-  ctx.arc(b.x, b.y, radius, start_angle, start_angle + Math.PI, false);
-  ds = Newton.vec2.scale(dn, radius);
-  var ap = Newton.vec2.add(a, ds);
-  ctx.lineTo(ap.x, ap.y);
-  ctx.closePath();
-  if (fillStyle) {
-    ctx.fillStyle = fillStyle;
-    ctx.fill();
-  }
-  if (strokeStyle) {
-    ctx.lineWidth = lineWidth;
-    ctx.strokeStyle = strokeStyle;
-    ctx.stroke();
-  }
-}
-function drawPolygon2(ctx, verts, lineWidth, strokeStyle, fillStyle) {
-  ctx.beginPath();
-  ctx.moveTo(verts[0].x, verts[0].y);
-  for (var i = 0; i < verts.length; i++) {
-    ctx.lineTo(verts[i].x, verts[i].y);
-  }
-  ctx.lineTo(verts[verts.length - 1].x, verts[verts.length - 1].y);
-  ctx.closePath();
-  if (fillStyle) {
-    ctx.fillStyle = fillStyle;
-    ctx.fill();
-  }
-  if (strokeStyle) {
-    ctx.lineWidth = lineWidth;
-    ctx.strokeStyle = strokeStyle;
-    ctx.stroke();
-  }
-}
 function TwoRenderer(Newton, canvas) {
   this.Newton = Newton;
   this.canvas = canvas;
@@ -8475,15 +8381,10 @@ function TwoRenderer(Newton, canvas) {
   }).appendTo(canvas);
   this.stage = new two_min_default.Group();
   this.two.add(this.stage);
-  var rect = two.makeRectangle(0, 0, 10, 10);
-  rect.fill = "rgb(0, 200, 255)";
-  rect.opacity = 0.75;
-  rect.noStroke();
-  this.stage.add(rect);
   this.zui = new two_min_default.ZUI(this.stage, this.two.renderer.domElement);
   this.resize();
   this.zui.translateSurface(this.width / 2, this.height / 2);
-  console.log(this.width / 2, this.height / 2);
+  this.zui.zoomSet(15, this.width / 2, this.height / 2);
 }
 TwoRenderer.prototype.resize = function() {
   var dx = this.canvas.offsetWidth - (this.width || this.canvas.offsetWidth);
@@ -8494,7 +8395,8 @@ TwoRenderer.prototype.resize = function() {
   this.zui.translateSurface(dx / 2, dy / 2);
 };
 TwoRenderer.prototype.createCircle = function(body_group, shape) {
-  const circle = this.two.makeCircle(0, 0, shape.r);
+  const circle = this.two.makeCircle(shape.c.x, shape.c.y, shape.r);
+  console.log(shape);
   circle.fill = "#FF8000";
   circle.stroke = "orangered";
   circle.linewidth = 0.05;
@@ -8541,16 +8443,16 @@ TwoRenderer.prototype.drawShape = function(shape, isStatic, lineWidth, outlineCo
   return;
   switch (shape.type) {
     case this.Newton.Shape.TYPE_CIRCLE:
-      drawCircle2(isStatic ? this.bg.ctx : this.fg.ctx, shape.tc, shape.r, shape.body.a, lineWidth, outlineColor, fillColor, this.Newton);
+      drawCircle(isStatic ? this.bg.ctx : this.fg.ctx, shape.tc, shape.r, shape.body.a, lineWidth, outlineColor, fillColor, this.Newton);
       break;
     case this.Newton.Shape.TYPE_SEGMENT:
-      drawSegment2(isStatic ? this.bg.ctx : this.fg.ctx, shape.ta, shape.tb, shape.r, lineWidth, outlineColor, fillColor, this.Newton);
+      drawSegment(isStatic ? this.bg.ctx : this.fg.ctx, shape.ta, shape.tb, shape.r, lineWidth, outlineColor, fillColor, this.Newton);
       break;
     case this.Newton.Shape.TYPE_POLY:
       if (shape.convexity)
-        drawPolygon2(isStatic ? this.bg.ctx : this.fg.ctx, shape.tverts, lineWidth, outlineColor, fillColor);
+        drawPolygon(isStatic ? this.bg.ctx : this.fg.ctx, shape.tverts, lineWidth, outlineColor, fillColor);
       else
-        drawPolygon2(isStatic ? this.bg.ctx : this.fg.ctx, shape.tverts, lineWidth, outlineColor, fillColor);
+        drawPolygon(isStatic ? this.bg.ctx : this.fg.ctx, shape.tverts, lineWidth, outlineColor, fillColor);
       break;
   }
 };
@@ -8582,13 +8484,13 @@ TwoRenderer.prototype.drawHelperJointAnchors = function(p1, p2, radius, lineWidt
   return;
   var rvec = new this.Newton.vec2(radius, 0);
   var uvec = new this.Newton.vec2(0, radius);
-  drawBox2(this.fg.ctx, p1, rvec, uvec, 0, "", jointAnchorColor, this.Newton);
-  drawBox2(this.fg.ctx, p2, rvec, uvec, 0, "", jointAnchorColor, this.Newton);
-  drawLine2(this.fg.ctx, p1, p2, lineWidth, jointAnchorColor);
+  drawBox(this.fg.ctx, p1, rvec, uvec, 0, "", jointAnchorColor, this.Newton);
+  drawBox(this.fg.ctx, p2, rvec, uvec, 0, "", jointAnchorColor, this.Newton);
+  drawLine(this.fg.ctx, p1, p2, lineWidth, jointAnchorColor);
 };
 TwoRenderer.prototype.drawLine = function(p1, p2, lineWidth, strokeStyle) {
   return;
-  drawLine2(this.fg.ctx, p1, p2, lineWidth, strokeStyle);
+  drawLine(this.fg.ctx, p1, p2, lineWidth, strokeStyle);
 };
 
 // src/utils/animate.js

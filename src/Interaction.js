@@ -305,7 +305,8 @@ function addZUI(renderer) {
 
     function mousewheel(e) {
         var dy = (e.wheelDeltaY || - e.deltaY) / 1000;
-        zui.zoomBy(dy, e.clientX, e.clientY);
+        var rect = domElement.getBoundingClientRect();
+        zui.zoomBy(dy, e.clientX - rect.left, e.clientY - rect.top);
         e.preventDefault();
     }
 
@@ -370,25 +371,34 @@ function addZUI(renderer) {
     function pinchmove(e) {
         var a = e.touches[ 0 ];
         var b = e.touches[ 1 ];
-        //console.log('pinchmove', e.touches);
 
         var dx = b.clientX - a.clientX;
         var dy = b.clientY - a.clientY;
+
+        var mx = dx / 2 + a.clientX;
+        var my = dy / 2 + a.clientY;
+        zui.translateSurface(mx - mouse.x, my - mouse.y);
+        mouse.x = mx;
+        mouse.y = my;
+
         var d = Math.sqrt(dx * dx + dy * dy);
         var delta = d - distance;
-        zui.zoomBy(delta / 250, mouse.x, mouse.y);
+        var rect = domElement.getBoundingClientRect();
+        zui.zoomBy(delta / 250, mouse.x - rect.left, mouse.y - rect.top);
         distance = d;
     }
 
 }
 
 Interaction.prototype.destroy = function() {
+    /*
     ["mousedown", "mousemove", "mouseup", "mouseleave", "mousewheel"]
         .forEach(event => this.runner.renderer.canvas.removeEventListener(event, this[event]));
     this.runner.renderer.canvas.removeEventListener("touchstart",  this.touchHandler);
     this.runner.renderer.canvas.removeEventListener("touchmove",   this.touchHandler);
     this.runner.renderer.canvas.removeEventListener("touchend",    this.touchHandler);
     this.runner.renderer.canvas.removeEventListener("touchcancel", this.touchHandler);
+    */
     this.removeJoint();
     this.runner.world.removeBody(this.mouseBody);
 }

@@ -35,9 +35,10 @@ button.edit {
 
 main {
     position:absolute;
-    width: 100%;
+    width: calc(100% - 300px);
+    left: 250px;
     height: calc(100% - 42px);
     bottom: 0;
     overflow: hidden;
-    /*border: 10px solid red;*/
+    border: 5px solid green;
 }

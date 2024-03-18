@@ -25,298 +25,6 @@ var ARROW_TYPE_NORMAL = 1;
 var ARROW_TYPE_CIRCLE = 2
 var ARROW_TYPE_BOX = 3;
 
-function scissorRect(ctx, x, y, width, height) {
-	ctx.beginPath();
-	ctx.rect(x, y, width, height);
-	ctx.closePath();
-	ctx.clip();
-}
-
-function drawLine(ctx, p1, p2, lineWidth, strokeStyle) {
-	ctx.beginPath();
-
-	ctx.moveTo(p1.x, p1.y);
-	ctx.lineTo(p2.x, p2.y);
-
-	ctx.lineWidth = lineWidth;
-	ctx.strokeStyle = strokeStyle;
-	ctx.stroke();
-}
-
-function drawDashLine(ctx, p1, p2, lineWidth, dashSize, strokeStyle) {
-	var dashSize2 = dashSize * 0.5;
-	var dsq = vec2.distsq(p1, p2);
-
-	var d = vec2.truncate(vec2.sub(p2, p1), dashSize);
-	var s1 = p1;
-	var s2 = vec2.add(p1, d);
-
-	ctx.beginPath();
-
-	while (d.lengthsq() > 0) {
-		var s3 = vec2.add(s1, vec2.truncate(vec2.sub(s2, s1), dashSize2));
-
-		ctx.moveTo(s1.x, s1.y);
-		ctx.lineTo(s3.x, s3.y);
-
-		d = vec2.truncate(vec2.sub(p2, s2), dashSize);
-		s1 = s2;
-		s2 = vec2.add(s2, d);
-	}
-
-	ctx.lineWidth = lineWidth;
-	ctx.strokeStyle = strokeStyle;
-	ctx.stroke();
-}
-
-function drawArrow(ctx, p1, p2, type1, type2, headSize, lineWidth, strokeStyle, fillStyle) {
-	if (strokeStyle) {
-		ctx.beginPath();
-
-		ctx.moveTo(p1.x, p1.y);
-		ctx.lineTo(p2.x, p2.y);
-
-		ctx.lineWidth = lineWidth;
-		ctx.strokeStyle = strokeStyle;
-		ctx.stroke();
-	}
-
-	ctx.beginPath();
-
-	if (type1 != ARROW_TYPE_NONE || type2 != ARROW_TYPE_NONE) {
-		if (type1 == ARROW_TYPE_NORMAL) {
-			var sdir = vec2.scale(vec2.normalize(vec2.sub(p1, p2)), headSize);
-
-			var pl = vec2.add(p1, vec2.rotate(sdir, Math.PI * 0.9));
-			var pr = vec2.add(p1, vec2.rotate(sdir, -Math.PI * 0.9));
-
-			ctx.moveTo(pl.x, pl.y);
-			ctx.lineTo(p1.x, p1.y);
-			ctx.lineTo(pr.x, pr.y);
-			ctx.lineTo(pl.x, pl.y);
-		}
-		else if (type1 == ARROW_TYPE_CIRCLE) {
-			ctx.moveTo(p1.x, p1.y);
-			ctx.arc(p1.x, p1.y, headSize, 0, Math.PI*2, true);
-		}
-		else if (type1 == ARROW_TYPE_BOX) {
-			var rvec = vec2.scale(vec2.normalize(vec2.sub(p1, p2)), headSize);
-			var uvec = vec2.perp(rvec);
-
-			var l = vec2.sub(p1, rvec);
-			var r = vec2.add(p1, rvec);
-			var lb = vec2.sub(l, uvec);
-			var lt = vec2.add(l, uvec);
-			var rb = vec2.sub(r, uvec);
-			var rt = vec2.add(r, uvec);
-
-			ctx.moveTo(lb.x, lb.y);
-			ctx.lineTo(rb.x, rb.y);
-			ctx.lineTo(rt.x, rt.y);
-			ctx.lineTo(lt.x, lt.y);
-			ctx.lineTo(lb.x, lb.y);
-		}
-
-		if (type2 == ARROW_TYPE_NORMAL) {
-			var sdir = vec2.scale(vec2.normalize(vec2.sub(p2, p1)), headSize);
-
-			var pl = vec2.add(p2, vec2.rotate(sdir, Math.PI * 0.9));
-			var pr = vec2.add(p2, vec2.rotate(sdir, -Math.PI * 0.9));
-
-			ctx.moveTo(pl.x, pl.y);
-			ctx.lineTo(p2.x, p2.y);
-			ctx.lineTo(pr.x, pr.y);
-			ctx.lineTo(pl.x, pl.y);
-		}
-		else if (type2 == ARROW_TYPE_CIRCLE) {
-			ctx.moveTo(p2.x, p2.y);
-			ctx.arc(p2.x, p2.y, headSize, 0, Math.PI*2, true);
-		}
-		else if (type2 == ARROW_TYPE_BOX) {
-			var rvec = vec2.scale(vec2.normalize(vec2.sub(p2, p1)), headSize);
-			var uvec = vec2.perp(rvec);
-
-			var l = vec2.sub(p2, rvec);
-			var r = vec2.add(p2, rvec);
-			var lb = vec2.sub(l, uvec);
-			var lt = vec2.add(l, uvec);
-			var rb = vec2.sub(r, uvec);
-			var rt = vec2.add(r, uvec);
-
-			ctx.moveTo(lb.x, lb.y);
-			ctx.lineTo(rb.x, rb.y);
-			ctx.lineTo(rt.x, rt.y);
-			ctx.lineTo(lt.x, lt.y);
-			ctx.lineTo(lb.x, lb.y);
-		}
-	}
-
-	ctx.closePath();
-
-	if (fillStyle) {
-		ctx.fillStyle = fillStyle;
-		ctx.fill();
-	}
-
-	if (strokeStyle) {
-		ctx.lineWidth = lineWidth;
-		ctx.strokeStyle = strokeStyle;
-		ctx.stroke();
-	}
-}
-
-function drawRect(ctx, mins, maxs, lineWidth, strokeStyle, fillStyle) {
-	ctx.beginPath();
-
-	ctx.rect(mins.x, mins.y, maxs.x - mins.x, maxs.y - mins.y);
-
-	ctx.closePath();
-
-	if (fillStyle) {
-		ctx.fillStyle = fillStyle;
-		ctx.fill();
-	}
-
-	if (strokeStyle) {
-		ctx.lineWidth = lineWidth;
-		ctx.strokeStyle = strokeStyle;
-		ctx.stroke();
-	}
-}
-
-function drawBox(ctx, center, rvec, uvec, lineWidth, strokeStyle, fillStyle, Newton) {
-	ctx.beginPath();
-
-	var l = Newton.vec2.sub(center, rvec);
-	var r = Newton.vec2.add(center, rvec);
-	var lb = Newton.vec2.sub(l, uvec);
-	var lt = Newton.vec2.add(l, uvec);
-	var rb = Newton.vec2.sub(r, uvec);
-	var rt = Newton.vec2.add(r, uvec);
-
-	ctx.moveTo(lb.x, lb.y);
-	ctx.lineTo(rb.x, rb.y);
-	ctx.lineTo(rt.x, rt.y);
-	ctx.lineTo(lt.x, lt.y);
-	ctx.lineTo(lb.x, lb.y);
-
-	ctx.closePath();
-
-	if (fillStyle) {
-		ctx.fillStyle = fillStyle;
-		ctx.fill();
-	}
-
-	if (strokeStyle) {
-		ctx.lineWidth = lineWidth;
-		ctx.strokeStyle = strokeStyle;
-		ctx.stroke();
-	}
-}
-
-function drawCircle(ctx, center, radius, angle, lineWidth, strokeStyle, fillStyle, Newton) {
-	ctx.beginPath();
-
-	ctx.arc(center.x, center.y, radius, 0, Math.PI*2, false);
-
-	if (fillStyle) {
-		ctx.fillStyle = fillStyle;
-		ctx.fill();
-	}
-
-	if (strokeStyle) {
-		if (typeof angle == "number") {
-			ctx.moveTo(center.x, center.y);
-			var rt = Newton.vec2.add(center, Newton.vec2.scale(Newton.vec2.rotation(angle), radius));
-			ctx.lineTo(rt.x, rt.y);
-		}
-
-		ctx.lineWidth = lineWidth;
-		ctx.strokeStyle = strokeStyle;
-		ctx.stroke();
-	}
-}
-
-function drawArc(ctx, center, radius, startAngle, endAngle, lineWidth, strokeStyle, fillStyle) {
-	ctx.beginPath();
-
-	ctx.moveTo(center.x, center.y);
-
-	var p = vec2.add(center, vec2.scale(vec2.rotation(startAngle), radius));
-	ctx.arc(center.x, center.y, radius, startAngle, endAngle, false);
-	ctx.lineTo(center.x, center.y);
-
-	ctx.closePath();
-
-	if (fillStyle) {
-		ctx.fillStyle = fillStyle;
-		ctx.fill();
-	}
-
-	if (strokeStyle) {
-		ctx.lineWidth = lineWidth;
-		ctx.strokeStyle = strokeStyle;
-		ctx.stroke();
-	}
-}
-
-function drawSegment(ctx, a, b, radius, lineWidth, strokeStyle, fillStyle, Newton) {
-	ctx.beginPath();
-
-	var dn = Newton.vec2.normalize(Newton.vec2.perp(Newton.vec2.sub(b, a)));
-	var start_angle = dn.toAngle();
-	ctx.arc(a.x, a.y, radius, start_angle, start_angle + Math.PI, false);
-
-	var ds = Newton.vec2.scale(dn, -radius);
-	var bp = Newton.vec2.add(b, ds);
-	ctx.lineTo(bp.x, bp.y);
-
-	start_angle += Math.PI;
-	ctx.arc(b.x, b.y, radius, start_angle, start_angle + Math.PI, false);
-
-	ds = Newton.vec2.scale(dn, radius);
-	var ap = Newton.vec2.add(a, ds);
-	ctx.lineTo(ap.x, ap.y);
-
-	ctx.closePath();
-
-	if (fillStyle) {
-		ctx.fillStyle = fillStyle;
-		ctx.fill();
-	}
-
-	if (strokeStyle) {
-		ctx.lineWidth = lineWidth;
-		ctx.strokeStyle = strokeStyle;
-		ctx.stroke();
-	}
-}
-
-function drawPolygon(ctx, verts, lineWidth, strokeStyle, fillStyle) {
-	ctx.beginPath();
-	ctx.moveTo(verts[0].x, verts[0].y);
-
-	for (var i = 0; i < verts.length; i++) {
-		ctx.lineTo(verts[i].x, verts[i].y);
-	}
-
-	ctx.lineTo(verts[verts.length - 1].x, verts[verts.length - 1].y);
-
-	ctx.closePath();
-
-	if (fillStyle) {
-		ctx.fillStyle = fillStyle;
-		ctx.fill();
-	}
-
-	if (strokeStyle) {
-		ctx.lineWidth = lineWidth;
-		ctx.strokeStyle = strokeStyle;
-		ctx.stroke();
-	}
-}
-
-
 function TwoRenderer(Newton, canvas) {
 	this.Newton = Newton;
     this.canvas = canvas;
@@ -327,30 +35,23 @@ function TwoRenderer(Newton, canvas) {
 		autostart: true
 	}).appendTo(canvas);
 
+
 	this.stage = new Two.Group();
 	this.two.add(this.stage);
-
-	var rect = two.makeRectangle(0, 0, 10, 10);
-	rect.fill = 'rgb(0, 200, 255)';
-	rect.opacity = 0.75;
-	rect.noStroke();
-
-	this.stage.add(rect);
 
 	this.zui = new Two.ZUI(this.stage, this.two.renderer.domElement);
 	this.resize();
 
+	//two.scene.scale = new Two.Vector( 1, -1 );
+	//two.scene.translation.set( 0, 40);
+
 	this.zui.translateSurface(this.width / 2, this.height / 2);
-	//this.zui.zoomSet(4, this.width / 2, this.height / 2);
-
-	console.log(this.width / 2, this.height / 2)
-
+	this.zui.zoomSet(15, this.width / 2, this.height / 2);
 };
 
 TwoRenderer.prototype.resize = function() {
 	var dx = this.canvas.offsetWidth  - (this.width  || this.canvas.offsetWidth);
 	var dy = this.canvas.offsetHeight - (this.height || this.canvas.offsetHeight);
-	
 	this.width  = this.canvas.offsetWidth;
 	this.height = this.canvas.offsetHeight;
 	this.two.renderer.setSize(this.width, this.height);
@@ -358,7 +59,8 @@ TwoRenderer.prototype.resize = function() {
 }
 
 TwoRenderer.prototype.createCircle = function(body_group, shape) {
-	const circle = this.two.makeCircle(0, 0, shape.r);
+	const circle = this.two.makeCircle(shape.c.x, shape.c.y, shape.r);
+	console.log(shape)
 	circle.fill = '#FF8000';
 	circle.stroke = 'orangered';
 	circle.linewidth = 0.05;
@@ -369,7 +71,7 @@ TwoRenderer.prototype.createCircle = function(body_group, shape) {
 }
 
 TwoRenderer.prototype.createPolygon = function(body_group, shape) {
-	const poly = this.two.makePath(...shape.verts.reduce((a, v) => a.concat([v.x,v.y]), []));
+	const poly = this.two.makePath(...shape.verts.reduce((a, v) => a.concat([v.x, v.y]), []));
 	poly.linewidth = 0.05; //poly.translation = new Two.Vector(60, 60);
 	poly.stroke = "#aaaaaa";
 	poly.fill = "#ececec";
