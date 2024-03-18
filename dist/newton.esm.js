@@ -2950,14 +2950,13 @@ function Interaction(runner, settings) {
   addZUI(this.runner.renderer);
 }
 function addZUI(renderer) {
-  const { Two: Two2, two, stage } = renderer;
+  const { Two: Two2, two, stage, zui } = renderer;
   var domElement = two.renderer.domElement;
-  var zui = new Two2.ZUI(stage);
   var mouse = new Two2.Vector();
   var touches = {};
   var distance2 = 0;
   var dragging = false;
-  zui.addLimits(0.06, 20);
+  zui.addLimits(0.06, 100);
   domElement.addEventListener("mousedown", mousedown, false);
   domElement.addEventListener("mousewheel", mousewheel, false);
   domElement.addEventListener("wheel", mousewheel, false);
@@ -4242,6 +4241,12 @@ CanvasRenderer.prototype.beginStatic = function(camera, backgroundColor) {
 };
 CanvasRenderer.prototype.endStatic = function() {
   this.bg.ctx.restore();
+};
+CanvasRenderer.prototype.addBody = function() {
+};
+CanvasRenderer.prototype.removeBody = function() {
+};
+CanvasRenderer.prototype.updateBody = function() {
 };
 CanvasRenderer.prototype.beginDynamic = function(camera) {
   this.fg.ctx.save();
@@ -8219,7 +8224,7 @@ var _ZUI = class _ZUI {
       x: _ZUI.Limit.clone(),
       y: _ZUI.Limit.clone()
     };
-    this.viewport = domElement || document.body;
+    this.viewport = domElement;
     this.viewportOffset = {
       top: 0,
       left: 0,
@@ -8304,12 +8309,13 @@ var _ZUI = class _ZUI {
     const r = vo.multiply(sm[0], sm[1], sm[2]);
     return { x: r[0], y: r[1], z: r[2] };
   }
-  zoomBy(byF, clientX, clientY) {
+  zoomBy(byF, clientX = 0, clientY = 0) {
+    console.log(clientX, clientY);
     const s = _ZUI.PositionToScale(this.zoom + byF);
     this.zoomSet(s, clientX, clientY);
     return this;
   }
-  zoomSet(zoom, clientX, clientY) {
+  zoomSet(zoom, clientX = 0, clientY = 0) {
     const newScale = this.fitToLimits(zoom);
     this.zoom = _ZUI.ScaleToPosition(newScale);
     if (newScale === this.scale)
@@ -8338,9 +8344,8 @@ var _ZUI = class _ZUI {
   }
   updateSurface() {
     const e = this.surfaceMatrix.elements;
-    for (let i = 0; i < this.surfaces.length; i++) {
+    for (let i = 0; i < this.surfaces.length; i++)
       this.surfaces[i].apply(e[2], e[5], e[0]);
-    }
     return this;
   }
   reset() {
@@ -8359,9 +8364,8 @@ __publicField(_ZUI, "Limit", {
   max: Infinity,
   clone: function() {
     const result = {};
-    for (let k in this) {
+    for (let k in this)
       result[k] = this[k];
-    }
     return result;
   }
 });
@@ -8471,32 +8475,38 @@ function TwoRenderer(Newton, canvas) {
   }).appendTo(canvas);
   this.stage = new two_min_default.Group();
   this.two.add(this.stage);
-  var rect = two.makeRectangle(two.width * 0.5, two.height * 0.5, 100, 100);
+  var rect = two.makeRectangle(0, 0, 10, 10);
   rect.fill = "rgb(0, 200, 255)";
   rect.opacity = 0.75;
   rect.noStroke();
   this.stage.add(rect);
+  this.zui = new two_min_default.ZUI(this.stage, this.two.renderer.domElement);
   this.resize();
+  this.zui.translateSurface(this.width / 2, this.height / 2);
+  console.log(this.width / 2, this.height / 2);
 }
 TwoRenderer.prototype.resize = function() {
+  var dx = this.canvas.offsetWidth - (this.width || this.canvas.offsetWidth);
+  var dy = this.canvas.offsetHeight - (this.height || this.canvas.offsetHeight);
   this.width = this.canvas.offsetWidth;
   this.height = this.canvas.offsetHeight;
   this.two.renderer.setSize(this.width, this.height);
+  this.zui.translateSurface(dx / 2, dy / 2);
 };
 TwoRenderer.prototype.createCircle = function(body_group, shape) {
   const circle = this.two.makeCircle(0, 0, shape.r);
   circle.fill = "#FF8000";
   circle.stroke = "orangered";
-  circle.linewidth = 0.1;
+  circle.linewidth = 0.05;
   const line = this.two.makeLine(0, 0, 0, shape.r);
-  line.linewidth = 0.1;
+  line.linewidth = 0.05;
   line.stroke = "rgba(255, 0, 0, 0.5)";
   body_group.add(circle, line);
 };
 TwoRenderer.prototype.createPolygon = function(body_group, shape) {
   const poly = this.two.makePath(...shape.verts.reduce((a, v) => a.concat([v.x, v.y]), []));
-  poly.linewidth = 0.1;
-  poly.stroke = "#cccccc";
+  poly.linewidth = 0.05;
+  poly.stroke = "#aaaaaa";
   poly.fill = "#ececec";
   body_group.add(poly);
 };
@@ -8514,7 +8524,6 @@ TwoRenderer.prototype.addBody = function(body) {
         console.log("TYPE_SEGMENT");
         break;
       case this.Newton.Shape.TYPE_POLY:
-        console.log("TYPE_POLY");
         this.createPolygon(body.render_group, shape);
         break;
     }

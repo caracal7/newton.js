@@ -326,49 +326,54 @@ function TwoRenderer(Newton, canvas) {
 	var two = this.two = new Two({
 		autostart: true
 	}).appendTo(canvas);
+
 	this.stage = new Two.Group();
 	this.two.add(this.stage);
 
-	var rect = two.makeRectangle(two.width * 0.5, two.height * 0.5, 100, 100);
+	var rect = two.makeRectangle(0, 0, 10, 10);
 	rect.fill = 'rgb(0, 200, 255)';
 	rect.opacity = 0.75;
 	rect.noStroke();
+
 	this.stage.add(rect);
 
+	this.zui = new Two.ZUI(this.stage, this.two.renderer.domElement);
 	this.resize();
+
+	this.zui.translateSurface(this.width / 2, this.height / 2);
+	//this.zui.zoomSet(4, this.width / 2, this.height / 2);
+
+	console.log(this.width / 2, this.height / 2)
+
 };
 
 TwoRenderer.prototype.resize = function() {
+	var dx = this.canvas.offsetWidth  - (this.width  || this.canvas.offsetWidth);
+	var dy = this.canvas.offsetHeight - (this.height || this.canvas.offsetHeight);
+	
 	this.width  = this.canvas.offsetWidth;
 	this.height = this.canvas.offsetHeight;
 	this.two.renderer.setSize(this.width, this.height);
+	this.zui.translateSurface(dx / 2, dy / 2);
 }
-
-
-
 
 TwoRenderer.prototype.createCircle = function(body_group, shape) {
 	const circle = this.two.makeCircle(0, 0, shape.r);
 	circle.fill = '#FF8000';
 	circle.stroke = 'orangered';
-	circle.linewidth = 0.1;
+	circle.linewidth = 0.05;
 	const line = this.two.makeLine(0, 0, 0, shape.r);
-	line.linewidth = 0.1;
+	line.linewidth = 0.05;
 	line.stroke = "rgba(255, 0, 0, 0.5)";
 	body_group.add(circle, line);
 }
 
 TwoRenderer.prototype.createPolygon = function(body_group, shape) {
-
 	const poly = this.two.makePath(...shape.verts.reduce((a, v) => a.concat([v.x,v.y]), []));
-	poly.linewidth = 0.1;
-	//poly.translation = new Two.Vector(60, 60);
-	poly.stroke = "#cccccc";
+	poly.linewidth = 0.05; //poly.translation = new Two.Vector(60, 60);
+	poly.stroke = "#aaaaaa";
 	poly.fill = "#ececec";
-
 	body_group.add(poly);
-
-
 }
 
 
@@ -387,7 +392,6 @@ TwoRenderer.prototype.addBody = function(body) {
 				console.log('TYPE_SEGMENT');
 				break;
 			case this.Newton.Shape.TYPE_POLY:
-				console.log('TYPE_POLY');
 				this.createPolygon(body.render_group, shape);
 				break;
 		}

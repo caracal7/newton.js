@@ -338,7 +338,7 @@ Runner.prototype.worldToCanvas = function(p) {
 
 Runner.prototype.canvasToWorld = function(p) {
     return new vec2(
-        (this.camera.origin.x + (p.x - this.renderer.width * 0.5))  / (this.camera.scale * meter2pixel(1)),
+        (this.camera.origin.x + (p.x - this.renderer.width  * 0.5)) / (this.camera.scale * meter2pixel(1)),
         (this.camera.origin.y - (p.y - this.renderer.height * 0.5)) / (this.camera.scale * meter2pixel(1)));
 }
 

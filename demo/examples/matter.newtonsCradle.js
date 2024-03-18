@@ -39,6 +39,16 @@ export default Newton => {
 		staticBody.resetMassData();
 		world.addBody(staticBody);
 
+        var b1 = new Body(Body.STATIC);
+		b1.addShape(new ShapeBox(0, 0, 1, 1));
+		b1.resetMassData();
+		world.addBody(b1);
+        var b2 = new Body(Body.STATIC);
+		b2.addShape(new ShapeBox(5, 5, 1, 1));
+		b2.resetMassData();
+		world.addBody(b2);
+
+
 		newtonsCradle(Newton, world, staticBody, -5, 10, 5, 0.3, 2);
 		newtonsCradle(Newton, world, staticBody,  0, 10, 8, 0.5, 5, 0.8);
 

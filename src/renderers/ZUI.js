@@ -36,7 +36,7 @@ class ZUI {
             y: ZUI.Limit.clone()
         };
 
-        this.viewport = domElement || document.body;
+        this.viewport = domElement;
         this.viewportOffset = {
             top: 0,
             left: 0,
@@ -62,9 +62,7 @@ class ZUI {
         max: Infinity,
         clone: function() {
             const result = {};
-            for (let k in this) {
-                result[k] = this[k];
-            }
+            for (let k in this) result[k] = this[k];
             return result;
         }
     }
@@ -82,7 +80,6 @@ class ZUI {
     static ScaleToPosition(scale) {
         return Math.log(scale);
     }
-
 
     add(surface) {
         this.surfaces.push(surface);
@@ -107,7 +104,6 @@ class ZUI {
         } else {
             this.limits.scale.max = max;
         }
-
         return this;
     }
 
@@ -149,13 +145,14 @@ class ZUI {
         return { x: r[0], y: r[1], z: r[2] };
     }
 
-    zoomBy(byF, clientX, clientY) {
+    zoomBy(byF, clientX = 0, clientY = 0) {
+        console.log(clientX, clientY)
         const s = ZUI.PositionToScale(this.zoom + byF);
         this.zoomSet(s, clientX, clientY);
         return this;
     }
 
-    zoomSet(zoom, clientX, clientY) {
+    zoomSet(zoom, clientX = 0, clientY = 0) {
         const newScale = this.fitToLimits(zoom);
         this.zoom = ZUI.ScaleToPosition(newScale);
 
@@ -168,9 +165,11 @@ class ZUI {
         this.scale = newScale;
 
         const c = this.surfaceToClient(sf);
+
         const dx = clientX - c.x;
         const dy = clientY - c.y;
         this.translateSurface(dx, dy);
+
         return this;
     }
 
@@ -182,8 +181,8 @@ class ZUI {
 
     updateOffset() {
         const rect = this.viewport.getBoundingClientRect();
-        this.viewportOffset.left = rect.left - document.body.scrollLeft;
-        this.viewportOffset.top = rect.top - document.body.scrollTop;
+        this.viewportOffset.left = rect.left - document.body.scrollLeft;  // this.viewport вместо document.body
+        this.viewportOffset.top  = rect.top  - document.body.scrollTop;
         this.viewportOffset.matrix
             .identity()
             .translate(this.viewportOffset.left, this.viewportOffset.top);
@@ -192,9 +191,8 @@ class ZUI {
 
     updateSurface() {
         const e = this.surfaceMatrix.elements;
-        for (let i = 0; i < this.surfaces.length; i++) {
+        for (let i = 0; i < this.surfaces.length; i++)
             this.surfaces[i].apply(e[2], e[5], e[0]);
-        }
         return this;
     }
 

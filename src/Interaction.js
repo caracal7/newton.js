@@ -255,16 +255,15 @@ function Interaction(runner, settings) {
 
 
 function addZUI(renderer) {
-    const { Two, two, stage } = renderer;
+    const { Two, two, stage, zui } = renderer;
 
     var domElement = two.renderer.domElement;
-    var zui = new Two.ZUI(stage);
     var mouse = new Two.Vector();
     var touches = {};
     var distance = 0;
     var dragging = false;
 
-    zui.addLimits(0.06, 20);
+    zui.addLimits(0.06, 100);
 
     domElement.addEventListener('mousedown', mousedown, false);
     domElement.addEventListener('mousewheel', mousewheel, false);
