@@ -266,27 +266,28 @@ function addZUI(interaction, runner, renderer) {
 
     zui.addLimits(0.06, 100);
 
+    const startDrag = (x,y) => {
+        // Remove previous mouse joint
+        interaction.removeJoint();
+
+        const world_pos = zui.clientToSurface(x, y);
+        const p = new vec2(world_pos.x, -world_pos.y);
+        // If we picked shape then create mouse joint
+        dragging = runner.world.findBodyByPoint(p);
+
+        if (dragging) {
+            interaction.mouseBody.p.copy(p);
+            interaction.mouseBody.syncTransform();
+            interaction.mouseJoint = new MouseJoint(interaction.mouseBody, dragging, p);
+            interaction.mouseJoint.maxForce = dragging.m * 50000;
+            runner.world.addJoint(interaction.mouseJoint);
+        }
+    }
 
     const mousedown = event =>  {
         mouse.x = event.clientX;
         mouse.y = event.clientY;
-
-        // Remove previous mouse joint
-    	interaction.removeJoint();
-
-        const world_pos = zui.clientToSurface(event.offsetX, event.offsetY);
-        const p = new vec2(world_pos.x, -world_pos.y);
-    	// If we picked shape then create mouse joint
-    	dragging = runner.world.findBodyByPoint(p);
-
-        if (dragging) {
-    		interaction.mouseBody.p.copy(p);
-    		interaction.mouseBody.syncTransform();
-    		interaction.mouseJoint = new MouseJoint(interaction.mouseBody, dragging, p);
-    		interaction.mouseJoint.maxForce = dragging.m * 50000;
-    		runner.world.addJoint(interaction.mouseJoint);
-    	}
-
+        startDrag(event.offsetX, event.offsetY);
         window.addEventListener('mousemove', mousemove, false);
         window.addEventListener('mouseup', mouseup, false);
     }
@@ -307,7 +308,7 @@ function addZUI(interaction, runner, renderer) {
     }
 
     function mouseup(e) {
-        interaction.removeJoint();    
+        interaction.removeJoint();
         window.removeEventListener('mousemove', mousemove, false);
         window.removeEventListener('mouseup', mouseup, false);
     }
@@ -353,10 +354,12 @@ function addZUI(interaction, runner, renderer) {
         e.preventDefault();
     }
 
-    function panstart(e) {
-        var touch = e.touches[ 0 ];
+    function panstart(event) {
+        var touch = event.touches[ 0 ];
         mouse.x = touch.clientX;
         mouse.y = touch.clientY;
+
+        startDrag(touch.offsetX, touch.offsetY);
     }
 
     function panmove(e) {

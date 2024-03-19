@@ -2918,11 +2918,9 @@ function addZUI(interaction, runner, renderer) {
   var distance2 = 0;
   var dragging = false;
   zui.addLimits(0.06, 100);
-  const mousedown = (event) => {
-    mouse.x = event.clientX;
-    mouse.y = event.clientY;
+  const startDrag = (x, y) => {
     interaction.removeJoint();
-    const world_pos = zui.clientToSurface(event.offsetX, event.offsetY);
+    const world_pos = zui.clientToSurface(x, y);
     const p = new vec22(world_pos.x, -world_pos.y);
     dragging = runner.world.findBodyByPoint(p);
     if (dragging) {
@@ -2932,6 +2930,11 @@ function addZUI(interaction, runner, renderer) {
       interaction.mouseJoint.maxForce = dragging.m * 5e4;
       runner.world.addJoint(interaction.mouseJoint);
     }
+  };
+  const mousedown = (event) => {
+    mouse.x = event.clientX;
+    mouse.y = event.clientY;
+    startDrag(event.offsetX, event.offsetY);
     window.addEventListener("mousemove", mousemove, false);
     window.addEventListener("mouseup", mouseup, false);
   };
@@ -2991,10 +2994,11 @@ function addZUI(interaction, runner, renderer) {
     }
     e.preventDefault();
   }
-  function panstart(e) {
-    var touch = e.touches[0];
+  function panstart(event) {
+    var touch = event.touches[0];
     mouse.x = touch.clientX;
     mouse.y = touch.clientY;
+    startDrag(touch.offsetX, touch.offsetY);
   }
   function panmove(e) {
     var touch = e.touches[0];
