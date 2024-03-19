@@ -8414,11 +8414,19 @@ TwoRenderer.prototype.updateBody = function(body) {
 TwoRenderer.prototype.addJoint = function(joint) {
   var p1 = joint.getWorldAnchor1();
   var p2 = joint.getWorldAnchor2();
+  joint.render_group = this.two.makeGroup();
   var line = this.two.makeLine(p1.x, p1.y, p2.x, p2.y);
   line.linewidth = 0.05;
   line.stroke = "rgba(0, 255, 0, 0.5)";
-  joint.render_group = this.two.makeGroup();
-  joint.render_group.add(line);
+  const circle1 = this.two.makeCircle(p1.x, p1.y, 0.1);
+  circle1.fill = "#FF8000";
+  circle1.stroke = "red";
+  circle1.linewidth = 0.05;
+  const circle2 = this.two.makeCircle(p2.x, p2.y, 0.05);
+  circle2.fill = "#FF8000";
+  circle2.stroke = "red";
+  circle2.linewidth = 0.05;
+  joint.render_group.add(line, circle1, circle2);
   this.stage.add(joint.render_group);
 };
 TwoRenderer.prototype.removeJoint = function(joint) {
@@ -8432,6 +8440,8 @@ TwoRenderer.prototype.updateJoint = function(joint) {
   a.y = p1.y;
   b.x = p2.x;
   b.y = p2.y;
+  joint.render_group.children[1].position.set(p1.x, p1.y);
+  joint.render_group.children[2].position.set(p2.x, p2.y);
 };
 TwoRenderer.prototype.drawShape = function(shape, isStatic, lineWidth, outlineColor, fillColor) {
   return;

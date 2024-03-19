@@ -83,7 +83,7 @@ Body.prototype.serialize = function() {
 	var shapes = [];
 	for (var i = 0; i < this.shapeArr.length; i++)
 		shapes.push(this.shapeArr[i].serialize());
-		
+
 	return {
 		type: 		["static", "kinetic", "dynamic"][this.type],
 		name: 		this.name,
@@ -333,9 +333,7 @@ Body.prototype.awake = function(flag) {
 
 Body.prototype.isCollidable = function(other) {
 	if (this == other) return false;
-
 	if (!this.isDynamic() && !other.isDynamic()) return false;
-
 	if (!(this.maskBits & other.categoryBits) || !(other.maskBits & this.categoryBits)) return false;
 
 	for (var i = 0; i < this.jointArr.length; i++) {

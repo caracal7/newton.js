@@ -24,31 +24,12 @@ export default Newton => {
 	function init(world) {
 		const staticBody = new Body(Body.STATIC);
 
-		staticBody.addShape(new ShapeBox(0, 0, 20.48, 0.4));
+		staticBody.addShape(new ShapeBox(0, 0.2, 20.48, 0.4));
 		staticBody.addShape(new ShapeBox(0, 15.16, 20.48, 0.4));
 		staticBody.addShape(new ShapeBox(-10.04, 7.68, 0.4, 14.56));
 		staticBody.addShape(new ShapeBox(10.04, 7.68, 0.4, 14.56));
-
-		staticBody.addShape(new ShapeBox(0, 0, 1, 1));
-		staticBody.addShape(new ShapeBox(1, 0, 1, 1));
-		staticBody.addShape(new ShapeCircle(2, 0, 1));
-		staticBody.addShape(new ShapeSegment(new vec2(-2, 0), new vec2(-2, 1), 0.5));
-
 		staticBody.resetMassData();
 		world.addBody(staticBody);
-
-		const staticBody2 = new Body(Body.DYNAMIC, new vec2(-3, 3), Math.PI / 4);
-		staticBody2.addShape(new ShapeSegment(new vec2(0, 0), new vec2(0, 2), 0.5));
-		staticBody2.resetMassData();
-		world.addBody(staticBody2);
-
-		const staticBody3 = new Body(Body.static, new vec2(-5, 6));
-		staticBody3.addShape(new ShapeSegment(new vec2(0, 0), new vec2(1, 4), 0.5));
-		staticBody3.resetMassData();
-		world.addBody(staticBody3);
-
-
-
 
 		const body1 = new Body(Body.DYNAMIC, new vec2(0, 2));
 		var shape = new ShapeSegment(new vec2(0, 0), new vec2(0, 1), 0.2);
