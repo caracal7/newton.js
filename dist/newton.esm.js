@@ -8214,7 +8214,7 @@ var Surface = class {
   }
   apply(px, py, s) {
     this.object.translation.set(px, py);
-    this.object.scale = new two_min_default.Vector(s, -s);
+    this.object.scale = new two_min_default.Vector(s, s);
     return this;
   }
 };
@@ -8326,10 +8326,24 @@ var _ZUI = class _ZUI {
     this.updateSurface();
     return this;
   }
-  updateOffset() {
-    this.viewportOffset.matrix.identity().translate(0, 0);
-    return this;
-  }
+  /*
+      updateOffset() {
+  
+          this.viewportOffset.matrix
+              .identity()
+              .translate(0, 0);
+  
+          const rect = this.viewport.getBoundingClientRect();
+          console.log(rect)
+          this.viewportOffset.left = rect.left;
+          this.viewportOffset.top  = rect.top;
+          this.viewportOffset.matrix
+              .identity()
+              .translate(this.viewportOffset.left, this.viewportOffset.top);
+  
+          return this;
+      }
+          */
   updateSurface() {
     const e = this.surfaceMatrix.elements;
     for (let i = 0; i < this.surfaces.length; i++)
@@ -8367,7 +8381,8 @@ function TwoRenderer(Newton, canvas) {
   two_min_default.ZUI = ZUI_default;
   this.Two = two_min_default;
   this.two = new two_min_default({
-    type: two_min_default.Types.svg,
+    type: two_min_default.Types.webgl,
+    //	type: Two.Types.svg,
     autostart: true
   }).appendTo(canvas);
   this.stage = new two_min_default.Group();

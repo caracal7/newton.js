@@ -16,7 +16,7 @@ class Surface {
 
     apply(px, py, s) {
         this.object.translation.set(px, py);
-        this.object.scale = new Two.Vector(s, -s);
+        this.object.scale = new Two.Vector(s, s);
         return this;
     }
 }
@@ -108,7 +108,7 @@ class ZUI {
     }
 
     clientToSurface(a, b, c) {
-    //    this.updateOffset();
+        //this.updateOffset();
         const m = this.surfaceMatrix.inverse();
         let x, y, z;
         if (arguments.length === 1) {
@@ -127,7 +127,7 @@ class ZUI {
     }
 
     surfaceToClient(a) {
-    //    this.updateOffset();
+        //this.updateOffset();
         const vo = this.viewportOffset.matrix.clone();
         let x, y, z;
 
@@ -172,13 +172,13 @@ class ZUI {
         this.updateSurface();
         return this;
     }
-
+        /*
     updateOffset() {
 
         this.viewportOffset.matrix
             .identity()
             .translate(0, 0);
-        /*
+
         const rect = this.viewport.getBoundingClientRect();
         console.log(rect)
         this.viewportOffset.left = rect.left;
@@ -186,10 +186,10 @@ class ZUI {
         this.viewportOffset.matrix
             .identity()
             .translate(this.viewportOffset.left, this.viewportOffset.top);
-        */
+
         return this;
     }
-
+        */
     updateSurface() {
         const e = this.surfaceMatrix.elements;
         for (let i = 0; i < this.surfaces.length; i++)

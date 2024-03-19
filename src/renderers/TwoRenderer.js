@@ -31,7 +31,8 @@ function TwoRenderer(Newton, canvas) {
 	Two.ZUI = ZUI;
 	this.Two = Two;
 	this.two = new Two({
-		type: Two.Types.svg,
+		type: Two.Types.webgl,
+	//	type: Two.Types.svg,
 		autostart: true
 	}).appendTo(canvas);
 
