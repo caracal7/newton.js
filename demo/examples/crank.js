@@ -37,7 +37,7 @@ export default Newton => {
 		staticBody.resetMassData();
 		world.addBody(staticBody);
 
-		const staticBody2 = new Body(Body.DYNAMIC, new vec2(-3, 3), Math.PI / 4);
+		const staticBody2 = new Body(Body.DYNAMIC, new vec2(-3, 3), Math.PI / 10);
 		staticBody2.addShape(new ShapeSegment(new vec2(0, 0), new vec2(0, 1), 0.5));
 
 		staticBody2.resetMassData();
@@ -74,7 +74,7 @@ export default Newton => {
 		var joint = new RevoluteJoint(staticBody, body1, new vec2(0, 2));
 		joint.collideConnected = false;
 		joint.enableMotor(true);
-		joint.setMotorSpeed(deg2rad(125));
+		joint.setMotorSpeed(deg2rad(225));
 		joint.setMaxMotorTorque(400000000);
 		world.addJoint(joint);
 

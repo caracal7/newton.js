@@ -23,15 +23,15 @@ export default Newton => {
 		shape2.e = 0.85;
 		shape2.u = 1.1;
 		shape2.density = 1;
-/*
+
 		const shape3 = new ShapeCircle(4, 0, 0.3);
 		shape3.e = 1;
 		shape3.u = 1.0;
 		shape3.density = 1;
-*/
+
 		body.addShape(shape1);
 		body.addShape(shape2);
-//		body.addShape(shape3);
+		body.addShape(shape3);
 
 		body.resetMassData();
 		world.addBody(body);

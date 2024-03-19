@@ -9,8 +9,10 @@
 </header>
 <@editor if(state.edit) runner=state.runner @play/>
 
-<main/>
+
 <canvas/>
+<main/>
+
 
 <!import Newton         from ../dist/newton.esm.js>
 

@@ -55,59 +55,38 @@ TwoRenderer.prototype.resize = function() {
 	this.zui.translateSurface(dx / 2, dy / 2);
 }
 
-TwoRenderer.prototype.createCircle = function(body_group, shape) {
-	const circle = this.two.makeCircle(shape.c.x, shape.c.y, shape.r);
+TwoRenderer.prototype.createCircle = function(body_group, shape, body) {
+	var pos = this.Newton.vec2.sub(shape.tc, body.p);
+	const circle = this.two.makeCircle(pos.x, pos.y, shape.r);
 	circle.fill = '#FF8000';
 	circle.stroke = 'orangered';
 	circle.linewidth = 0.05;
-	const line = this.two.makeLine(shape.c.x, shape.c.y, shape.c.x, shape.r);
+	const line = this.two.makeLine(pos.x, pos.y, pos.x, pos.y + shape.r);
 	line.linewidth = 0.05;
 	line.stroke = "rgba(255, 0, 0, 0.5)";
 	body_group.add(circle, line);
 }
 
-TwoRenderer.prototype.createPolygon = function(body_group, shape) {
-	const poly = this.two.makePath(...shape.verts.reduce((a, v) => a.concat([v.x, v.y]), []));
-	poly.linewidth = 0.05; //poly.translation = new Two.Vector(60, 60);
+TwoRenderer.prototype.createPolygon = function(body_group, shape, body) {
+	const poly = this.two.makePath(...shape.tverts.reduce((a, v) => {
+		var pos = this.Newton.vec2.sub(v, body.p);
+		return a.concat([pos.x, pos.y])
+	}, []));
+	poly.linewidth = 0.05;
 	poly.stroke = "#aaaaaa";
 	poly.fill = "#ececec";
 	body_group.add(poly);
 }
 
 
-//drawSegment(this.fg.ctx, shape.ta, shape.tb, shape.r, lineWidth, outlineColor, fillColor, this.Newton);
-
-function drawSegment(ctx, a, b, radius, lineWidth, strokeStyle, fillStyle, Newton) {
-	ctx.beginPath();
-
-	var dn = Newton.vec2.normalize(Newton.vec2.perp(Newton.vec2.sub(b, a)));
-	var start_angle = dn.toAngle();
-	ctx.arc(a.x, a.y, radius, start_angle, start_angle + Math.PI, false);
-
-	var ds = Newton.vec2.scale(dn, -radius);
-	var bp = Newton.vec2.add(b, ds);
-	ctx.lineTo(bp.x, bp.y);
-
-	start_angle += Math.PI;
-	ctx.arc(b.x, b.y, radius, start_angle, start_angle + Math.PI, false);
-
-	ds = Newton.vec2.scale(dn, radius);
-	var ap = Newton.vec2.add(a, ds);
-	ctx.lineTo(ap.x, ap.y);
-
-	ctx.closePath();
-}
-
-
-TwoRenderer.prototype.createSegment = function(body_group, shape) {
-
-	var a = shape.ta;
-	var b = shape.tb;
+TwoRenderer.prototype.createSegment = function(body_group, shape, body) {
+	var a = this.Newton.vec2.sub(shape.ta, body.p);
+	var b = this.Newton.vec2.sub(shape.tb, body.p);
 
 	var dn = this.Newton.vec2.normalize(this.Newton.vec2.perp(this.Newton.vec2.sub(b, a)));
 	var start_angle = dn.toAngle();
 	const arc1 = this.two.makeArcSegment(a.x, a.y, 0, shape.r, start_angle, start_angle + Math.PI, 10);
-	arc1.linewidth = 0.05; //poly.translation = new Two.Vector(60, 60);
+	arc1.linewidth = 0.05;
 	arc1.stroke = "#aaaaaa";
 	arc1.fill = "#ececec";
 
@@ -120,7 +99,7 @@ TwoRenderer.prototype.createSegment = function(body_group, shape) {
 
 	start_angle += Math.PI;
 	const arc2 = this.two.makeArcSegment(b.x, b.y, 0, shape.r, start_angle + Math.PI, start_angle, 10);
-	arc2.linewidth = 0.05; //poly.translation = new Two.Vector(60, 60);
+	arc2.linewidth = 0.05;
 	arc2.stroke = "#aaaaaa";
 	arc2.fill = "#ececec";
 
@@ -129,44 +108,29 @@ TwoRenderer.prototype.createSegment = function(body_group, shape) {
 
 	const line2 = this.two.makeLine(ap.x, bp.y, ap.x, ap.y);
 	line2.linewidth = 0.05;
-	line2.stroke = "#aaaaaa";
+	line2.stroke = "red";
 
-	console.log(shape)
-	const circle1 = this.two.makeCircle(shape.a.x, shape.a.y, shape.r);
-	circle1.fill = '#FF8000';
-	circle1.stroke = 'orangered';
-	circle1.linewidth = 0.05;
-
-	const circle2 = this.two.makeCircle(shape.b.x, shape.b.y, shape.r);
-	circle2.fill = '#FF0080';
-	circle2.stroke = 'red';
-	circle2.linewidth = 0.05;
-
-	body_group.add(arc1, line1, line2, arc2, circle1, circle2);
-
-/*
-
-*/
-
+	body_group.add(arc1, line1, line2, arc2);
 }
 
 
 TwoRenderer.prototype.addBody = function(body) {
 	body.render_group = this.two.makeGroup();
 	body.render_group.position.set(body.p.x, body.p.y);
+	body.render_group.rotation = body.a;
 	this.stage.add(body.render_group);
 
 	for (var k = 0; k < body.shapeArr.length; k++) {
 		var shape = body.shapeArr[k];
 		switch (shape.type) {
 			case this.Newton.Shape.TYPE_CIRCLE:
-				this.createCircle(body.render_group, shape);
+				this.createCircle(body.render_group, shape, body);
 				break;
 			case this.Newton.Shape.TYPE_SEGMENT:
-				this.createSegment(body.render_group, shape);
+				this.createSegment(body.render_group, shape, body);
 				break;
 			case this.Newton.Shape.TYPE_POLY:
-				this.createPolygon(body.render_group, shape);
+				this.createPolygon(body.render_group, shape, body);
 				break;
 		}
 	}
