@@ -42,14 +42,14 @@ const Joint = function(type, body1, body2, collideConnected) {
 	this.breakable = false;
 }
 
-Joint.TYPE_ANGLE = 0;
-Joint.TYPE_REVOLUTE = 1;
-Joint.TYPE_WELD = 2;
-Joint.TYPE_WHEEL = 3;
-Joint.TYPE_PRISMATIC = 4;
-Joint.TYPE_DISTANCE = 5;
-Joint.TYPE_ROPE = 6;
-Joint.TYPE_MOUSE = 7;
+Joint.TYPE_ANGLE     = Joint.prototype.TYPE_ANGLE     = 0;
+Joint.TYPE_REVOLUTE  = Joint.prototype.TYPE_REVOLUTE  = 1;
+Joint.TYPE_WELD      = Joint.prototype.TYPE_WELD      = 2;
+Joint.TYPE_WHEEL     = Joint.prototype.TYPE_WHEEL     = 3;
+Joint.TYPE_PRISMATIC = Joint.prototype.TYPE_PRISMATIC = 4;
+Joint.TYPE_DISTANCE  = Joint.prototype.TYPE_DISTANCE  = 5;
+Joint.TYPE_ROPE      = Joint.prototype.TYPE_ROPE      = 6;
+Joint.TYPE_MOUSE     = Joint.prototype.TYPE_MOUSE     = 7;
 
 Joint.LINEAR_SLOP = 0.0008;
 Joint.ANGULAR_SLOP = deg2rad(2);

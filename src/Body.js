@@ -295,9 +295,7 @@ Body.prototype.applyLinearImpulse = function(impulse, p) {
 
 Body.prototype.applyAngularImpulse = function(impulse) {
 	if (!this.isDynamic()) return;
-
 	if (!this.isAwake()) this.awake(true);
-
 	this.w += impulse * this.i_inv;
 }
 

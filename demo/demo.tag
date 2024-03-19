@@ -66,7 +66,7 @@
     connected() {
         const { Runner, TwoRenderer, CanvasRenderer, Interaction } = Newton;
 
-        const firstApp      = Web(Newton);
+        const firstApp      = Car(Newton);
 
         // const renderer      = new CanvasRenderer(Newton, this.$('canvas'));
 

@@ -30,8 +30,10 @@ function TwoRenderer(Newton, canvas) {
     this.canvas = canvas;
 	Two.ZUI = ZUI;
 	this.Two = Two;
-
-	var two = this.two = new Two({ autostart: true }).appendTo(canvas);
+	this.two = new Two({
+		type: Two.Types.svg,
+		autostart: true
+	}).appendTo(canvas);
 
 	this.stage = new Two.Group();
 	this.two.add(this.stage);
@@ -112,7 +114,6 @@ TwoRenderer.prototype.addBody = function(body) {
 				break;
 		}
 	}
-	//this.two.update();
 }
 
 TwoRenderer.prototype.removeBody = function(body) {
@@ -124,22 +125,69 @@ TwoRenderer.prototype.updateBody = function(body) {
 	body.render_group.rotation = body.a;
 }
 
+/*
+Joint.TYPE_ANGLE = 0;
+Joint.TYPE_REVOLUTE = 1;
+Joint.TYPE_WELD = 2;
+Joint.TYPE_WHEEL = 3;
+Joint.TYPE_PRISMATIC = 4;
+Joint.TYPE_DISTANCE = 5;
+Joint.TYPE_ROPE = 6;
+Joint.TYPE_MOUSE = 7;
+*/
+
 TwoRenderer.prototype.addJoint = function(joint) {
-	var p1 = joint.getWorldAnchor1();
-	var p2 = joint.getWorldAnchor2();
 	joint.render_group = this.two.makeGroup();
-	var line = this.two.makeLine(p1.x, p1.y, p2.x, p2.y);
-	line.linewidth = 0.05;
-	line.stroke = "rgba(0, 255, 0, 0.5)";
-	const circle1 = this.two.makeCircle(p1.x, p1.y, 0.1);
-	circle1.fill = '#FF8000';
-	circle1.stroke = 'red';
-	circle1.linewidth = 0.05;
-	const circle2 = this.two.makeCircle(p2.x, p2.y, 0.05);
-	circle2.fill = '#FF8000';
-	circle2.stroke = 'red';
-	circle2.linewidth = 0.05;
-	joint.render_group.add(line, circle1, circle2);
+
+	if(joint.type === joint.TYPE_DISTANCE || joint.type === joint.TYPE_ROPE || joint.type === joint.TYPE_PRISMATIC) {
+		var p1 = joint.getWorldAnchor1();
+		var p2 = joint.getWorldAnchor2();
+		var line = this.two.makeLine(p1.x, p1.y, p2.x, p2.y);
+		if(joint.type === joint.TYPE_PRISMATIC) {
+			line.linewidth = 0.02;
+			line.stroke = "rgba(255, 0, 0, 1)";
+			line.dashes = [0.5, 0.1];
+		} else if(joint.type === joint.TYPE_DISTANCE) {
+			line.linewidth = 0.05;
+			line.stroke = "rgba(0, 255, 0, 0.5)";
+			line.dashes = [0.1, 0.1];
+		} else {
+			line.linewidth = 0.05;
+			line.stroke = "rgba(0, 255, 0, 0.5)";
+		}
+		const circle1 = this.two.makeCircle(p1.x, p1.y, 0.08);
+		circle1.fill = 'red';
+		circle1.linewidth = 0;
+		const circle2 = this.two.makeCircle(p2.x, p2.y, 0.08);
+		circle2.fill = 'red';
+		circle2.linewidth = 0;
+		joint.render_group.add(line, circle1, circle2);
+	}
+	else if(joint.type === joint.TYPE_REVOLUTE) {
+		var p1 = joint.getWorldAnchor1();
+		const circle = this.two.makeCircle(p1.x, p1.y, 0.08);
+		circle.stroke = 'green';
+		circle.linewidth = 0.05;
+		joint.render_group.add(circle);
+	} else if(joint.type === joint.TYPE_WELD) {
+		var p1 = joint.getWorldAnchor1();
+		const circle = this.two.makeCircle(p1.x, p1.y, 0.05);
+		circle.stroke = 'blue';
+		circle.linewidth = 0.02;
+		joint.render_group.add(circle);
+	} else if(joint.type === joint.TYPE_WHEEL) {
+		var p1 = joint.getWorldAnchor1();
+		var p2 = joint.getWorldAnchor1();
+		const circle1 = this.two.makeCircle(p1.x, p1.y, 0.06);
+		circle1.stroke = 'gray';
+		circle1.linewidth = 0.04;
+		const circle2 = this.two.makeCircle(p2.x, p2.y, 0.08);
+		circle2.fill = 'black';
+		circle2.linewidth = 0;
+		joint.render_group.add(circle1, circle2);
+	} else {
+		console.log(joint)
+	}
 	this.stage.add(joint.render_group);
 }
 
@@ -148,15 +196,29 @@ TwoRenderer.prototype.removeJoint = function(joint) {
 }
 
 TwoRenderer.prototype.updateJoint = function(joint) {
-	var p1 = joint.getWorldAnchor1();
-	var p2 = joint.getWorldAnchor2();
-	var [a, b] = joint.render_group.children[0].vertices;
-	a.x = p1.x;
-	a.y = p1.y;
-	b.x = p2.x;
-	b.y = p2.y;
-	joint.render_group.children[1].position.set(p1.x, p1.y);
-	joint.render_group.children[2].position.set(p2.x, p2.y);
+	if(joint.type === joint.TYPE_DISTANCE || joint.type === joint.TYPE_ROPE || joint.type === joint.TYPE_PRISMATIC) {
+		var p1 = joint.getWorldAnchor1();
+		var p2 = joint.getWorldAnchor2();
+		var [a, b] = joint.render_group.children[0].vertices;
+		var [circle1, circle2] = [joint.render_group.children[1], joint.render_group.children[2]];
+		a.x = p1.x;
+		a.y = p1.y;
+		b.x = p2.x;
+		b.y = p2.y;
+		circle1.position.set(p1.x, p1.y);
+		circle2.position.set(p2.x, p2.y);
+	}
+	else if(joint.type === joint.TYPE_REVOLUTE || joint.type === joint.TYPE_WELD) {
+		var p1 = joint.getWorldAnchor1();
+		joint.render_group.children[0].position.set(p1.x, p1.y);
+	}
+	else if(joint.type === joint.TYPE_WHEEL) {
+		var p1 = joint.getWorldAnchor1();
+		var p2 = joint.getWorldAnchor2();
+		var [circle1, circle2] = [joint.render_group.children[0], joint.render_group.children[1]];
+		circle1.position.set(p1.x, p1.y);
+		circle2.position.set(p2.x, p2.y);
+	}
 }
 
 TwoRenderer.prototype.drawShape = function(shape, isStatic, lineWidth, outlineColor, fillColor) {
