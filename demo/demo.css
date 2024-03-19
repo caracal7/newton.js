@@ -40,5 +40,6 @@ main {
     height: calc(100% - 42px);
     bottom: 0;
     overflow: hidden;
-    border: 5px solid green;
+    border: 0px solid green;
+    background: #eeeeee;
 }

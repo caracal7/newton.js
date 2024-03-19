@@ -2093,9 +2093,8 @@ World.prototype.findBodyByPoint = function(p, refBody) {
   var firstBody;
   for (var i = 0; i < this.bodyArr.length; i++) {
     var body = this.bodyArr[i];
-    if (!body) {
+    if (!body)
       continue;
-    }
     for (var j = 0; j < body.shapeArr.length; j++) {
       var shape = body.shapeArr[j];
       if (shape.pointQuery(p)) {
@@ -2909,9 +2908,9 @@ function Interaction(runner, settings) {
   this.runner.world.addBody(this.mouseBody);
   this[Events2] = {};
   if (this.runner.renderer.two)
-    addZUI(this.runner.renderer);
+    addZUI(this, this.runner, this.runner.renderer);
 }
-function addZUI(renderer) {
+function addZUI(interaction, runner, renderer) {
   const { Two: Two2, two, stage, zui } = renderer;
   var domElement = two.renderer.domElement;
   var mouse = new Two2.Vector();
@@ -2919,29 +2918,39 @@ function addZUI(renderer) {
   var distance2 = 0;
   var dragging = false;
   zui.addLimits(0.06, 100);
-  domElement.addEventListener("mousedown", mousedown, false);
-  domElement.addEventListener("mousewheel", mousewheel, false);
-  domElement.addEventListener("wheel", mousewheel, false);
-  domElement.addEventListener("touchstart", touchstart, false);
-  domElement.addEventListener("touchmove", touchmove, false);
-  domElement.addEventListener("touchend", touchend, false);
-  domElement.addEventListener("touchcancel", touchend, false);
-  function mousedown(e) {
-    mouse.x = e.clientX;
-    mouse.y = e.clientY;
+  const mousedown = (event) => {
+    mouse.x = event.clientX;
+    mouse.y = event.clientY;
+    interaction.removeJoint();
+    const world_pos = zui.clientToSurface(event.offsetX, event.offsetY);
+    const p = new vec22(world_pos.x, -world_pos.y);
+    dragging = runner.world.findBodyByPoint(p);
+    if (dragging) {
+      interaction.mouseBody.p.copy(p);
+      interaction.mouseBody.syncTransform();
+      interaction.mouseJoint = new MouseJoint(interaction.mouseBody, dragging, p);
+      interaction.mouseJoint.maxForce = dragging.m * 5e4;
+      runner.world.addJoint(interaction.mouseJoint);
+    }
     window.addEventListener("mousemove", mousemove, false);
     window.addEventListener("mouseup", mouseup, false);
-  }
-  function mousemove(e) {
-    var dx = e.clientX - mouse.x;
-    var dy = e.clientY - mouse.y;
+  };
+  function mousemove(event) {
+    var dx = event.clientX - mouse.x;
+    var dy = event.clientY - mouse.y;
     if (dragging) {
+      const rect = runner.renderer.canvas.getBoundingClientRect();
+      const world_pos = zui.clientToSurface(event.offsetX - rect.left, event.offsetY - rect.top);
+      const p = new vec22(world_pos.x, -world_pos.y);
+      interaction.mouseBody.p.copy(p);
+      interaction.mouseBody.syncTransform();
     } else {
       zui.translateSurface(dx, dy);
     }
-    mouse.set(e.clientX, e.clientY);
+    mouse.set(event.clientX, event.clientY);
   }
   function mouseup(e) {
+    interaction.removeJoint();
     window.removeEventListener("mousemove", mousemove, false);
     window.removeEventListener("mouseup", mouseup, false);
   }
@@ -3019,6 +3028,13 @@ function addZUI(renderer) {
     zui.zoomBy(delta / 250, mouse.x - rect.left, mouse.y - rect.top);
     distance2 = d;
   }
+  domElement.addEventListener("mousedown", mousedown, false);
+  domElement.addEventListener("mousewheel", mousewheel, false);
+  domElement.addEventListener("wheel", mousewheel, false);
+  domElement.addEventListener("touchstart", touchstart, false);
+  domElement.addEventListener("touchmove", touchmove, false);
+  domElement.addEventListener("touchend", touchend, false);
+  domElement.addEventListener("touchcancel", touchend, false);
 }
 Interaction.prototype.destroy = function() {
   this.removeJoint();
@@ -8341,6 +8357,8 @@ function TwoRenderer(Newton, canvas) {
   }).appendTo(canvas);
   this.stage = new two_min_default.Group();
   this.two.add(this.stage);
+  this.joints_group = new two_min_default.Group();
+  this.stage.add(this.joints_group);
   this.zui = new two_min_default.ZUI(this.stage, this.two.renderer.domElement);
   this.resize();
   this.zui.translateSurface(this.width / 2, this.height / 2);
@@ -8353,6 +8371,9 @@ TwoRenderer.prototype.resize = function() {
   this.height = this.canvas.offsetHeight;
   this.two.renderer.setSize(this.width, this.height);
   this.zui.translateSurface(dx / 2, dy / 2);
+};
+TwoRenderer.prototype.jointsVisible = function(visible) {
+  this.joints_group.visible = visible;
 };
 TwoRenderer.prototype.createCircle = function(body_group, shape, body) {
   var pos = this.Newton.vec2.sub(shape.tc, body.p);
@@ -8418,7 +8439,7 @@ TwoRenderer.prototype.updateBody = function(body) {
 };
 TwoRenderer.prototype.addJoint = function(joint) {
   joint.render_group = this.two.makeGroup();
-  if (joint.type === joint.TYPE_DISTANCE || joint.type === joint.TYPE_ROPE || joint.type === joint.TYPE_PRISMATIC) {
+  if (joint.type === joint.TYPE_DISTANCE || joint.type === joint.TYPE_ROPE || joint.type === joint.TYPE_PRISMATIC || joint.type === joint.TYPE_MOUSE) {
     var p1 = joint.getWorldAnchor1();
     var p2 = joint.getWorldAnchor2();
     var line = this.two.makeLine(p1.x, p1.y, p2.x, p2.y);
@@ -8426,6 +8447,10 @@ TwoRenderer.prototype.addJoint = function(joint) {
       line.linewidth = 0.02;
       line.stroke = "rgba(255, 0, 0, 1)";
       line.dashes = [0.5, 0.1];
+    } else if (joint.type === joint.TYPE_MOUSE) {
+      line.linewidth = 0.02;
+      line.stroke = "rgba(255, 0, 0, 1)";
+      line.dashes = [0.05, 0.05];
     } else if (joint.type === joint.TYPE_DISTANCE) {
       line.linewidth = 0.05;
       line.stroke = "rgba(0, 255, 0, 0.5)";
@@ -8466,13 +8491,14 @@ TwoRenderer.prototype.addJoint = function(joint) {
   } else {
     console.log(joint);
   }
-  this.stage.add(joint.render_group);
+  this.joints_group.add(joint.render_group);
+  this.stage.add(this.joints_group);
 };
 TwoRenderer.prototype.removeJoint = function(joint) {
   joint.render_group.remove();
 };
 TwoRenderer.prototype.updateJoint = function(joint) {
-  if (joint.type === joint.TYPE_DISTANCE || joint.type === joint.TYPE_ROPE || joint.type === joint.TYPE_PRISMATIC) {
+  if (joint.type === joint.TYPE_DISTANCE || joint.type === joint.TYPE_ROPE || joint.type === joint.TYPE_PRISMATIC || joint.type === joint.TYPE_MOUSE) {
     var p1 = joint.getWorldAnchor1();
     var p2 = joint.getWorldAnchor2();
     var [a, b] = joint.render_group.children[0].vertices;

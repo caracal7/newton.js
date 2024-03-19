@@ -274,9 +274,7 @@ World.prototype.findBodyByPoint = function(p, refBody) {
 
 	for (var i = 0; i < this.bodyArr.length; i++) {
 		var body = this.bodyArr[i];
-		if (!body) {
-			continue;
-		}
+		if (!body) continue;
 
 		for (var j = 0; j < body.shapeArr.length; j++) {
 			var shape = body.shapeArr[j];

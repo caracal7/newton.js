@@ -38,6 +38,9 @@ function TwoRenderer(Newton, canvas) {
 	this.stage = new Two.Group();
 	this.two.add(this.stage);
 
+	this.joints_group = new Two.Group();
+	this.stage.add(this.joints_group);
+
 	this.zui = new Two.ZUI(this.stage, this.two.renderer.domElement);
 	this.resize();
 
@@ -52,6 +55,10 @@ TwoRenderer.prototype.resize = function() {
 	this.height = this.canvas.offsetHeight;
 	this.two.renderer.setSize(this.width, this.height);
 	this.zui.translateSurface(dx / 2, dy / 2);
+}
+
+TwoRenderer.prototype.jointsVisible = function(visible) {
+	this.joints_group.visible = visible;
 }
 
 TwoRenderer.prototype.createCircle = function(body_group, shape, body) {
@@ -126,20 +133,13 @@ TwoRenderer.prototype.updateBody = function(body) {
 }
 
 /*
-Joint.TYPE_ANGLE = 0;
-Joint.TYPE_REVOLUTE = 1;
-Joint.TYPE_WELD = 2;
-Joint.TYPE_WHEEL = 3;
-Joint.TYPE_PRISMATIC = 4;
-Joint.TYPE_DISTANCE = 5;
-Joint.TYPE_ROPE = 6;
-Joint.TYPE_MOUSE = 7;
+Joint.TYPE_ANGLE = 0; ?????
 */
 
 TwoRenderer.prototype.addJoint = function(joint) {
 	joint.render_group = this.two.makeGroup();
 
-	if(joint.type === joint.TYPE_DISTANCE || joint.type === joint.TYPE_ROPE || joint.type === joint.TYPE_PRISMATIC) {
+	if(joint.type === joint.TYPE_DISTANCE || joint.type === joint.TYPE_ROPE || joint.type === joint.TYPE_PRISMATIC || joint.type === joint.TYPE_MOUSE) {
 		var p1 = joint.getWorldAnchor1();
 		var p2 = joint.getWorldAnchor2();
 		var line = this.two.makeLine(p1.x, p1.y, p2.x, p2.y);
@@ -147,6 +147,10 @@ TwoRenderer.prototype.addJoint = function(joint) {
 			line.linewidth = 0.02;
 			line.stroke = "rgba(255, 0, 0, 1)";
 			line.dashes = [0.5, 0.1];
+		} else if(joint.type === joint.TYPE_MOUSE) {
+			line.linewidth = 0.02;
+			line.stroke = "rgba(255, 0, 0, 1)";
+			line.dashes = [0.05, 0.05];
 		} else if(joint.type === joint.TYPE_DISTANCE) {
 			line.linewidth = 0.05;
 			line.stroke = "rgba(0, 255, 0, 0.5)";
@@ -188,7 +192,9 @@ TwoRenderer.prototype.addJoint = function(joint) {
 	} else {
 		console.log(joint)
 	}
-	this.stage.add(joint.render_group);
+
+	this.joints_group.add(joint.render_group);
+	this.stage.add(this.joints_group);
 }
 
 TwoRenderer.prototype.removeJoint = function(joint) {
@@ -196,7 +202,7 @@ TwoRenderer.prototype.removeJoint = function(joint) {
 }
 
 TwoRenderer.prototype.updateJoint = function(joint) {
-	if(joint.type === joint.TYPE_DISTANCE || joint.type === joint.TYPE_ROPE || joint.type === joint.TYPE_PRISMATIC) {
+	if(joint.type === joint.TYPE_DISTANCE || joint.type === joint.TYPE_ROPE || joint.type === joint.TYPE_PRISMATIC || joint.type === joint.TYPE_MOUSE) {
 		var p1 = joint.getWorldAnchor1();
 		var p2 = joint.getWorldAnchor2();
 		var [a, b] = joint.render_group.children[0].vertices;

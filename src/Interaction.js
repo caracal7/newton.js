@@ -251,11 +251,11 @@ function Interaction(runner, settings) {
     this[Events] = {};
 
     if(this.runner.renderer.two) // Временно
-        addZUI(this.runner.renderer);
+        addZUI(this, this.runner, this.runner.renderer);
 }
 
 
-function addZUI(renderer) {
+function addZUI(interaction, runner, renderer) {
     const { Two, two, stage, zui } = renderer;
 
     var domElement = two.renderer.domElement;
@@ -266,40 +266,48 @@ function addZUI(renderer) {
 
     zui.addLimits(0.06, 100);
 
-    domElement.addEventListener('mousedown', mousedown, false);
-    domElement.addEventListener('mousewheel', mousewheel, false);
-    domElement.addEventListener('wheel', mousewheel, false);
 
-    domElement.addEventListener('touchstart', touchstart, false);
-    domElement.addEventListener('touchmove', touchmove, false);
-    domElement.addEventListener('touchend', touchend, false);
-    domElement.addEventListener('touchcancel', touchend, false);
+    const mousedown = event =>  {
+        mouse.x = event.clientX;
+        mouse.y = event.clientY;
 
-    function mousedown(e) {
-        mouse.x = e.clientX;
-        mouse.y = e.clientY;
-        /*
-        var rect = shape.getBoundingClientRect();
-        dragging = mouse.x > rect.left && mouse.x < rect.right
-            && mouse.y > rect.top && mouse.y < rect.bottom;
-        */
+        // Remove previous mouse joint
+    	interaction.removeJoint();
+
+        const world_pos = zui.clientToSurface(event.offsetX, event.offsetY);
+        const p = new vec2(world_pos.x, -world_pos.y);
+    	// If we picked shape then create mouse joint
+    	dragging = runner.world.findBodyByPoint(p);
+
+        if (dragging) {
+    		interaction.mouseBody.p.copy(p);
+    		interaction.mouseBody.syncTransform();
+    		interaction.mouseJoint = new MouseJoint(interaction.mouseBody, dragging, p);
+    		interaction.mouseJoint.maxForce = dragging.m * 50000;
+    		runner.world.addJoint(interaction.mouseJoint);
+    	}
+
         window.addEventListener('mousemove', mousemove, false);
         window.addEventListener('mouseup', mouseup, false);
     }
 
-    function mousemove(e) {
-        var dx = e.clientX - mouse.x;
-        var dy = e.clientY - mouse.y;
+    function mousemove(event) {
+        var dx = event.clientX - mouse.x;
+        var dy = event.clientY - mouse.y;
         if (dragging) {
-            //shape.position.x += dx / zui.scale;
-            //shape.position.y += dy / zui.scale;
+            const rect = runner.renderer.canvas.getBoundingClientRect();
+            const world_pos = zui.clientToSurface(event.offsetX - rect.left, event.offsetY - rect.top);
+            const p = new vec2(world_pos.x, -world_pos.y);
+            interaction.mouseBody.p.copy(p);
+            interaction.mouseBody.syncTransform();
         } else {
             zui.translateSurface(dx, dy);
         }
-        mouse.set(e.clientX, e.clientY);
+        mouse.set(event.clientX, event.clientY);
     }
 
     function mouseup(e) {
+        interaction.removeJoint();    
         window.removeEventListener('mousemove', mousemove, false);
         window.removeEventListener('mouseup', mouseup, false);
     }
@@ -388,6 +396,15 @@ function addZUI(renderer) {
         zui.zoomBy(delta / 250, mouse.x - rect.left, mouse.y - rect.top);
         distance = d;
     }
+
+    domElement.addEventListener('mousedown', mousedown, false);
+    domElement.addEventListener('mousewheel', mousewheel, false);
+    domElement.addEventListener('wheel', mousewheel, false);
+
+    domElement.addEventListener('touchstart', touchstart, false);
+    domElement.addEventListener('touchmove', touchmove, false);
+    domElement.addEventListener('touchend', touchend, false);
+    domElement.addEventListener('touchcancel', touchend, false);
 
 }
 
