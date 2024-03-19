@@ -112,7 +112,7 @@ TwoRenderer.prototype.addBody = function(body) {
 				break;
 		}
 	}
-	this.two.update();
+	//this.two.update();
 }
 
 TwoRenderer.prototype.removeBody = function(body) {
@@ -124,6 +124,34 @@ TwoRenderer.prototype.updateBody = function(body) {
 	body.render_group.rotation = body.a;
 }
 
+TwoRenderer.prototype.addJoint = function(joint) {
+
+	//body.render_group.position.set(body.p.x, body.p.y);
+	//body.render_group.rotation = body.a;
+	var p1 = joint.getWorldAnchor1();
+	var p2 = joint.getWorldAnchor2();
+	var line = this.two.makeLine(p1.x, p1.y, p2.x, p2.y);
+	line.linewidth = 0.05;
+	line.stroke = "rgba(0, 255, 0, 0.5)";
+
+	joint.render_group = this.two.makeGroup();
+	joint.render_group.add(line);
+	this.stage.add(joint.render_group);
+}
+
+TwoRenderer.prototype.removeJoint = function(joint) {
+	joint.render_group.remove();
+}
+
+TwoRenderer.prototype.updateJoint = function(joint) {
+	var p1 = joint.getWorldAnchor1();
+	var p2 = joint.getWorldAnchor2();
+	var [a, b] = joint.render_group.children[0].vertices;
+	a.x = p1.x;
+	a.y = p1.y;
+	b.x = p2.x;
+	b.y = p2.y;
+}
 
 TwoRenderer.prototype.drawShape = function(shape, isStatic, lineWidth, outlineColor, fillColor) {
 	return;

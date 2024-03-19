@@ -219,6 +219,8 @@ World.prototype.addJoint = function(joint) {
 
 	joint.body1.awake(true);
 	joint.body2.awake(true);
+
+	this.renderer.addJoint(joint);
 }
 
 World.prototype.removeJoint = function(joint) {
@@ -237,6 +239,8 @@ World.prototype.removeJoint = function(joint) {
 
 	joint.body1.awake(true);
 	joint.body2.awake(true);
+
+	this.renderer.removeJoint(joint);
 }
 
 World.prototype.findShapeByPoint = function(p, refShape) {
@@ -659,7 +663,7 @@ World.prototype.getBounds = function() {
 	for (var i = 0; i < this.bodyArr.length; i++)
 		for (var j = 0; j < this.bodyArr[i].shapeArr.length; j++)
             bounds.addBounds(this.bodyArr[i].shapeArr[j].bounds);
-	return bounds
+	return bounds;
 }
 export {
 	World

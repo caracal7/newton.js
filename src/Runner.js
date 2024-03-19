@@ -308,6 +308,10 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
 		for (var i = 0; i < this.world.jointArr.length; i++) {
             var joint = this.world.jointArr[i];
 			if(joint) {
+                this.renderer?.updateJoint(joint);
+
+
+
                 var p1 = joint.getWorldAnchor1();
             	var p2 = joint.getWorldAnchor2();
 				this.renderer.drawHelperJointAnchors(p1, p2, HELPER_JOINT_ANCHOR_RADIUS, PIXEL_UNIT, this.settings.jointAnchorColor);

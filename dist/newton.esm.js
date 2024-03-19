@@ -2048,6 +2048,7 @@ World.prototype.addJoint = function(joint) {
   joint.body2.jointArr.push(joint);
   joint.body1.awake(true);
   joint.body2.awake(true);
+  this.renderer.addJoint(joint);
 };
 World.prototype.removeJoint = function(joint) {
   if (this.jointHash[joint.id] == void 0)
@@ -2063,6 +2064,7 @@ World.prototype.removeJoint = function(joint) {
   joint.body2.jointArr.splice(index, 1);
   joint.body1.awake(true);
   joint.body2.awake(true);
+  this.renderer.removeJoint(joint);
 };
 World.prototype.findShapeByPoint = function(p, refShape) {
   var firstShape;
@@ -2651,7 +2653,7 @@ Runner.prototype.redraw = function() {
   this.drawFrame(0);
 };
 Runner.prototype.drawFrame = function(frameTime = 0) {
-  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l;
+  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m;
   (_b = (_a = this[Events]) == null ? void 0 : _a.beforeRenderFrame) == null ? void 0 : _b.forEach((callback) => callback(frameTime));
   this.camera.bounds.set(
     this.canvasToWorld(new vec22(0, this.renderer.height)),
@@ -2745,6 +2747,7 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
     for (var i = 0; i < this.world.jointArr.length; i++) {
       var joint = this.world.jointArr[i];
       if (joint) {
+        (_k = this.renderer) == null ? void 0 : _k.updateJoint(joint);
         var p1 = joint.getWorldAnchor1();
         var p2 = joint.getWorldAnchor2();
         this.renderer.drawHelperJointAnchors(p1, p2, HELPER_JOINT_ANCHOR_RADIUS, PIXEL_UNIT, this.settings.jointAnchorColor);
@@ -2760,7 +2763,7 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
       }
     }
   }
-  (_l = (_k = this[Events]) == null ? void 0 : _k.afterRenderFrame) == null ? void 0 : _l.forEach((callback) => callback(frameTime));
+  (_m = (_l = this[Events]) == null ? void 0 : _l.afterRenderFrame) == null ? void 0 : _m.forEach((callback) => callback(frameTime));
   this.renderer.endDynamic();
 };
 Runner.prototype.worldToCanvas = function(p) {
@@ -4206,6 +4209,12 @@ CanvasRenderer.prototype.addBody = function() {
 CanvasRenderer.prototype.removeBody = function() {
 };
 CanvasRenderer.prototype.updateBody = function() {
+};
+CanvasRenderer.prototype.addJoint = function() {
+};
+CanvasRenderer.prototype.removeJoint = function() {
+};
+CanvasRenderer.prototype.updateJoint = function() {
 };
 CanvasRenderer.prototype.beginDynamic = function(camera) {
   this.fg.ctx.save();
@@ -8394,7 +8403,6 @@ TwoRenderer.prototype.addBody = function(body) {
         break;
     }
   }
-  this.two.update();
 };
 TwoRenderer.prototype.removeBody = function(body) {
   body.render_group.remove();
@@ -8402,6 +8410,28 @@ TwoRenderer.prototype.removeBody = function(body) {
 TwoRenderer.prototype.updateBody = function(body) {
   body.render_group.position.set(body.p.x, body.p.y);
   body.render_group.rotation = body.a;
+};
+TwoRenderer.prototype.addJoint = function(joint) {
+  var p1 = joint.getWorldAnchor1();
+  var p2 = joint.getWorldAnchor2();
+  var line = this.two.makeLine(p1.x, p1.y, p2.x, p2.y);
+  line.linewidth = 0.05;
+  line.stroke = "rgba(0, 255, 0, 0.5)";
+  joint.render_group = this.two.makeGroup();
+  joint.render_group.add(line);
+  this.stage.add(joint.render_group);
+};
+TwoRenderer.prototype.removeJoint = function(joint) {
+  joint.render_group.remove();
+};
+TwoRenderer.prototype.updateJoint = function(joint) {
+  var p1 = joint.getWorldAnchor1();
+  var p2 = joint.getWorldAnchor2();
+  var [a, b] = joint.render_group.children[0].vertices;
+  a.x = p1.x;
+  a.y = p1.y;
+  b.x = p2.x;
+  b.y = p2.y;
 };
 TwoRenderer.prototype.drawShape = function(shape, isStatic, lineWidth, outlineColor, fillColor) {
   return;
