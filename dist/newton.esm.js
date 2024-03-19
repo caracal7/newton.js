@@ -1910,6 +1910,8 @@ World.prototype.clear = function() {
   Shape.id_counter = 0;
   Body.id_counter = 0;
   Joint.id_counter = 0;
+  while (this.jointArr.length)
+    this.removeJoint(this.jointArr[this.jointArr.length - 1]);
   while (this.bodyArr.length)
     this.removeBody(this.bodyArr[this.bodyArr.length - 1]);
   this.bodyArr = [];
