@@ -94,7 +94,11 @@ World.prototype.create = function(text) {
 
 	for (var i = 0; i < config.bodies.length; i++) {
 		var config_body = config.bodies[i];
-		var type = {"static": Body.Static, "kinetic": Body.KINETIC, "dynamic": Body.DYNAMIC}[config_body.type];
+		var type = {
+			static:  Body.STATIC,
+			kinetic: Body.KINETIC,
+			dynamic: Body.DYNAMIC
+		}[config_body.type];
 		var body = new Body(type, config_body.position.x, config_body.position.y, config_body.angle);
 
 		for (var j = 0; j < config_body.shapes.length; j++) {
@@ -193,9 +197,9 @@ World.prototype.removeBody = function(body) {
 
 	// Remove linked joint
 	for (var i = 0; i < body.jointArr.length; i++) {
-		if (body.jointArr[i]) {
+		//if (body.jointArr[i]) {
 			this.removeJoint(body.jointArr[i]);
-		}
+		//}
 	}
 
 	body.world = null;
@@ -248,17 +252,9 @@ World.prototype.findShapeByPoint = function(p, refShape) {
 			var shape = body.shapeArr[j];
 
 			if (shape.pointQuery(p)) {
-				if (!refShape) {
-					return shape;
-				}
-
-				if (!firstShape) {
-					firstShape = shape;
-				}
-
-				if (shape == refShape) {
-					refShape = null;
-				}
+				if (!refShape) return shape;
+				if (!firstShape) firstShape = shape;
+				if (shape == refShape) refShape = null;
 			}
 		}
 	}
@@ -279,18 +275,9 @@ World.prototype.findBodyByPoint = function(p, refBody) {
 			var shape = body.shapeArr[j];
 
 			if (shape.pointQuery(p)) {
-				if (!refBody) {
-					return shape.body;
-				}
-
-				if (!firstBody) {
-					firstBody = shape.body;
-				}
-
-				if (shape.body == refBody) {
-					refBody = null;
-				}
-
+				if (!refBody) return shape.body;
+				if (!firstBody) firstBody = shape.body;
+				if (shape.body == refBody) refBody = null;
 				break;
 			}
 		}
@@ -304,14 +291,10 @@ World.prototype.shapeById = function(id) {
 	var shape;
 	for (var i = 0; i < this.bodyArr.length; i++) {
 		var body = this.bodyArr[i];
-		if (!body) {
-			continue;
-		}
+		if (!body) continue;
 
 		for (var j = 0; j < body.shapeArr.length; j++) {
-			if (body.shapeArr[j].id == id) {
-				return body.shapeArr[j];
-			}
+			if (body.shapeArr[j].id == id) return body.shapeArr[j];
 		}
 	}
 
@@ -320,9 +303,7 @@ World.prototype.shapeById = function(id) {
 
 World.prototype.jointById = function(id) {
 	var index = this.jointHash[id];
-	if (index != undefined) {
-		return this.jointArr[index];
-	}
+	if (index != undefined) return this.jointArr[index];
 	return null;
 }
 
@@ -333,26 +314,16 @@ World.prototype.findVertexByPoint = function(p, minDist, refVertexId) {
 
 	for (var i = 0; i < this.bodyArr.length; i++) {
 		var body = this.bodyArr[i];
-		if (!body) {
-			continue;
-		}
+		if (!body) continue;
 
 		for (var j = 0; j < body.shapeArr.length; j++) {
 			var shape = body.shapeArr[j];
 			var index = shape.findVertexByPoint(p, minDist);
 			if (index != -1) {
 				var vertex = (shape.id << 16) | index;
-				if (refVertexId == -1) {
-					return vertex;
-				}
-
-				if (firstVertexId == -1) {
-					firstVertexId = vertex;
-				}
-
-				if (vertex == refVertexId) {
-					refVertexId = -1;
-				}
+				if (refVertexId == -1) return vertex;
+				if (firstVertexId == -1) firstVertexId = vertex;
+				if (vertex == refVertexId) refVertexId = -1;
 			}
 		}
 	}
@@ -367,30 +338,18 @@ World.prototype.findEdgeByPoint = function(p, minDist, refEdgeId) {
 
 	for (var i = 0; i < this.bodyArr.length; i++) {
 		var body = this.bodyArr[i];
-		if (!body) {
-			continue;
-		}
+		if (!body) continue;
 
 		for (var j = 0; j < body.shapeArr.length; j++) {
 			var shape = body.shapeArr[j];
-			if (shape.type != Shape.TYPE_POLY) {
-				continue;
-			}
+			if (shape.type != Shape.TYPE_POLY) continue;
 
 			var index = shape.findEdgeByPoint(p, minDist);
 			if (index != -1) {
 				var edge = (shape.id << 16) | index;
-				if (refEdgeId == -1) {
-					return edge;
-				}
-
-				if (firstEdgeId == -1) {
-					firstEdgeId = edge;
-				}
-
-				if (edge == refEdgeId) {
-					refEdgeId = -1;
-				}
+				if (refEdgeId == -1) return edge;
+				if (firstEdgeId == -1) firstEdgeId = edge;
+				if (edge == refEdgeId) refEdgeId = -1;
 			}
 		}
 	}
@@ -407,9 +366,7 @@ World.prototype.findJointByPoint = function(p, minDist, refJointId) {
 
 	for (var i = 0; i < this.jointArr.length; i++) {
 		var joint = this.jointArr[i];
-		if (!joint) {
-			continue;
-		}
+		if (!joint) continue;
 
 		var jointId = -1;
 
@@ -421,17 +378,9 @@ World.prototype.findJointByPoint = function(p, minDist, refJointId) {
 		}
 
 		if (jointId != -1) {
-			if (refJointId == -1) {
-				return jointId;
-			}
-
-			if (firstJointId == -1) {
-				firstJointId = jointId;
-			}
-
-			if (jointId == refJointId) {
-				refJointId = -1;
-			}
+			if (refJointId == -1) return jointId;
+			if (firstJointId == -1) firstJointId = jointId;
+			if (jointId == refJointId) refJointId = -1;
 		}
 	}
 
@@ -441,11 +390,8 @@ World.prototype.findJointByPoint = function(p, minDist, refJointId) {
 World.prototype.findContactSolver = function(shape1, shape2) {
 	for (var i = 0; i < this.contactSolverArr.length; i++) {
 		var contactSolver = this.contactSolverArr[i];
-		if (shape1 == contactSolver.shape1 && shape2 == contactSolver.shape2) {
-			return contactSolver;
-		}
+		if (shape1 == contactSolver.shape1 && shape2 == contactSolver.shape2) return contactSolver;
 	}
-
 	return null;
 }
 
@@ -457,36 +403,22 @@ World.prototype.genTemporalContactSolvers = function() {
 
 	for (var body1_index = 0; body1_index < this.bodyArr.length; body1_index++) {
 		var body1 = this.bodyArr[body1_index];
-		if (!body1) {
-			continue;
-		}
+		if (!body1) continue;
 
 		body1.stepCount = this.stepCount;
 
 		for (var body2_index = 0; body2_index < this.bodyArr.length; body2_index++) {
 			var body2 = this.bodyArr[body2_index];
-			if (!body2) {
-				continue;
-			}
-
-			if (body1.stepCount == body2.stepCount) {
-				continue;
-			}
+			if (!body2) continue;
+			if (body1.stepCount == body2.stepCount) continue;
 
 			var active1 = body1.isAwake() && !body1.isStatic();
 			var active2 = body2.isAwake() && !body2.isStatic();
 
-			if (!active1 && !active2) {
-				continue;
-			}
+			if (!active1 && !active2) continue;
+			if (!body1.isCollidable(body2)) continue;
 
-			if (!body1.isCollidable(body2)) {
-				continue;
-			}
-
-			if (!body1.bounds.intersectsBounds(body2.bounds)) {
-				continue;
-			}
+			if (!body1.bounds.intersectsBounds(body2.bounds)) continue;
 
 			for (var i = 0; i < body1.shapeArr.length; i++) {
 				for (var j = 0; j < body2.shapeArr.length; j++) {
@@ -494,9 +426,7 @@ World.prototype.genTemporalContactSolvers = function() {
 					var shape2 = body2.shapeArr[j];
 
 					var contactArr = [];
-					if (!collision.collide(shape1, shape2, contactArr)) {
-						continue;
-					}
+					if (!collision.collide(shape1, shape2, contactArr)) continue;
 
 					if (shape1.type > shape2.type) {
 						var temp = shape1;
@@ -625,9 +555,7 @@ World.prototype.step = function(dt, vel_iteration, pos_iteration, warmStarting, 
 	// Intergrate velocity
 	for (var i = 0; i < this.bodyArr.length; i++) {
 		var body = this.bodyArr[i];
-		if (!body) {
-			continue;
-		}
+		if (!body) continue;
 
 		if (body.isDynamic() && body.isAwake()) {
 			body.updateVelocity(this.gravity, dt, this.damping);
@@ -637,9 +565,7 @@ World.prototype.step = function(dt, vel_iteration, pos_iteration, warmStarting, 
 	//
 	for (var i = 0; i < this.jointArr.length; i++) {
 		var joint = this.jointArr[i];
-		if (!joint) {
-			continue;
-		}
+		if (!joint) continue;
 
 		var body1 = joint.body1;
 		var body2 = joint.body2;
@@ -648,10 +574,8 @@ World.prototype.step = function(dt, vel_iteration, pos_iteration, warmStarting, 
 		var awake2 = body2.isAwake() && !body2.isStatic();
 
 		if (awake1 ^ awake2) {
-			if (!awake1)
-				body1.awake(true);
-			if (!awake2)
-				body2.awake(true);
+			if (!awake1) body1.awake(true);
+			if (!awake2) body2.awake(true);
 		}
 	}
 
@@ -661,25 +585,17 @@ World.prototype.step = function(dt, vel_iteration, pos_iteration, warmStarting, 
 	// Intergrate position
 	for (var i = 0; i < this.bodyArr.length; i++) {
 		var body = this.bodyArr[i];
-		if (!body) {
-			continue
-		}
-
-		if (body.isDynamic() && body.isAwake()) {
-			body.updatePosition(dt);
-		}
+		if (!body) continue
+		if (body.isDynamic() && body.isAwake()) body.updatePosition(dt);
 	}
 
 	// Process breakable joint
 	for (var i = 0; i < this.jointArr.length; i++) {
 		var joint = this.jointArr[i];
-		if (!joint) {
-			continue;
-		}
+		if (!joint) continue;
 
 		if (joint.breakable) {
-			if (joint.getReactionForce(dt_inv).lengthsq() >= joint.maxForce * joint.maxForce)
-				this.removeJoint(joint);
+			if (joint.getReactionForce(dt_inv).lengthsq() >= joint.maxForce * joint.maxForce) this.removeJoint(joint);
 		}
 	}
 
@@ -689,10 +605,7 @@ World.prototype.step = function(dt, vel_iteration, pos_iteration, warmStarting, 
 	//
 	for (var i = 0; i < this.bodyArr.length; i++) {
 		var body = this.bodyArr[i];
-		if (!body) {
-			continue;
-		}
-
+		if (!body) continue;
 		body.syncTransform();
 	}
 
@@ -704,13 +617,9 @@ World.prototype.step = function(dt, vel_iteration, pos_iteration, warmStarting, 
 
 	for (var i = 0; i < this.bodyArr.length; i++) {
 		var body = this.bodyArr[i];
-		if (!body) {
-			continue;
-		}
+		if (!body) continue;
 
-		if (body.isDynamic() && body.isAwake()) {
-			body.cacheData();
-		}
+		if (body.isDynamic() && body.isAwake()) body.cacheData();
 	}
 
 	// Process sleeping
@@ -722,13 +631,8 @@ World.prototype.step = function(dt, vel_iteration, pos_iteration, warmStarting, 
 
 		for (var i = 0; i < this.bodyArr.length; i++) {
 		   	var body = this.bodyArr[i];
-		   	if (!body) {
-		   		continue;
-		   	}
-
-			if (!body.isDynamic()) {
-				continue;
-			}
+		   	if (!body) continue;
+			if (!body.isDynamic()) continue;
 
 			if (body.w * body.w > angTolSqr || body.v.dot(body.v) > linTolSqr) {
 				body.sleepTime = 0;
@@ -743,10 +647,7 @@ World.prototype.step = function(dt, vel_iteration, pos_iteration, warmStarting, 
 		if (positionSolved && minSleepTime >= World.TIME_TO_SLEEP) {
 			for (var i = 0; i < this.bodyArr.length; i++) {
 				var body = this.bodyArr[i];
-				if (!body) {
-					continue;
-				}
-
+				if (!body) continue;
 				body.awake(false);
 			}
 		}
