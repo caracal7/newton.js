@@ -8455,14 +8455,14 @@ TwoRenderer.prototype.addJoint = function(joint) {
     joint.render_group.add(circle);
   } else if (joint.type === joint.TYPE_WHEEL) {
     var p1 = joint.getWorldAnchor1();
-    var p2 = joint.getWorldAnchor1();
-    const circle1 = this.two.makeCircle(p1.x, p1.y, 0.06);
-    circle1.stroke = "gray";
-    circle1.linewidth = 0.04;
-    const circle2 = this.two.makeCircle(p2.x, p2.y, 0.08);
-    circle2.fill = "black";
-    circle2.linewidth = 0;
-    joint.render_group.add(circle1, circle2);
+    var p2 = joint.getWorldAnchor2();
+    const circle = this.two.makeCircle(p2.x, p2.y, 0.08);
+    circle.fill = "red";
+    circle.linewidth = 0;
+    var line = this.two.makeLine(p1.x, p1.y, p2.x, p2.y);
+    line.linewidth = 0.05;
+    line.stroke = "rgba(0, 0, 0, 1)";
+    joint.render_group.add(circle, line);
   } else {
     console.log(joint);
   }
@@ -8489,9 +8489,13 @@ TwoRenderer.prototype.updateJoint = function(joint) {
   } else if (joint.type === joint.TYPE_WHEEL) {
     var p1 = joint.getWorldAnchor1();
     var p2 = joint.getWorldAnchor2();
-    var [circle1, circle2] = [joint.render_group.children[0], joint.render_group.children[1]];
-    circle1.position.set(p1.x, p1.y);
-    circle2.position.set(p2.x, p2.y);
+    var circle = joint.render_group.children[0];
+    circle.position.set(p2.x, p2.y);
+    var [a, b] = joint.render_group.children[1].vertices;
+    a.x = p1.x;
+    a.y = p1.y;
+    b.x = p2.x;
+    b.y = p2.y;
   }
 };
 TwoRenderer.prototype.drawShape = function(shape, isStatic, lineWidth, outlineColor, fillColor) {
