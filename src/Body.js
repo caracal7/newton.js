@@ -252,9 +252,7 @@ Body.prototype.resetMassData = function() {
 Body.prototype.resetJointAnchors = function() {
 	for (var i = 0; i < this.jointArr.length; i++) {
 		var joint = this.jointArr[i];
-		if (!joint) {
-			continue;
-		}
+		if (!joint) continue;
 
 		var anchor1 = joint.getWorldAnchor1();
 		var anchor2 = joint.getWorldAnchor2();
@@ -303,53 +301,38 @@ Body.prototype.resetForce = function() {
 }
 
 Body.prototype.applyForce = function(force, p) {
-	if (!this.isDynamic())
-		return;
+	if (!this.isDynamic()) return;
 
-	if (!this.isAwake())
-		this.awake(true);
+	if (!this.isAwake()) this.awake(true);
 
 	this.f.addself(force);
 	this.t += vec2.cross(vec2.sub(p, this.p), force);
 }
 
 Body.prototype.applyForceToCenter = function(force) {
-	if (!this.isDynamic())
-		return;
-
-	if (!this.isAwake())
-		this.awake(true);
-
+	if (!this.isDynamic()) return;
+	if (!this.isAwake()) this.awake(true);
 	this.f.addself(force);
 }
 
 Body.prototype.applyTorque = function(torque) {
-	if (!this.isDynamic())
-		return;
-
-	if (!this.isAwake())
-		this.awake(true);
-
+	if (!this.isDynamic()) return;
+	if (!this.isAwake()) this.awake(true);
 	this.t += torque;
 }
 
 Body.prototype.applyLinearImpulse = function(impulse, p) {
-	if (!this.isDynamic())
-		return;
-
-	if (!this.isAwake())
-		this.awake(true);
+	if (!this.isDynamic()) return;
+	if (!this.isAwake()) this.awake(true);
 
 	this.v.mad(impulse, this.m_inv);
 	this.w += vec2.cross(vec2.sub(p, this.p), impulse) * this.i_inv;
 }
 
 Body.prototype.applyAngularImpulse = function(impulse) {
-	if (!this.isDynamic())
-		return;
+	if (!this.isDynamic()) return;
 
-	if (!this.isAwake())
-		this.awake(true);
+	if (!this.isAwake()) this.awake(true);
 
 	this.w += impulse * this.i_inv;
 }
@@ -378,14 +361,11 @@ Body.prototype.awake = function(flag) {
 }
 
 Body.prototype.isCollidable = function(other) {
-	if (this == other)
-		return false;
+	if (this == other) return false;
 
-	if (!this.isDynamic() && !other.isDynamic())
-		return false;
+	if (!this.isDynamic() && !other.isDynamic()) return false;
 
-	if (!(this.maskBits & other.categoryBits) || !(other.maskBits & this.categoryBits))
-		return false;
+	if (!(this.maskBits & other.categoryBits) || !(other.maskBits & this.categoryBits)) return false;
 
 	for (var i = 0; i < this.jointArr.length; i++) {
 		var joint = this.jointArr[i];

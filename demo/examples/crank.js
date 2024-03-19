@@ -30,6 +30,16 @@ export default Newton => {
 		staticBody.resetMassData();
 		world.addBody(staticBody);
 
+		const body0 = new Body(Body.DYNAMIC, new vec2(0, 0));
+		var shape = new ShapeSegment(new vec2(0, 0), new vec2(0, 1), 0.2);
+		shape.e = 0.4;
+		shape.u = 1.0;
+		shape.density = 10;
+		body0.addShape(shape);
+		body0.resetMassData();
+		world.addBody(body0);
+
+
 		const body1 = new Body(Body.DYNAMIC, new vec2(0, 2));
 		var shape = new ShapeSegment(new vec2(0, 0), new vec2(0, 1), 0.2);
 		shape.e = 0.4;

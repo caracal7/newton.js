@@ -178,7 +178,7 @@ World.prototype.addBody = function(body) {
 	if (this.bodyArr.find(b => b.id ===body.id)) return;
 	this.bodyArr.push(body);
 
-	this.renderer.addBody(body);
+	this.renderer?.addBody(body);
 
 	body.awake(true);
 	body.world = this;
@@ -189,7 +189,7 @@ World.prototype.removeBody = function(body) {
 	var index = this.bodyArr.findIndex(b => b.id ===body.id);
 	if(index === -1) return;
 
-	this.renderer.removeBody(body);
+	this.renderer?.removeBody(body);
 
 	// Remove linked joint
 	for (var i = 0; i < body.jointArr.length; i++) {

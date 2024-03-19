@@ -1599,9 +1599,8 @@ Body.prototype.resetMassData = function() {
 Body.prototype.resetJointAnchors = function() {
   for (var i = 0; i < this.jointArr.length; i++) {
     var joint = this.jointArr[i];
-    if (!joint) {
+    if (!joint)
       continue;
-    }
     var anchor1 = joint.getWorldAnchor1();
     var anchor2 = joint.getWorldAnchor2();
     joint.setWorldAnchor1(anchor1);
@@ -2019,19 +2018,21 @@ World.prototype.create = function(text) {
   }
 };
 World.prototype.addBody = function(body) {
+  var _a;
   if (this.bodyArr.find((b) => b.id === body.id))
     return;
   this.bodyArr.push(body);
-  this.renderer.addBody(body);
+  (_a = this.renderer) == null ? void 0 : _a.addBody(body);
   body.awake(true);
   body.world = this;
   body.cacheData();
 };
 World.prototype.removeBody = function(body) {
+  var _a;
   var index = this.bodyArr.findIndex((b) => b.id === body.id);
   if (index === -1)
     return;
-  this.renderer.removeBody(body);
+  (_a = this.renderer) == null ? void 0 : _a.removeBody(body);
   for (var i = 0; i < body.jointArr.length; i++) {
     if (body.jointArr[i]) {
       this.removeJoint(body.jointArr[i]);
@@ -4159,7 +4160,7 @@ function drawCircle2(ctx, center, radius, angle, lineWidth, strokeStyle, fillSty
     ctx.stroke();
   }
 }
-function drawSegment2(ctx, a, b, radius, lineWidth, strokeStyle, fillStyle, Newton) {
+function drawSegment(ctx, a, b, radius, lineWidth, strokeStyle, fillStyle, Newton) {
   ctx.beginPath();
   var dn = Newton.vec2.normalize(Newton.vec2.perp(Newton.vec2.sub(b, a)));
   var start_angle = dn.toAngle();
@@ -4222,7 +4223,7 @@ CanvasRenderer.prototype.drawShape = function(shape, isStatic, lineWidth, outlin
       drawCircle2(isStatic ? this.bg.ctx : this.fg.ctx, shape.tc, shape.r, shape.body.a, lineWidth, outlineColor, fillColor, this.Newton);
       break;
     case this.Newton.Shape.TYPE_SEGMENT:
-      drawSegment2(isStatic ? this.bg.ctx : this.fg.ctx, shape.ta, shape.tb, shape.r, lineWidth, outlineColor, fillColor, this.Newton);
+      drawSegment(isStatic ? this.bg.ctx : this.fg.ctx, shape.ta, shape.tb, shape.r, lineWidth, outlineColor, fillColor, this.Newton);
       break;
     case this.Newton.Shape.TYPE_POLY:
       if (shape.convexity)
@@ -8276,7 +8277,6 @@ var _ZUI = class _ZUI {
     return this;
   }
   clientToSurface(a, b, c) {
-    this.updateOffset();
     const m = this.surfaceMatrix.inverse();
     let x, y, z;
     if (arguments.length === 1) {
@@ -8294,7 +8294,6 @@ var _ZUI = class _ZUI {
     return { x: r[0], y: r[1], z: r[2] };
   }
   surfaceToClient(a) {
-    this.updateOffset();
     const vo = this.viewportOffset.matrix.clone();
     let x, y, z;
     x = typeof a.x === "number" ? a.x : 0;
@@ -8377,7 +8376,7 @@ function TwoRenderer(Newton, canvas) {
   this.zui = new two_min_default.ZUI(this.stage, this.two.renderer.domElement);
   this.resize();
   this.zui.translateSurface(this.width / 2, this.height / 2);
-  this.zui.zoomSet(15, this.width / 2, this.height / 2);
+  this.zui.zoomSet(35, this.width / 2, this.height / 2);
 }
 TwoRenderer.prototype.resize = function() {
   var dx = this.canvas.offsetWidth - (this.width || this.canvas.offsetWidth);
@@ -8404,6 +8403,47 @@ TwoRenderer.prototype.createPolygon = function(body_group, shape) {
   poly.fill = "#ececec";
   body_group.add(poly);
 };
+function drawSegment2(ctx, a, b, radius, lineWidth, strokeStyle, fillStyle, Newton) {
+  ctx.beginPath();
+  var dn = Newton.vec2.normalize(Newton.vec2.perp(Newton.vec2.sub(b, a)));
+  var start_angle = dn.toAngle();
+  ctx.arc(a.x, a.y, radius, start_angle, start_angle + Math.PI, false);
+  var ds = Newton.vec2.scale(dn, -radius);
+  var bp = Newton.vec2.add(b, ds);
+  ctx.lineTo(bp.x, bp.y);
+  start_angle += Math.PI;
+  ctx.arc(b.x, b.y, radius, start_angle, start_angle + Math.PI, false);
+  ds = Newton.vec2.scale(dn, radius);
+  var ap = Newton.vec2.add(a, ds);
+  ctx.lineTo(ap.x, ap.y);
+  ctx.closePath();
+}
+TwoRenderer.prototype.createSegment = function(body_group, shape) {
+  var a = shape.ta;
+  var b = shape.tb;
+  var dn = this.Newton.vec2.normalize(this.Newton.vec2.perp(this.Newton.vec2.sub(b, a)));
+  var start_angle = dn.toAngle();
+  const arc1 = this.two.makeArcSegment(a.x, a.y, 0, shape.r, start_angle, start_angle + Math.PI, 10);
+  arc1.linewidth = 0.05;
+  arc1.stroke = "#aaaaaa";
+  arc1.fill = "#ececec";
+  var ds = this.Newton.vec2.scale(dn, -shape.r);
+  var bp = this.Newton.vec2.add(b, ds);
+  const line1 = this.two.makeLine(bp.x, a.y, bp.x, bp.y);
+  line1.linewidth = 0.05;
+  line1.stroke = "#aaaaaa";
+  start_angle += Math.PI;
+  const arc2 = this.two.makeArcSegment(b.x, b.y, 0, shape.r, start_angle + Math.PI, start_angle, 10);
+  arc2.linewidth = 0.05;
+  arc2.stroke = "#aaaaaa";
+  arc2.fill = "#ececec";
+  ds = this.Newton.vec2.scale(dn, shape.r);
+  var ap = this.Newton.vec2.add(a, ds);
+  const line2 = this.two.makeLine(ap.x, bp.y, ap.x, ap.y);
+  line2.linewidth = 0.05;
+  line2.stroke = "#aaaaaa";
+  body_group.add(arc1, line1, line2, arc2);
+};
 TwoRenderer.prototype.addBody = function(body) {
   body.render_group = this.two.makeGroup();
   body.render_group.position.set(body.p.x, body.p.y);
@@ -8415,7 +8455,7 @@ TwoRenderer.prototype.addBody = function(body) {
         this.createCircle(body.render_group, shape);
         break;
       case this.Newton.Shape.TYPE_SEGMENT:
-        console.log("TYPE_SEGMENT");
+        this.createSegment(body.render_group, shape);
         break;
       case this.Newton.Shape.TYPE_POLY:
         this.createPolygon(body.render_group, shape);
@@ -8438,7 +8478,7 @@ TwoRenderer.prototype.drawShape = function(shape, isStatic, lineWidth, outlineCo
       drawCircle(isStatic ? this.bg.ctx : this.fg.ctx, shape.tc, shape.r, shape.body.a, lineWidth, outlineColor, fillColor, this.Newton);
       break;
     case this.Newton.Shape.TYPE_SEGMENT:
-      drawSegment(isStatic ? this.bg.ctx : this.fg.ctx, shape.ta, shape.tb, shape.r, lineWidth, outlineColor, fillColor, this.Newton);
+      drawSegment2(isStatic ? this.bg.ctx : this.fg.ctx, shape.ta, shape.tb, shape.r, lineWidth, outlineColor, fillColor, this.Newton);
       break;
     case this.Newton.Shape.TYPE_POLY:
       if (shape.convexity)

@@ -63,7 +63,7 @@
     connected() {
         const { Runner, TwoRenderer, Interaction } = Newton;
 
-        const firstApp      = NewtonsCradle(Newton);
+        const firstApp      = Crank(Newton);
         const renderer      = new TwoRenderer(Newton, this.$('main'));
         const runner        = new Runner(renderer, firstApp);
         const interaction   = new Interaction(runner);

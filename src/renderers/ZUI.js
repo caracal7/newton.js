@@ -108,7 +108,7 @@ class ZUI {
     }
 
     clientToSurface(a, b, c) {
-        this.updateOffset();
+    //    this.updateOffset();
         const m = this.surfaceMatrix.inverse();
         let x, y, z;
         if (arguments.length === 1) {
@@ -127,7 +127,7 @@ class ZUI {
     }
 
     surfaceToClient(a) {
-        this.updateOffset();
+    //    this.updateOffset();
         const vo = this.viewportOffset.matrix.clone();
         let x, y, z;
 
@@ -154,7 +154,6 @@ class ZUI {
 
         const sf = this.clientToSurface(clientX, clientY);
         const scaleBy = newScale / this.scale;
-
 
         this.surfaceMatrix.scale(scaleBy);
         this.scale = newScale;
