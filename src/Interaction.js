@@ -274,7 +274,6 @@ function addZUI(interaction, runner, renderer) {
         const p = new vec2(world_pos.x, -world_pos.y);
         // If we picked shape then create mouse joint
         dragging = runner.world.findBodyByPoint(p);
-
         if (dragging) {
             interaction.mouseBody.p.copy(p);
             interaction.mouseBody.syncTransform();
@@ -293,8 +292,6 @@ function addZUI(interaction, runner, renderer) {
     }
 
     function mousemove(event) {
-        var dx = event.clientX - mouse.x;
-        var dy = event.clientY - mouse.y;
         if (dragging) {
             const rect = runner.renderer.canvas.getBoundingClientRect();
             const world_pos = zui.clientToSurface(event.offsetX - rect.left, event.offsetY - rect.top);
@@ -302,9 +299,11 @@ function addZUI(interaction, runner, renderer) {
             interaction.mouseBody.p.copy(p);
             interaction.mouseBody.syncTransform();
         } else {
+            var dx = event.clientX - mouse.x;
+            var dy = event.clientY - mouse.y;
             zui.translateSurface(dx, dy);
+            mouse.set(event.clientX, event.clientY);
         }
-        mouse.set(event.clientX, event.clientY);
     }
 
     function mouseup(e) {
@@ -345,8 +344,9 @@ function addZUI(interaction, runner, renderer) {
     }
 
     function touchend(e) {
+        interaction.removeJoint();
         touches = {};
-        var touch = e.touches[ 0 ];
+        var touch = e.touches[0];
         if (touch) {  // Pass through for panning after pinching
             mouse.x = touch.clientX;
             mouse.y = touch.clientY;
@@ -358,16 +358,25 @@ function addZUI(interaction, runner, renderer) {
         var touch = event.touches[ 0 ];
         mouse.x = touch.clientX;
         mouse.y = touch.clientY;
-
-        startDrag(touch.offsetX, touch.offsetY);
+        console.log('panstart', mouse.x, mouse.y)
+        var rect = runner.renderer.canvas.getBoundingClientRect();
+        startDrag(touch.clientX - rect.left, touch.clientY - rect.top);
     }
 
     function panmove(e) {
-        var touch = e.touches[ 0 ];
-        var dx = touch.clientX - mouse.x;
-        var dy = touch.clientY - mouse.y;
-        zui.translateSurface(dx, dy);
-        mouse.set(touch.clientX, touch.clientY);
+        var touch = e.touches[0];
+        if (dragging) {
+            const rect = runner.renderer.canvas.getBoundingClientRect();
+            const world_pos = zui.clientToSurface(touch.clientX - rect.left, touch.clientY - rect.top);
+            const p = new vec2(world_pos.x, -world_pos.y);
+            interaction.mouseBody.p.copy(p);
+            interaction.mouseBody.syncTransform();
+        } else {
+            var dx = touch.clientX - mouse.x;
+            var dy = touch.clientY - mouse.y;
+            zui.translateSurface(dx, dy);
+            mouse.set(touch.clientX, touch.clientY);
+        }
     }
 
     function pinchstart(e) {
