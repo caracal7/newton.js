@@ -10,6 +10,7 @@
 <@editor if(state.edit) runner=state.runner @play/>
 
 <main/>
+<canvas/>
 
 <!import Newton         from ../dist/newton.esm.js>
 
@@ -61,10 +62,13 @@
     }
 
     connected() {
-        const { Runner, TwoRenderer, Interaction } = Newton;
+        const { Runner, TwoRenderer, CanvasRenderer, Interaction } = Newton;
 
         const firstApp      = Crank(Newton);
-        const renderer      = new TwoRenderer(Newton, this.$('main'));
+
+        // const renderer      = new CanvasRenderer(Newton, this.$('canvas'));
+
+        const renderer      = new (this.hash[0] == 'canvas' ? CanvasRenderer : TwoRenderer)(Newton, this.$(this.hash[0] == 'canvas' ? 'canvas' : 'main'));
         const runner        = new Runner(renderer, firstApp);
         const interaction   = new Interaction(runner);
 

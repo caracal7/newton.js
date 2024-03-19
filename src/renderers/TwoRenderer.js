@@ -60,7 +60,7 @@ TwoRenderer.prototype.createCircle = function(body_group, shape) {
 	circle.fill = '#FF8000';
 	circle.stroke = 'orangered';
 	circle.linewidth = 0.05;
-	const line = this.two.makeLine(0, 0, 0, shape.r);
+	const line = this.two.makeLine(shape.c.x, shape.c.y, shape.c.x, shape.r);
 	line.linewidth = 0.05;
 	line.stroke = "rgba(255, 0, 0, 0.5)";
 	body_group.add(circle, line);
@@ -73,6 +73,9 @@ TwoRenderer.prototype.createPolygon = function(body_group, shape) {
 	poly.fill = "#ececec";
 	body_group.add(poly);
 }
+
+
+//drawSegment(this.fg.ctx, shape.ta, shape.tb, shape.r, lineWidth, outlineColor, fillColor, this.Newton);
 
 function drawSegment(ctx, a, b, radius, lineWidth, strokeStyle, fillStyle, Newton) {
 	ctx.beginPath();
@@ -95,9 +98,9 @@ function drawSegment(ctx, a, b, radius, lineWidth, strokeStyle, fillStyle, Newto
 	ctx.closePath();
 }
 
-//drawSegment(isStatic ? this.bg.ctx : this.fg.ctx, shape.ta, shape.tb, shape.r, lineWidth, outlineColor, fillColor, this.Newton);
 
 TwoRenderer.prototype.createSegment = function(body_group, shape) {
+
 	var a = shape.ta;
 	var b = shape.tb;
 
@@ -128,7 +131,23 @@ TwoRenderer.prototype.createSegment = function(body_group, shape) {
 	line2.linewidth = 0.05;
 	line2.stroke = "#aaaaaa";
 
-	body_group.add(arc1, line1, line2, arc2);
+	console.log(shape)
+	const circle1 = this.two.makeCircle(shape.a.x, shape.a.y, shape.r);
+	circle1.fill = '#FF8000';
+	circle1.stroke = 'orangered';
+	circle1.linewidth = 0.05;
+
+	const circle2 = this.two.makeCircle(shape.b.x, shape.b.y, shape.r);
+	circle2.fill = '#FF0080';
+	circle2.stroke = 'red';
+	circle2.linewidth = 0.05;
+
+	body_group.add(arc1, line1, line2, arc2, circle1, circle2);
+
+/*
+
+*/
+
 }
 
 

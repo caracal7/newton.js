@@ -19,25 +19,29 @@
 
 export default Newton => {
 
-	const { Body, ShapeBox, ShapeSegment, RevoluteJoint, PrismaticJoint, vec2, deg2rad } = Newton;
+	const { Body, ShapeBox, ShapeCircle, ShapeSegment, RevoluteJoint, PrismaticJoint, vec2, deg2rad } = Newton;
 
 	function init(world) {
 		const staticBody = new Body(Body.STATIC);
-		staticBody.addShape(new ShapeBox(0, 0.2, 20.48, 0.4));
+
+		staticBody.addShape(new ShapeBox(0, 0, 20.48, 0.4));
 		staticBody.addShape(new ShapeBox(0, 15.16, 20.48, 0.4));
 		staticBody.addShape(new ShapeBox(-10.04, 7.68, 0.4, 14.56));
 		staticBody.addShape(new ShapeBox(10.04, 7.68, 0.4, 14.56));
+
+		staticBody.addShape(new ShapeBox(0, 0, 1, 1));
+		staticBody.addShape(new ShapeBox(1, 0, 1, 1));
+		staticBody.addShape(new ShapeCircle(2, 0, 1));
+		staticBody.addShape(new ShapeSegment(new vec2(-2, 0), new vec2(-2, 1), 0.5));
+
 		staticBody.resetMassData();
 		world.addBody(staticBody);
 
-		const body0 = new Body(Body.DYNAMIC, new vec2(0, 0));
-		var shape = new ShapeSegment(new vec2(0, 0), new vec2(0, 1), 0.2);
-		shape.e = 0.4;
-		shape.u = 1.0;
-		shape.density = 10;
-		body0.addShape(shape);
-		body0.resetMassData();
-		world.addBody(body0);
+		const staticBody2 = new Body(Body.DYNAMIC, new vec2(-3, 3), Math.PI / 4);
+		staticBody2.addShape(new ShapeSegment(new vec2(0, 0), new vec2(0, 1), 0.5));
+
+		staticBody2.resetMassData();
+		world.addBody(staticBody2);
 
 
 		const body1 = new Body(Body.DYNAMIC, new vec2(0, 2));
@@ -70,7 +74,7 @@ export default Newton => {
 		var joint = new RevoluteJoint(staticBody, body1, new vec2(0, 2));
 		joint.collideConnected = false;
 		joint.enableMotor(true);
-		joint.setMotorSpeed(deg2rad(225));
+		joint.setMotorSpeed(deg2rad(125));
 		joint.setMaxMotorTorque(400000000);
 		world.addJoint(joint);
 

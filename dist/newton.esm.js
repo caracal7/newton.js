@@ -2948,7 +2948,8 @@ function Interaction(runner, settings) {
   this.mouseBody.resetMassData();
   this.runner.world.addBody(this.mouseBody);
   this[Events2] = {};
-  addZUI(this.runner.renderer);
+  if (this.runner.renderer.two)
+    addZUI(this.runner.renderer);
 }
 function addZUI(renderer) {
   const { Two: Two2, two, stage, zui } = renderer;
@@ -8391,7 +8392,7 @@ TwoRenderer.prototype.createCircle = function(body_group, shape) {
   circle.fill = "#FF8000";
   circle.stroke = "orangered";
   circle.linewidth = 0.05;
-  const line = this.two.makeLine(0, 0, 0, shape.r);
+  const line = this.two.makeLine(shape.c.x, shape.c.y, shape.c.x, shape.r);
   line.linewidth = 0.05;
   line.stroke = "rgba(255, 0, 0, 0.5)";
   body_group.add(circle, line);
@@ -8442,7 +8443,16 @@ TwoRenderer.prototype.createSegment = function(body_group, shape) {
   const line2 = this.two.makeLine(ap.x, bp.y, ap.x, ap.y);
   line2.linewidth = 0.05;
   line2.stroke = "#aaaaaa";
-  body_group.add(arc1, line1, line2, arc2);
+  console.log(shape);
+  const circle1 = this.two.makeCircle(shape.a.x, shape.a.y, shape.r);
+  circle1.fill = "#FF8000";
+  circle1.stroke = "orangered";
+  circle1.linewidth = 0.05;
+  const circle2 = this.two.makeCircle(shape.b.x, shape.b.y, shape.r);
+  circle2.fill = "#FF0080";
+  circle2.stroke = "red";
+  circle2.linewidth = 0.05;
+  body_group.add(arc1, line1, line2, arc2, circle1, circle2);
 };
 TwoRenderer.prototype.addBody = function(body) {
   body.render_group = this.two.makeGroup();

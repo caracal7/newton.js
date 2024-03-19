@@ -250,7 +250,8 @@ function Interaction(runner, settings) {
     */
     this[Events] = {};
 
-    addZUI(this.runner.renderer);
+    if(this.runner.renderer.two) // Временно
+        addZUI(this.runner.renderer);
 }
 
 
