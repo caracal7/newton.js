@@ -37,11 +37,17 @@ export default Newton => {
 		staticBody.resetMassData();
 		world.addBody(staticBody);
 
-		const staticBody2 = new Body(Body.DYNAMIC, new vec2(-3, 3), Math.PI / 10);
-		staticBody2.addShape(new ShapeSegment(new vec2(0, 0), new vec2(0, 1), 0.5));
-
+		const staticBody2 = new Body(Body.DYNAMIC, new vec2(-3, 3), Math.PI / 4);
+		staticBody2.addShape(new ShapeSegment(new vec2(0, 0), new vec2(0, 2), 0.5));
 		staticBody2.resetMassData();
 		world.addBody(staticBody2);
+
+		const staticBody3 = new Body(Body.static, new vec2(-5, 6));
+		staticBody3.addShape(new ShapeSegment(new vec2(0, 0), new vec2(1, 4), 0.5));
+		staticBody3.resetMassData();
+		world.addBody(staticBody3);
+
+
 
 
 		const body1 = new Body(Body.DYNAMIC, new vec2(0, 2));

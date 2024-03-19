@@ -31,10 +31,7 @@ function TwoRenderer(Newton, canvas) {
 	Two.ZUI = ZUI;
 	this.Two = Two;
 
-	var two = this.two = new Two({
-		autostart: true
-	}).appendTo(canvas);
-
+	var two = this.two = new Two({ autostart: true }).appendTo(canvas);
 
 	this.stage = new Two.Group();
 	this.two.add(this.stage);
@@ -82,35 +79,16 @@ TwoRenderer.prototype.createPolygon = function(body_group, shape, body) {
 TwoRenderer.prototype.createSegment = function(body_group, shape, body) {
 	var a = this.Newton.vec2.sub(shape.ta, body.p);
 	var b = this.Newton.vec2.sub(shape.tb, body.p);
-
-	var dn = this.Newton.vec2.normalize(this.Newton.vec2.perp(this.Newton.vec2.sub(b, a)));
-	var start_angle = dn.toAngle();
-	const arc1 = this.two.makeArcSegment(a.x, a.y, 0, shape.r, start_angle, start_angle + Math.PI, 10);
-	arc1.linewidth = 0.05;
-	arc1.stroke = "#aaaaaa";
-	arc1.fill = "#ececec";
-
-	var ds = this.Newton.vec2.scale(dn, -shape.r);
-	var bp = this.Newton.vec2.add(b, ds);
-	const line1 = this.two.makeLine(bp.x, a.y, bp.x, bp.y);
-	line1.linewidth = 0.05;
-	line1.stroke = "#aaaaaa";
-
-
-	start_angle += Math.PI;
-	const arc2 = this.two.makeArcSegment(b.x, b.y, 0, shape.r, start_angle + Math.PI, start_angle, 10);
-	arc2.linewidth = 0.05;
-	arc2.stroke = "#aaaaaa";
-	arc2.fill = "#ececec";
-
-	ds = this.Newton.vec2.scale(dn, shape.r);
-	var ap = this.Newton.vec2.add(a, ds);
-
-	const line2 = this.two.makeLine(ap.x, bp.y, ap.x, ap.y);
-	line2.linewidth = 0.05;
-	line2.stroke = "red";
-
-	body_group.add(arc1, line1, line2, arc2);
+	var d = shape.r * 2
+	var angle = this.Newton.vec2.perp(this.Newton.vec2.sub(b, a)).toAngle() - body.a;
+	const len = this.Newton.vec2.dist(b, a) + d;
+	const c = this.Newton.vec2.add(b, a).scale(0.5);
+	var rect = this.two.makeRoundedRectangle(c.x, c.y, d, len, shape.r);
+	rect.rotation = angle;
+	rect.stroke = '#aaaaaa';
+	rect.fill = "#ececec";
+	rect.linewidth = 0.05;
+	body_group.add(rect);
 }
 
 
