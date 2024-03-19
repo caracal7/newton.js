@@ -42,8 +42,10 @@ function TwoRenderer(Newton, canvas) {
 	this.zui = new Two.ZUI(this.stage, this.two.renderer.domElement);
 	this.resize();
 
-	//two.scene.scale = new Two.Vector( 1, -1 );
-	//two.scene.translation.set( 0, 40);
+
+//	two.scene.position.set(0, two.height);
+//	two.scene.scale = new Two.Vector(1, -1);
+
 
 	this.zui.translateSurface(this.width / 2, this.height / 2);
 	this.zui.zoomSet(15, this.width / 2, this.height / 2);
@@ -60,7 +62,6 @@ TwoRenderer.prototype.resize = function() {
 
 TwoRenderer.prototype.createCircle = function(body_group, shape) {
 	const circle = this.two.makeCircle(shape.c.x, shape.c.y, shape.r);
-	console.log(shape)
 	circle.fill = '#FF8000';
 	circle.stroke = 'orangered';
 	circle.linewidth = 0.05;

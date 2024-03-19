@@ -8215,7 +8215,7 @@ var Surface = class {
   }
   apply(px, py, s) {
     this.object.translation.set(px, py);
-    this.object.scale = s;
+    this.object.scale = new two_min_default.Vector(s, -s);
     return this;
   }
 };
@@ -8293,20 +8293,13 @@ var _ZUI = class _ZUI {
     const r = m.multiply(n[0], n[1], n[2]);
     return { x: r[0], y: r[1], z: r[2] };
   }
-  surfaceToClient(a, b, c) {
+  surfaceToClient(a) {
     this.updateOffset();
     const vo = this.viewportOffset.matrix.clone();
     let x, y, z;
-    if (arguments.length === 1) {
-      const v = a;
-      x = typeof v.x === "number" ? v.x : 0;
-      y = typeof v.y === "number" ? v.y : 0;
-      z = typeof v.z === "number" ? v.z : 1;
-    } else {
-      x = typeof a === "number" ? a : 0;
-      y = typeof b === "number" ? b : 0;
-      z = typeof c === "number" ? c : 1;
-    }
+    x = typeof a.x === "number" ? a.x : 0;
+    y = typeof a.y === "number" ? a.y : 0;
+    z = typeof a.z === "number" ? a.z : 1;
     const sm = this.surfaceMatrix.multiply(x, y, z);
     const r = vo.multiply(sm[0], sm[1], sm[2]);
     return { x: r[0], y: r[1], z: r[2] };
@@ -8396,7 +8389,6 @@ TwoRenderer.prototype.resize = function() {
 };
 TwoRenderer.prototype.createCircle = function(body_group, shape) {
   const circle = this.two.makeCircle(shape.c.x, shape.c.y, shape.r);
-  console.log(shape);
   circle.fill = "#FF8000";
   circle.stroke = "orangered";
   circle.linewidth = 0.05;

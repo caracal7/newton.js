@@ -16,7 +16,7 @@ class Surface {
 
     apply(px, py, s) {
         this.object.translation.set(px, py);
-        this.object.scale = s;
+        this.object.scale = new Two.Vector(s, -s);
         return this;
     }
 }
@@ -126,20 +126,15 @@ class ZUI {
         return { x: r[0], y: r[1], z: r[2] };
     }
 
-    surfaceToClient(a, b, c) {
+    surfaceToClient(a) {
         this.updateOffset();
         const vo = this.viewportOffset.matrix.clone();
         let x, y, z;
-        if (arguments.length === 1) {
-            const v = a;
-            x = typeof v.x === 'number' ? v.x : 0;
-            y = typeof v.y === 'number' ? v.y : 0;
-            z = typeof v.z === 'number' ? v.z : 1;
-        } else {
-            x = typeof a === 'number' ? a : 0;
-            y = typeof b === 'number' ? b : 0;
-            z = typeof c === 'number' ? c : 1;
-        }
+
+        x = typeof a.x === 'number' ? a.x : 0;
+        y = typeof a.y === 'number' ? a.y : 0;
+        z = typeof a.z === 'number' ? a.z : 1;
+
         const sm = this.surfaceMatrix.multiply(x, y, z);
         const r = vo.multiply(sm[0], sm[1], sm[2]);
         return { x: r[0], y: r[1], z: r[2] };
@@ -160,6 +155,7 @@ class ZUI {
         const sf = this.clientToSurface(clientX, clientY);
         const scaleBy = newScale / this.scale;
 
+
         this.surfaceMatrix.scale(scaleBy);
         this.scale = newScale;
 
@@ -168,9 +164,9 @@ class ZUI {
         const dx = clientX - c.x;
         const dy = clientY - c.y;
         this.translateSurface(dx, dy);
-
         return this;
     }
+
 
     translateSurface(x, y) {
         ZUI.TranslateMatrix(this.surfaceMatrix, x, y);
