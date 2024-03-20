@@ -31,16 +31,20 @@ function TwoRenderer(Newton, canvas) {
 	Two.ZUI = ZUI;
 	this.Two = Two;
 	this.two = new Two({
-		type: Two.Types.webgl,
-	//	type: Two.Types.svg,
+	//	type: Two.Types.webgl,
+		type: Two.Types.svg,
+		//fullscreen: true,
 		autostart: true
 	}).appendTo(canvas);
+
 
 	this.stage = new Two.Group();
 	this.two.add(this.stage);
 
+
 	this.joints_group = new Two.Group();
 	this.stage.add(this.joints_group);
+
 
 	this.zui = new Two.ZUI(this.stage, this.two.renderer.domElement);
 	this.resize();
@@ -154,7 +158,7 @@ TwoRenderer.prototype.addJoint = function(joint) {
 			line.dashes = [0.05, 0.05];
 		} else if(joint.type === joint.TYPE_DISTANCE) {
 			line.linewidth = 0.05;
-			line.stroke = "rgba(0, 255, 0, 0.5)";
+			line.stroke = "rgba(0, 155, 255, 0.7)";
 			line.dashes = [0.1, 0.1];
 		} else {
 			line.linewidth = 0.05;

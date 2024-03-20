@@ -16,7 +16,8 @@ class Surface {
 
     apply(px, py, s) {
         this.object.translation.set(px, py);
-        this.object.scale = new Two.Vector(s, s);
+        this.object.scale = new Two.Vector(s, -s);
+    //    this.object.scale = new Two.Vector(1, 1);
         return this;
     }
 }
@@ -108,7 +109,7 @@ class ZUI {
     }
 
     clientToSurface(a, b, c) {
-        //this.updateOffset();
+        this.updateOffset();
         const m = this.surfaceMatrix.inverse();
         let x, y, z;
         if (arguments.length === 1) {
@@ -126,15 +127,20 @@ class ZUI {
         return { x: r[0], y: r[1], z: r[2] };
     }
 
-    surfaceToClient(a) {
-        //this.updateOffset();
+    surfaceToClient(a, b, c) {
+        this.updateOffset();
         const vo = this.viewportOffset.matrix.clone();
         let x, y, z;
-
-        x = typeof a.x === 'number' ? a.x : 0;
-        y = typeof a.y === 'number' ? a.y : 0;
-        z = typeof a.z === 'number' ? a.z : 1;
-
+        if (arguments.length === 1) {
+          const v = a;
+          x = typeof v.x === 'number' ? v.x : 0;
+          y = typeof v.y === 'number' ? v.y : 0;
+          z = typeof v.z === 'number' ? v.z : 1;
+        } else {
+          x = typeof a === 'number' ? a : 0;
+          y = typeof b === 'number' ? b : 0;
+          z = typeof c === 'number' ? c : 1;
+        }
         const sm = this.surfaceMatrix.multiply(x, y, z);
         const r = vo.multiply(sm[0], sm[1], sm[2]);
         return { x: r[0], y: r[1], z: r[2] };
@@ -172,24 +178,23 @@ class ZUI {
         this.updateSurface();
         return this;
     }
-        /*
-    updateOffset() {
 
+    updateOffset() {
+/*
         this.viewportOffset.matrix
             .identity()
             .translate(0, 0);
-
+*/
         const rect = this.viewport.getBoundingClientRect();
-        console.log(rect)
-        this.viewportOffset.left = rect.left;
-        this.viewportOffset.top  = rect.top;
+        this.viewportOffset.left = 0//rect.left;
+        this.viewportOffset.top  = 0// rect.top;
         this.viewportOffset.matrix
             .identity()
-            .translate(this.viewportOffset.left, this.viewportOffset.top);
+            //.translate(this.viewportOffset.left, this.viewportOffset.top);
 
         return this;
     }
-        */
+
     updateSurface() {
         const e = this.surfaceMatrix.elements;
         for (let i = 0; i < this.surfaces.length; i++)

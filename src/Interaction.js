@@ -274,7 +274,10 @@ function addZUI(interaction, runner, renderer) {
         const p = new vec2(world_pos.x, -world_pos.y);
         // If we picked shape then create mouse joint
         dragging = runner.world.findBodyByPoint(p);
+
         if (dragging) {
+            if(dragging.isStatic()) return (dragging = undefined);
+
             interaction.mouseBody.p.copy(p);
             interaction.mouseBody.syncTransform();
             interaction.mouseJoint = new MouseJoint(interaction.mouseBody, dragging, p);

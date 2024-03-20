@@ -2924,6 +2924,8 @@ function addZUI(interaction, runner, renderer) {
     const p = new vec22(world_pos.x, -world_pos.y);
     dragging = runner.world.findBodyByPoint(p);
     if (dragging) {
+      if (dragging.isStatic())
+        return dragging = void 0;
       interaction.mouseBody.p.copy(p);
       interaction.mouseBody.syncTransform();
       interaction.mouseJoint = new MouseJoint(interaction.mouseBody, dragging, p);
@@ -8214,7 +8216,7 @@ var Surface = class {
   }
   apply(px, py, s) {
     this.object.translation.set(px, py);
-    this.object.scale = new two_min_default.Vector(s, s);
+    this.object.scale = new two_min_default.Vector(s, -s);
     return this;
   }
 };
@@ -8275,6 +8277,7 @@ var _ZUI = class _ZUI {
     return this;
   }
   clientToSurface(a, b, c) {
+    this.updateOffset();
     const m = this.surfaceMatrix.inverse();
     let x, y, z;
     if (arguments.length === 1) {
@@ -8291,12 +8294,20 @@ var _ZUI = class _ZUI {
     const r = m.multiply(n[0], n[1], n[2]);
     return { x: r[0], y: r[1], z: r[2] };
   }
-  surfaceToClient(a) {
+  surfaceToClient(a, b, c) {
+    this.updateOffset();
     const vo = this.viewportOffset.matrix.clone();
     let x, y, z;
-    x = typeof a.x === "number" ? a.x : 0;
-    y = typeof a.y === "number" ? a.y : 0;
-    z = typeof a.z === "number" ? a.z : 1;
+    if (arguments.length === 1) {
+      const v = a;
+      x = typeof v.x === "number" ? v.x : 0;
+      y = typeof v.y === "number" ? v.y : 0;
+      z = typeof v.z === "number" ? v.z : 1;
+    } else {
+      x = typeof a === "number" ? a : 0;
+      y = typeof b === "number" ? b : 0;
+      z = typeof c === "number" ? c : 1;
+    }
     const sm = this.surfaceMatrix.multiply(x, y, z);
     const r = vo.multiply(sm[0], sm[1], sm[2]);
     return { x: r[0], y: r[1], z: r[2] };
@@ -8326,24 +8337,13 @@ var _ZUI = class _ZUI {
     this.updateSurface();
     return this;
   }
-  /*
-      updateOffset() {
-  
-          this.viewportOffset.matrix
-              .identity()
-              .translate(0, 0);
-  
-          const rect = this.viewport.getBoundingClientRect();
-          console.log(rect)
-          this.viewportOffset.left = rect.left;
-          this.viewportOffset.top  = rect.top;
-          this.viewportOffset.matrix
-              .identity()
-              .translate(this.viewportOffset.left, this.viewportOffset.top);
-  
-          return this;
-      }
-          */
+  updateOffset() {
+    const rect = this.viewport.getBoundingClientRect();
+    this.viewportOffset.left = 0;
+    this.viewportOffset.top = 0;
+    this.viewportOffset.matrix.identity();
+    return this;
+  }
   updateSurface() {
     const e = this.surfaceMatrix.elements;
     for (let i = 0; i < this.surfaces.length; i++)
@@ -8381,8 +8381,9 @@ function TwoRenderer(Newton, canvas) {
   two_min_default.ZUI = ZUI_default;
   this.Two = two_min_default;
   this.two = new two_min_default({
-    type: two_min_default.Types.webgl,
-    //	type: Two.Types.svg,
+    //	type: Two.Types.webgl,
+    type: two_min_default.Types.svg,
+    //fullscreen: true,
     autostart: true
   }).appendTo(canvas);
   this.stage = new two_min_default.Group();
@@ -8483,7 +8484,7 @@ TwoRenderer.prototype.addJoint = function(joint) {
       line.dashes = [0.05, 0.05];
     } else if (joint.type === joint.TYPE_DISTANCE) {
       line.linewidth = 0.05;
-      line.stroke = "rgba(0, 255, 0, 0.5)";
+      line.stroke = "rgba(0, 155, 255, 0.7)";
       line.dashes = [0.1, 0.1];
     } else {
       line.linewidth = 0.05;
