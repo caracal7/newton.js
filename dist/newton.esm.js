@@ -2946,6 +2946,7 @@ function Interaction(runner, settings) {
   const mousedown = (event) => {
     var _a, _b;
     this.state.mouseDown = true;
+    this.state.pointerDownMoving = false;
     mouse.x = event.clientX;
     mouse.y = event.clientY;
     interaction.removeJoint();
@@ -2976,6 +2977,9 @@ function Interaction(runner, settings) {
     window.addEventListener("mouseup", mouseup, false);
   };
   const mousemove = (event) => {
+    var _a, _b;
+    if (this.state.mouseDown)
+      this.state.pointerDownMoving = true;
     if (dragging) {
       const rect = runner.renderer.canvas.getBoundingClientRect();
       const world_pos = zui.clientToSurface(event.offsetX - rect.left, event.offsetY - rect.top);
@@ -2987,17 +2991,30 @@ function Interaction(runner, settings) {
       var dy = event.clientY - mouse.y;
       zui.translateSurface(dx, dy);
       mouse.set(event.clientX, event.clientY);
+      if ((_b = (_a = this[Events2]) == null ? void 0 : _a.mousemove) == null ? void 0 : _b.length) {
+        const rect = runner.renderer.canvas.getBoundingClientRect();
+        var x = event.offsetX - rect.left;
+        var y = event.offsetY - rect.top;
+        const world_pos = zui.clientToSurface(x, x);
+        const world_pos_vec = new vec22(world_pos.x, -world_pos.y);
+        this[Events2].mousemove.forEach((callback) => callback(new vec22(x, y), world_pos_vec));
+        if (this.runner.pause)
+          this.runner.drawFrame(0);
+      }
+      ;
     }
   };
   const mouseup = (event) => {
     var _a, _b;
     if ((_b = (_a = this[Events2]) == null ? void 0 : _a.mouseup) == null ? void 0 : _b.length) {
       const rect = runner.renderer.canvas.getBoundingClientRect();
-      const world_pos = zui.clientToSurface(event.offsetX - rect.left, event.offsetY - rect.top);
+      var x = event.offsetX - rect.left;
+      var y = event.offsetY - rect.top;
+      const world_pos = zui.clientToSurface(x, x);
       const world_pos_vec = new vec22(world_pos.x, -world_pos.y);
       this[Events2].mouseup.forEach((callback) => callback(
         event.type == "mouseleave" ? void 0 : runner.world.findBodyByPoint(world_pos_vec),
-        new vec22(event.offsetX - rect.left, event.offsetY - rect.top),
+        new vec22(x, y),
         world_pos_vec,
         this.state.pointerDownMoving
       ));
