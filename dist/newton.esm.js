@@ -718,6 +718,10 @@ Shape.prototype.translateWithDelta = function(delta) {
       this.b.copy(this.body.getLocalPoint(wb));
       break;
     case Shape.TYPE_POLY:
+      var transformCenter = this.body.p;
+      var a = this.body.a;
+      console.log(this.body.a);
+      this.body.a = 0;
       for (var j = 0; j < this.tverts.length; j++) {
         var wv = vec22.add(this.tverts[j], delta);
         this.verts[j].copy(this.body.getLocalPoint(wv));
