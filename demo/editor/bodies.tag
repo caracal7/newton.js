@@ -14,6 +14,7 @@
         this.interaction = this.state.runner.interaction;
 
         this.mouseup = (body, screen, world, isMoved) => {
+            console.log('mouseup', body, screen, world, isMoved)
             if(!isMoved) {
                 this.selected = body;
                 this.state.runner.redraw();
@@ -22,6 +23,7 @@
         };
 
         this.mousedown = (body, screen, world) => {
+            console.log('mousedown', body, screen, world)
             if(this.selected && this.selected === body) {
                 this.lastPos = world;
                 return true; // Block viewport move

@@ -2895,12 +2895,13 @@ function Interaction(runner, settings) {
   this.SELECTABLE_LINE_DIST_THREHOLD = SELECTABLE_LINE_DIST_THREHOLD;
   this.state = {
     mouseDown: false,
-    pointerDownMoving: false,
-    mouseDownPosition: new vec22(),
-    mousePositionOld: new vec22(),
-    touchPosOld: new Array(2),
-    touchDist: void 0,
-    gestureStartScale: void 0
+    pointerDownMoving: false
+    /*
+    mouseDownPosition:  new vec2(),
+    mousePositionOld:   new vec2(),
+    touchPosOld:        new Array(2),
+    touchDist:          undefined,
+    gestureStartScale:  undefined,*/
   };
   this.mouseJoint = null;
   this.mouseBody = new Body(Body.KINETIC);
@@ -2919,6 +2920,7 @@ function Interaction(runner, settings) {
   var dragging = false;
   zui.addLimits(0.06, 100);
   const startDrag = (x, y) => {
+    console.log("startDrag");
     interaction.removeJoint();
     const world_pos = zui.clientToSurface(x, y);
     const p = new vec22(world_pos.x, -world_pos.y);
@@ -2932,11 +2934,44 @@ function Interaction(runner, settings) {
       interaction.mouseJoint.maxForce = dragging.m * 5e4;
       runner.world.addJoint(interaction.mouseJoint);
     }
+    return world_pos;
+  };
+  const createMouseJoint = (world_pos_vec) => {
+    interaction.mouseBody.p.copy(world_pos_vec);
+    interaction.mouseBody.syncTransform();
+    interaction.mouseJoint = new MouseJoint(interaction.mouseBody, dragging, world_pos_vec);
+    interaction.mouseJoint.maxForce = dragging.m * 5e4;
+    runner.world.addJoint(interaction.mouseJoint);
   };
   const mousedown = (event) => {
+    var _a, _b;
+    this.state.mouseDown = true;
     mouse.x = event.clientX;
     mouse.y = event.clientY;
-    startDrag(event.offsetX, event.offsetY);
+    interaction.removeJoint();
+    const world_pos = zui.clientToSurface(event.offsetX, event.offsetY);
+    const world_pos_vec = new vec22(world_pos.x, -world_pos.y);
+    dragging = runner.world.findBodyByPoint(world_pos_vec);
+    var block = false;
+    if ((_b = (_a = this[Events2]) == null ? void 0 : _a.mousedown) == null ? void 0 : _b.length) {
+      this[Events2].mousedown.forEach((callback) => {
+        if (callback(dragging, new vec22(event.offsetX, event.offsetY), world_pos_vec))
+          block = true;
+      });
+      if (this.runner.pause)
+        this.runner.drawFrame(0);
+    }
+    if (block) {
+      dragging = void 0;
+      this.state.mouseDown = false;
+    } else {
+      if (this.settings.pick && dragging) {
+        if (dragging.isStatic())
+          dragging = void 0;
+        else
+          createMouseJoint(world_pos_vec);
+      }
+    }
     window.addEventListener("mousemove", mousemove, false);
     window.addEventListener("mouseup", mouseup, false);
   };
@@ -2944,8 +2979,8 @@ function Interaction(runner, settings) {
     if (dragging) {
       const rect = runner.renderer.canvas.getBoundingClientRect();
       const world_pos = zui.clientToSurface(event.offsetX - rect.left, event.offsetY - rect.top);
-      const p = new vec22(world_pos.x, -world_pos.y);
-      interaction.mouseBody.p.copy(p);
+      const world_pos_vec = new vec22(world_pos.x, -world_pos.y);
+      interaction.mouseBody.p.copy(world_pos_vec);
       interaction.mouseBody.syncTransform();
     } else {
       var dx = event.clientX - mouse.x;
@@ -2955,9 +2990,26 @@ function Interaction(runner, settings) {
     }
   };
   const mouseup = (event) => {
+    var _a, _b;
+    if ((_b = (_a = this[Events2]) == null ? void 0 : _a.mouseup) == null ? void 0 : _b.length) {
+      const rect = runner.renderer.canvas.getBoundingClientRect();
+      const world_pos = zui.clientToSurface(event.offsetX - rect.left, event.offsetY - rect.top);
+      const world_pos_vec = new vec22(world_pos.x, -world_pos.y);
+      this[Events2].mouseup.forEach((callback) => callback(
+        event.type == "mouseleave" ? void 0 : runner.world.findBodyByPoint(world_pos_vec),
+        new vec22(event.offsetX - rect.left, event.offsetY - rect.top),
+        world_pos_vec,
+        this.state.pointerDownMoving
+      ));
+    }
+    ;
+    this.state.mouseDown = false;
     interaction.removeJoint();
     window.removeEventListener("mousemove", mousemove, false);
     window.removeEventListener("mouseup", mouseup, false);
+  };
+  const mouseleave = (event) => {
+    mouseup(event);
   };
   const mousewheel = (event) => {
     var dy = (event.wheelDeltaY || -event.deltaY) / 1e3;
@@ -3043,6 +3095,7 @@ function Interaction(runner, settings) {
     distance2 = d;
   };
   domElement.addEventListener("mousedown", mousedown, false);
+  domElement.addEventListener("mouseleave", mouseleave, false);
   domElement.addEventListener("mousewheel", mousewheel, false);
   domElement.addEventListener("wheel", mousewheel, false);
   domElement.addEventListener("touchstart", touchstart, false);

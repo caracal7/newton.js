@@ -25,11 +25,12 @@ function Interaction(runner, settings) {
     this.state = {
         mouseDown:          false,
         pointerDownMoving:  false,
+        /*
         mouseDownPosition:  new vec2(),
         mousePositionOld:   new vec2(),
         touchPosOld:        new Array(2),
         touchDist:          undefined,
-        gestureStartScale:  undefined,
+        gestureStartScale:  undefined,*/
     };
 
     this.mouseJoint = null;
@@ -268,6 +269,7 @@ function Interaction(runner, settings) {
     zui.addLimits(0.06, 100);
 
     const startDrag = (x,y) => {
+        console.log('startDrag')
         // Remove previous mouse joint
         interaction.removeJoint();
 
@@ -285,12 +287,52 @@ function Interaction(runner, settings) {
             interaction.mouseJoint.maxForce = dragging.m * 50000;
             runner.world.addJoint(interaction.mouseJoint);
         }
+        return world_pos;
     }
+
+    const createMouseJoint = world_pos_vec => {
+        interaction.mouseBody.p.copy(world_pos_vec);
+        interaction.mouseBody.syncTransform();
+        interaction.mouseJoint = new MouseJoint(interaction.mouseBody, dragging, world_pos_vec);
+        interaction.mouseJoint.maxForce = dragging.m * 50000;
+        runner.world.addJoint(interaction.mouseJoint);
+    }
+
     //------------------------------ mousedown
     const mousedown = event => {
+        this.state.mouseDown = true;
+
         mouse.x = event.clientX;
         mouse.y = event.clientY;
-        startDrag(event.offsetX, event.offsetY);
+
+        // Remove previous mouse joint
+        interaction.removeJoint();
+
+        const world_pos = zui.clientToSurface(event.offsetX, event.offsetY);
+        const world_pos_vec = new vec2(world_pos.x, -world_pos.y);
+        // If we picked shape then create mouse joint
+        dragging = runner.world.findBodyByPoint(world_pos_vec);
+
+        var block = false;
+        if(this[Events]?.mousedown?.length) {
+            this[Events].mousedown.forEach(callback => {
+                if(callback(dragging, new vec2(event.offsetX, event.offsetY), world_pos_vec))
+                    block = true;
+            });
+            if(this.runner.pause) this.runner.drawFrame(0);
+        }
+
+        if(block) {
+            dragging = undefined;
+            this.state.mouseDown = false;
+        } else {
+            if (this.settings.pick && dragging) {
+                if(dragging.isStatic())
+                    dragging = undefined;
+                else
+                    createMouseJoint(world_pos_vec);
+        	}
+        }
         window.addEventListener('mousemove', mousemove, false);
         window.addEventListener('mouseup', mouseup, false);
     }
@@ -299,8 +341,8 @@ function Interaction(runner, settings) {
         if (dragging) {
             const rect = runner.renderer.canvas.getBoundingClientRect();
             const world_pos = zui.clientToSurface(event.offsetX - rect.left, event.offsetY - rect.top);
-            const p = new vec2(world_pos.x, -world_pos.y);
-            interaction.mouseBody.p.copy(p);
+            const world_pos_vec = new vec2(world_pos.x, -world_pos.y);
+            interaction.mouseBody.p.copy(world_pos_vec);
             interaction.mouseBody.syncTransform();
         } else {
             var dx = event.clientX - mouse.x;
@@ -311,10 +353,26 @@ function Interaction(runner, settings) {
     }
     //------------------------------ mouseup
     const mouseup = event => {
+        if(this[Events]?.mouseup?.length) {
+            const rect = runner.renderer.canvas.getBoundingClientRect();
+            const world_pos = zui.clientToSurface(event.offsetX - rect.left, event.offsetY - rect.top);
+            const world_pos_vec = new vec2(world_pos.x, -world_pos.y);
+            this[Events].mouseup.forEach(callback => callback(
+                event.type == 'mouseleave' ? undefined : runner.world.findBodyByPoint(world_pos_vec),
+                new vec2(event.offsetX - rect.left, event.offsetY - rect.top), world_pos_vec, this.state.pointerDownMoving
+            ));
+        };
+
+        this.state.mouseDown = false;
         interaction.removeJoint();
         window.removeEventListener('mousemove', mousemove, false);
         window.removeEventListener('mouseup', mouseup, false);
     }
+    //------------------------------ mouseleave
+    const mouseleave = event => {
+        mouseup(event)
+    }
+
     //------------------------------ mousewheel
     const mousewheel = event => {
         var dy = (event.wheelDeltaY || - event.deltaY) / 1000;
@@ -411,6 +469,7 @@ function Interaction(runner, settings) {
     }
 
     domElement.addEventListener('mousedown', mousedown, false);
+    domElement.addEventListener('mouseleave', mouseleave, false);
     domElement.addEventListener('mousewheel', mousewheel, false);
     domElement.addEventListener('wheel', mousewheel, false);
 
