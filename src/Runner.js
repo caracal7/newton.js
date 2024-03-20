@@ -194,6 +194,17 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
 
     this[Events]?.beforeRenderFrame?.forEach(callback => callback(frameTime));
 
+    for (var i = 0; i < this.world.bodyArr.length; i++) {
+        this.renderer.updateBody(this.world.bodyArr[i]);
+    }
+
+    for (var i = 0; i < this.world.jointArr.length; i++) {
+        this.renderer?.updateJoint(this.world.jointArr[i]);
+    }
+
+    this[Events]?.afterRenderFrame?.forEach(callback => callback(frameTime));
+        
+/*
 	// camera.bounds for culling
 	this.camera.bounds.set(
         this.canvasToWorld(new vec2(0, this.renderer.height)),
@@ -217,15 +228,10 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
 			}
 		}
 	}
+*/
 
 
-    for (var i = 0; i < this.world.bodyArr.length; i++) {
-        var body = this.world.bodyArr[i];
-        this.renderer.updateBody(body);
-    }
-
-
-
+/*
 	// Update whole background canvas if we needed
 	if (this.static_outdated) {
 		this.static_outdated = false;
@@ -302,7 +308,9 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
 			}
 		}
 	}
+*/
 
+/*
 	// Draw joints
 	if (this.settings.showJoints) {
 		for (var i = 0; i < this.world.jointArr.length; i++) {
@@ -326,10 +334,10 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
 			}
 		}
 	}
+*/
 
-    this[Events]?.afterRenderFrame?.forEach(callback => callback(frameTime));
 
-    this.renderer.endDynamic();
+//    this.renderer.endDynamic();
 }
 
 Runner.prototype.worldToCanvas = function(p) {

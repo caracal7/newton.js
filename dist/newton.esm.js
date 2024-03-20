@@ -2287,9 +2287,7 @@ World.prototype.velocitySolver = function(iteration) {
   var t0 = Date.now();
   for (var i = 0; i < iteration; i++) {
     for (var j = 0; j < this.jointArr.length; j++) {
-      if (this.jointArr[j]) {
-        this.jointArr[j].solveVelocityConstraints();
-      }
+      this.jointArr[j].solveVelocityConstraints();
     }
     for (var j = 0; j < this.contactSolverArr.length; j++) {
       this.contactSolverArr[j].solveVelocityConstraints();
@@ -2498,14 +2496,6 @@ MouseJoint.prototype.getReactionTorque = function(dt_inv) {
 // src/Runner.js
 var HELPER_JOINT_ANCHOR_RADIUS = pixel2meter(2.5);
 var PIXEL_UNIT = pixel2meter(1);
-var randomColor = ["#BEB", "#48B", "#CAA", "#8D5", "#6BE", "#98D", "#E78", "#7BC", "#E9E", "#BCD", "#EB6", "#EE7"];
-function bodyColor(body) {
-  if (!body.isDynamic())
-    return "#777";
-  if (!body.isAwake())
-    return "#999";
-  return randomColor[body.id % randomColor.length];
-}
 var App = Symbol("app");
 var Pause = Symbol("pause");
 var Events = Symbol("events");
@@ -2654,118 +2644,15 @@ Runner.prototype.redraw = function() {
   this.drawFrame(0);
 };
 Runner.prototype.drawFrame = function(frameTime = 0) {
-  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m;
+  var _a, _b, _c, _d, _e;
   (_b = (_a = this[Events]) == null ? void 0 : _a.beforeRenderFrame) == null ? void 0 : _b.forEach((callback) => callback(frameTime));
-  this.camera.bounds.set(
-    this.canvasToWorld(new vec22(0, this.renderer.height)),
-    this.canvasToWorld(new vec22(this.renderer.width, 0))
-  );
   for (var i = 0; i < this.world.bodyArr.length; i++) {
-    var body = this.world.bodyArr[i];
-    body.visible = false;
-    for (var j = 0; j < body.shapeArr.length; j++) {
-      var shape = body.shapeArr[j];
-      var bounds = new Bounds(shape.bounds.mins, shape.bounds.maxs);
-      if (this.camera.bounds.intersectsBounds(bounds)) {
-        shape.visible = true;
-        body.visible = true;
-      } else {
-        shape.visible = false;
-      }
-    }
+    this.renderer.updateBody(this.world.bodyArr[i]);
   }
-  for (var i = 0; i < this.world.bodyArr.length; i++) {
-    var body = this.world.bodyArr[i];
-    this.renderer.updateBody(body);
+  for (var i = 0; i < this.world.jointArr.length; i++) {
+    (_c = this.renderer) == null ? void 0 : _c.updateJoint(this.world.jointArr[i]);
   }
-  if (this.static_outdated) {
-    this.static_outdated = false;
-    this.renderer.beginStatic(this.camera, this.settings.backgroundColor);
-    for (var i = 0; i < this.world.bodyArr.length; i++) {
-      var body = this.world.bodyArr[i];
-      if (body.isStatic()) {
-        var body_colors = {
-          outline: "#000",
-          body: bodyColor(body)
-        };
-        (_d = (_c = this[Events]) == null ? void 0 : _c.beforeRenderBody) == null ? void 0 : _d.forEach((callback) => callback(body, body_colors));
-        for (var k = 0; k < body.shapeArr.length; k++) {
-          var shape = body.shapeArr[k];
-          if (!shape.visible)
-            continue;
-          var shape_colors = {
-            outline: body_colors.outline,
-            body: body_colors.body
-          };
-          (_f = (_e = this[Events]) == null ? void 0 : _e.beforeRenderShape) == null ? void 0 : _f.forEach((callback) => callback(shape, shape_colors));
-          this.renderer.drawShape(shape, true, PIXEL_UNIT, shape_colors.outline, shape_colors.body);
-        }
-      }
-    }
-    this.renderer.endStatic();
-  }
-  if (this.settings.enableDirtyBounds) {
-    if (!this.dirtyBounds.isEmpty()) {
-      var mins2 = this.worldToCanvas(this.dirtyBounds.mins);
-      var maxs2 = this.worldToCanvas(this.dirtyBounds.maxs);
-      var x = Math.max(Math.floor(mins2.x), 0);
-      var y = Math.max(Math.floor(maxs2.y), 0);
-      var w = Math.min(Math.ceil(maxs2.x), this.renderer.width) - x;
-      var h = Math.min(Math.ceil(mins2.y), this.renderer.height) - y;
-      if (w > 0 && h > 0)
-        this.renderer.copyBackground(x, y, w, h, x, y, w, h);
-    }
-  } else
-    this.renderer.copyBackground(0, 0);
-  this.dirtyBounds.clear();
-  this.renderer.beginDynamic(this.camera);
-  for (var i = 0; i < this.world.bodyArr.length; i++) {
-    var body = this.world.bodyArr[i];
-    if (body.visible) {
-      if (!body.isStatic()) {
-        var body_colors = {
-          outline: "#000",
-          body: bodyColor(body)
-        };
-        (_h = (_g = this[Events]) == null ? void 0 : _g.beforeRenderBody) == null ? void 0 : _h.forEach((callback) => callback(body, body_colors));
-        for (var k = 0; k < body.shapeArr.length; k++) {
-          var shape = body.shapeArr[k];
-          if (!shape.visible)
-            continue;
-          var shape_colors = {
-            outline: body_colors.outline,
-            body: body_colors.body
-          };
-          (_j = (_i = this[Events]) == null ? void 0 : _i.beforeRenderShape) == null ? void 0 : _j.forEach((callback) => callback(shape, shape_colors));
-          this.renderer.drawShape(shape, false, PIXEL_UNIT, shape_colors.outline, shape_colors.body);
-          var expand = PIXEL_UNIT * 3;
-          this.dirtyBounds.addBounds(Bounds.expand(shape.bounds, expand, expand));
-        }
-      }
-    }
-  }
-  if (this.settings.showJoints) {
-    for (var i = 0; i < this.world.jointArr.length; i++) {
-      var joint = this.world.jointArr[i];
-      if (joint) {
-        (_k = this.renderer) == null ? void 0 : _k.updateJoint(joint);
-        var p1 = joint.getWorldAnchor1();
-        var p2 = joint.getWorldAnchor2();
-        this.renderer.drawHelperJointAnchors(p1, p2, HELPER_JOINT_ANCHOR_RADIUS, PIXEL_UNIT, this.settings.jointAnchorColor);
-        var bounds = new Bounds();
-        bounds.addExtents(p1, HELPER_JOINT_ANCHOR_RADIUS, HELPER_JOINT_ANCHOR_RADIUS);
-        bounds.addExtents(p2, HELPER_JOINT_ANCHOR_RADIUS, HELPER_JOINT_ANCHOR_RADIUS);
-        bounds.addPoint(p1);
-        bounds.addPoint(p2);
-        if (!joint.body1.isStatic() || !joint.body2.isStatic()) {
-          bounds.expand(PIXEL_UNIT * 2, PIXEL_UNIT * 2);
-          this.dirtyBounds.addBounds(bounds);
-        }
-      }
-    }
-  }
-  (_m = (_l = this[Events]) == null ? void 0 : _l.afterRenderFrame) == null ? void 0 : _m.forEach((callback) => callback(frameTime));
-  this.renderer.endDynamic();
+  (_e = (_d = this[Events]) == null ? void 0 : _d.afterRenderFrame) == null ? void 0 : _e.forEach((callback) => callback(frameTime));
 };
 Runner.prototype.worldToCanvas = function(p) {
   return new vec22(
@@ -8444,6 +8331,7 @@ function TwoRenderer(Newton, canvas) {
   two_min_default.ZUI = ZUI_default;
   this.Two = two_min_default;
   this.two = new two_min_default({
+    //	type: Two.Types.canvas,
     //	type: Two.Types.webgl,
     type: two_min_default.Types.svg,
     //fullscreen: true,
@@ -8479,6 +8367,7 @@ TwoRenderer.prototype.createCircle = function(body_group, shape, body) {
   line.linewidth = 0.05;
   line.stroke = "rgba(255, 0, 0, 0.5)";
   body_group.add(circle, line);
+  shape.render_entity = circle;
 };
 TwoRenderer.prototype.createPolygon = function(body_group, shape, body) {
   const poly = this.two.makePath(...shape.tverts.reduce((a, v) => {
@@ -8489,6 +8378,7 @@ TwoRenderer.prototype.createPolygon = function(body_group, shape, body) {
   poly.stroke = "#aaaaaa";
   poly.fill = "#ececec";
   body_group.add(poly);
+  shape.render_entity = poly;
 };
 TwoRenderer.prototype.createSegment = function(body_group, shape, body) {
   var a = this.Newton.vec2.sub(shape.ta, body.p);
@@ -8503,6 +8393,7 @@ TwoRenderer.prototype.createSegment = function(body_group, shape, body) {
   rect.fill = "#ececec";
   rect.linewidth = 0.05;
   body_group.add(rect);
+  shape.render_entity = rect;
 };
 TwoRenderer.prototype.addBody = function(body) {
   body.render_group = this.two.makeGroup();

@@ -496,9 +496,9 @@ World.prototype.velocitySolver = function(iteration) {
 
 	for (var i = 0; i < iteration; i++) {
 		for (var j = 0; j < this.jointArr.length; j++) {
-			if (this.jointArr[j]) {
+		//	if (this.jointArr[j]) {
 				this.jointArr[j].solveVelocityConstraints();
-			}
+		//	}
 		}
 
 		for (var j = 0; j < this.contactSolverArr.length; j++) {

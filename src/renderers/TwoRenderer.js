@@ -31,6 +31,7 @@ function TwoRenderer(Newton, canvas) {
 	Two.ZUI = ZUI;
 	this.Two = Two;
 	this.two = new Two({
+	//	type: Two.Types.canvas,
 	//	type: Two.Types.webgl,
 		type: Two.Types.svg,
 		//fullscreen: true,
@@ -76,6 +77,7 @@ TwoRenderer.prototype.createCircle = function(body_group, shape, body) {
 	line.linewidth = 0.05;
 	line.stroke = "rgba(255, 0, 0, 0.5)";
 	body_group.add(circle, line);
+	shape.render_entity = circle;
 }
 
 TwoRenderer.prototype.createPolygon = function(body_group, shape, body) {
@@ -87,6 +89,7 @@ TwoRenderer.prototype.createPolygon = function(body_group, shape, body) {
 	poly.stroke = "#aaaaaa";
 	poly.fill = "#ececec";
 	body_group.add(poly);
+	shape.render_entity = poly;
 }
 
 
@@ -103,6 +106,7 @@ TwoRenderer.prototype.createSegment = function(body_group, shape, body) {
 	rect.fill = "#ececec";
 	rect.linewidth = 0.05;
 	body_group.add(rect);
+	shape.render_entity = rect;
 }
 
 

@@ -42,10 +42,10 @@ const Shape = function(type) {
 	this.bounds = new Bounds;
 }
 
-Shape.TYPE_CIRCLE = 0;
+Shape.TYPE_CIRCLE  = 0;
 Shape.TYPE_SEGMENT = 1;
-Shape.TYPE_POLY = 2;
-Shape.NUM_TYPES = 3;
+Shape.TYPE_POLY    = 2;
+Shape.NUM_TYPES    = 3;
 
 Shape.prototype.translateTo = function(pos) {
 	switch (this.type) {
@@ -88,9 +88,19 @@ Shape.prototype.translateWithDelta = function(delta) {
 			this.b.copy(this.body.getLocalPoint(wb));
 		break;
 		case Shape.TYPE_POLY:
+
+//vec2.rotation(this.body.a)
+
+			//var _delta = delta.rotation(this.body.a)
+			//vec2.rotate(this.body.getLocalVector(this.body.a), this.body.a);
+
+		//	var _delta = vec2.rotate(delta, this.body.a));
 			for (var j = 0; j < this.tverts.length; j++) {
 				var wv = vec2.add(this.tverts[j], delta);
 				this.verts[j].copy(this.body.getLocalPoint(wv));
+
+
+			//	this.verts[j].copy(vec2.add(this.body.getLocalPoint(this.tverts[j]), delta););
 			}
 		break;
 	}

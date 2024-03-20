@@ -6,6 +6,24 @@
 <!static>
     const IS_TOUCH = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
 
+    function higlightBody(body, colors) {
+        colors.fill.length = 0;
+        colors.stroke.length = 0;
+        body.render_group.children.forEach(entity => {
+            colors.fill.push(entity.fill);
+            colors.stroke.push(entity.stroke);
+            entity.fill = colors.FILL;
+            entity.stroke = colors.STROKE;
+        });
+    }
+
+    function unhiglightBody(body, colors) {
+        body.render_group.children.forEach((entity, index) => {
+            entity.fill = colors.fill[index];
+            entity.stroke = colors.stroke[index];
+        });
+    }
+
 <!class>
     connected() {
         this.selectedColors = {
@@ -20,24 +38,6 @@
             FILL: '#FF552255',
             STROKE: '#00000055'
         };
-
-        function higlightBody(body, colors) {
-            colors.fill.length = 0;
-            colors.stroke.length = 0;
-            body.render_group.children.forEach(entity => {
-                colors.fill.push(entity.fill);
-                colors.stroke.push(entity.stroke);
-                entity.fill = colors.FILL;
-                entity.stroke = colors.STROKE;
-            });
-        }
-
-        function unhiglightBody(body, colors) {
-            body.render_group.children.forEach((entity, index) => {
-                entity.fill = colors.fill[index];
-                entity.stroke = colors.stroke[index];
-            });
-        }
 
         this.mouseup = (body, screen, world, isMoved) => {
             if(!isMoved) {
@@ -71,7 +71,6 @@
                 var delta = new Newton.vec2(world.x - this.lastPos.x, world.y - this.lastPos.y);
                 this.selected.translateWithDelta(delta);
                 this.lastPos = world;
-                this.state.runner.redraw();
             }
             if(!IS_TOUCH) {
                 var hovered = this.state.runner.world.findBodyByPoint(world);
@@ -93,6 +92,7 @@
         this.state.runner.interaction.on('mousedown', this.mousedown);
         this.state.runner.interaction.on('mousemove', this.mousemove);
     }
+
     disconnected() {
         if(this.hovered) unhiglightBody(this.hovered, this.hoveredColors);
         if(this.selected) unhiglightBody(this.selected, this.selectedColors);
