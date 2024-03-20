@@ -250,12 +250,13 @@ function Interaction(runner, settings) {
     */
     this[Events] = {};
 
-    if(this.runner.renderer.two) // Временно
-        addZUI(this, this.runner, this.runner.renderer);
-}
+    if(!this.runner.renderer.two) return; // Временно
 
 
-function addZUI(interaction, runner, renderer) {
+
+    var renderer =  this.runner.renderer;
+    var interaction = this;
+
     const { Two, two, stage, zui } = renderer;
 
     var domElement = two.renderer.domElement;
@@ -285,16 +286,16 @@ function addZUI(interaction, runner, renderer) {
             runner.world.addJoint(interaction.mouseJoint);
         }
     }
-
-    const mousedown = event =>  {
+    //------------------------------ mousedown
+    const mousedown = event => {
         mouse.x = event.clientX;
         mouse.y = event.clientY;
         startDrag(event.offsetX, event.offsetY);
         window.addEventListener('mousemove', mousemove, false);
         window.addEventListener('mouseup', mouseup, false);
     }
-
-    function mousemove(event) {
+    //------------------------------ mousemove
+    const mousemove = event => {
         if (dragging) {
             const rect = runner.renderer.canvas.getBoundingClientRect();
             const world_pos = zui.clientToSurface(event.offsetX - rect.left, event.offsetY - rect.top);
@@ -308,66 +309,65 @@ function addZUI(interaction, runner, renderer) {
             mouse.set(event.clientX, event.clientY);
         }
     }
-
-    function mouseup(e) {
+    //------------------------------ mouseup
+    const mouseup = event => {
         interaction.removeJoint();
         window.removeEventListener('mousemove', mousemove, false);
         window.removeEventListener('mouseup', mouseup, false);
     }
-
-    function mousewheel(e) {
-        var dy = (e.wheelDeltaY || - e.deltaY) / 1000;
+    //------------------------------ mousewheel
+    const mousewheel = event => {
+        var dy = (event.wheelDeltaY || - event.deltaY) / 1000;
         var rect = domElement.getBoundingClientRect();
-        zui.zoomBy(dy, e.clientX - rect.left, e.clientY - rect.top);
-        e.preventDefault();
+        zui.zoomBy(dy, event.clientX - rect.left, event.clientY - rect.top);
+        event.preventDefault();
     }
-
-    function touchstart(e) {
-        switch (e.touches.length) {
+    //------------------------------ touchstart
+    const touchstart = event => {
+        switch (event.touches.length) {
             case 2:
-                pinchstart(e);
+                pinchstart(event);
                 break;
             case 1:
-                panstart(e)
+                panstart(event)
                 break;
         }
         e.preventDefault();
     }
-
-    function touchmove(e) {
-        switch (e.touches.length) {
+    //------------------------------ touchmove
+    const touchmove = event => {
+        switch (event.touches.length) {
             case 2:
-                pinchmove(e);
+                pinchmove(event);
                 break;
             case 1:
-                panmove(e)
+                panmove(event)
                 break;
         }
-        e.preventDefault();
+        event.preventDefault();
     }
-
-    function touchend(e) {
+    //------------------------------ touchend
+    const touchend = event => {
         interaction.removeJoint();
         touches = {};
-        var touch = e.touches[0];
+        var touch = event.touches[0];
         if (touch) {  // Pass through for panning after pinching
             mouse.x = touch.clientX;
             mouse.y = touch.clientY;
         }
-        e.preventDefault();
+        event.preventDefault();
     }
-
-    function panstart(event) {
+    //------------------------------ panstart
+    const panstart = event => {
         var touch = event.touches[ 0 ];
         mouse.x = touch.clientX;
         mouse.y = touch.clientY;
-        console.log('panstart', mouse.x, mouse.y)
         var rect = runner.renderer.canvas.getBoundingClientRect();
         startDrag(touch.clientX - rect.left, touch.clientY - rect.top);
     }
-
-    function panmove(e) {
-        var touch = e.touches[0];
+    //------------------------------ panmove
+    const panmove = event => {
+        var touch = event.touches[0];
         if (dragging) {
             const rect = runner.renderer.canvas.getBoundingClientRect();
             const world_pos = zui.clientToSurface(touch.clientX - rect.left, touch.clientY - rect.top);
@@ -381,20 +381,18 @@ function addZUI(interaction, runner, renderer) {
             mouse.set(touch.clientX, touch.clientY);
         }
     }
-
-    function pinchstart(e) {
-        var a = e.touches[ 0 ];
-        var b = e.touches[ 1 ];
+    //------------------------------ pinchstart
+    const pinchstart = event => {
+        var [a, b] = event.touches;
         var dx = b.clientX - a.clientX;
         var dy = b.clientY - a.clientY;
         distance = Math.sqrt(dx * dx + dy * dy);
         mouse.x = dx / 2 + a.clientX;
         mouse.y = dy / 2 + a.clientY;
     }
-
-    function pinchmove(e) {
-        var a = e.touches[ 0 ];
-        var b = e.touches[ 1 ];
+    //------------------------------ pinchmove
+    const pinchmove = event => {
+        var [a, b] = event.touches;
 
         var dx = b.clientX - a.clientX;
         var dy = b.clientY - a.clientY;
@@ -422,6 +420,9 @@ function addZUI(interaction, runner, renderer) {
     domElement.addEventListener('touchcancel', touchend, false);
 
 }
+
+
+
 
 Interaction.prototype.destroy = function() {
     /*
