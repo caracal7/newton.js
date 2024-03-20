@@ -352,17 +352,17 @@ function Interaction(runner, settings) {
             var dy = event.clientY - mouse.y;
             zui.translateSurface(dx, dy);
             mouse.set(event.clientX, event.clientY);
-
-            if(this[Events]?.mousemove?.length) {
-                const rect = runner.renderer.canvas.getBoundingClientRect();
-                var x = event.offsetX - rect.left;
-                var y = event.offsetY - rect.top;
-                const world_pos = zui.clientToSurface(x, x);
-                const world_pos_vec = new vec2(world_pos.x, -world_pos.y);
-                this[Events].mousemove.forEach(callback => callback(new vec2(x, y), world_pos_vec));
-                if(this.runner.pause) this.runner.drawFrame(0);
-            };
         }
+
+        if(this[Events]?.mousemove?.length) {
+            const rect = runner.renderer.canvas.getBoundingClientRect();
+            var x = event.offsetX - rect.left;
+            var y = event.offsetY - rect.top;
+            const world_pos = zui.clientToSurface(x, y);
+            const world_pos_vec = new vec2(world_pos.x, -world_pos.y);
+            this[Events].mousemove.forEach(callback => callback(new vec2(x, y), world_pos_vec));
+            if(this.runner.pause) this.runner.drawFrame(0);
+        };
     }
     //------------------------------ mouseup
     const mouseup = event => {
@@ -370,7 +370,7 @@ function Interaction(runner, settings) {
             const rect = runner.renderer.canvas.getBoundingClientRect();
             var x = event.offsetX - rect.left;
             var y = event.offsetY - rect.top;
-            const world_pos = zui.clientToSurface(x, x);
+            const world_pos = zui.clientToSurface(x, y);
             const world_pos_vec = new vec2(world_pos.x, -world_pos.y);
             this[Events].mouseup.forEach(callback => callback(
                 event.type == 'mouseleave' ? undefined : runner.world.findBodyByPoint(world_pos_vec),

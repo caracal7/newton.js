@@ -13,17 +13,44 @@
 
         this.interaction = this.state.runner.interaction;
 
+
+        const oldFill = [];
+        const oldStroke = [];
+
+        function higlightBody(body) {
+            oldFill.length = 0;
+            oldStroke.length = 0;
+            body.render_group.children.forEach(entity => {
+                oldFill.push(entity.fill);
+                oldStroke.push(entity.stroke);
+                entity.fill = 'gold';
+                entity.stroke = 'red';
+            });
+        }
+        function unhiglightBody(body) {
+            body.render_group.children.forEach((entity, index) => {
+                entity.fill = oldFill[index];
+                entity.stroke = oldStroke[index];
+            });
+        }
+
         this.mouseup = (body, screen, world, isMoved) => {
-            console.log('mouseup', body, screen, world, isMoved)
             if(!isMoved) {
-                this.selected = body;
-                this.state.runner.redraw();
+                if(body) {
+                    if(this.selected) unhiglightBody(this.selected);
+                    if(this.selected !== body) {
+                        this.selected = body;
+                        higlightBody(body);
+                    }
+                } else {
+                    if(this.selected) unhiglightBody(this.selected);
+                    this.selected = null;
+                }
             }
             this.lastPos = undefined;
         };
 
         this.mousedown = (body, screen, world) => {
-            console.log('mousedown', body, screen, world)
             if(this.selected && this.selected === body) {
                 this.lastPos = world;
                 return true; // Block viewport move
@@ -31,14 +58,17 @@
         };
 
         this.mousemove = (screen, world) => {
+                        //console.log('mousemove', screen, world, this.selected && this.lastPos)
             if(this.selected && this.lastPos) {
                 var delta = new Newton.vec2(world.x - this.lastPos.x, world.y - this.lastPos.y);
                 this.selected.translateWithDelta(delta);
+                console.log(delta)
                 this.lastPos = world;
+                this.state.runner.redraw();
             }
             this.hovered = this.state.runner.world.findBodyByPoint(world);
         }
-
+/*
         this.beforeRenderFrame = () => this.state.runner.initFrame();
 
         this.beforeRenderBody = (body, colors) => {
@@ -51,9 +81,9 @@
                 }
             }
         };
-
-        if(!IS_TOUCH) this.state.runner.on('beforeRenderFrame', this.beforeRenderFrame);
-        this.state.runner.on('beforeRenderBody', this.beforeRenderBody);
+*/
+        //if(!IS_TOUCH) this.state.runner.on('beforeRenderFrame', this.beforeRenderFrame);
+        //this.state.runner.on('beforeRenderBody', this.beforeRenderBody);
         this.interaction.on('mouseup', this.mouseup);
         this.interaction.on('mousedown', this.mousedown);
         this.interaction.on('mousemove', this.mousemove);
