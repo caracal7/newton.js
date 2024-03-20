@@ -9,41 +9,55 @@
 <!class>
     connected() {
         const HOVER_COLOR = '#FFFF00';
-        const SELECTED_COLOR = '#FF0000';
+        const SELECTED_COLOR = '#FF5522';
 
         this.interaction = this.state.runner.interaction;
 
+        const selectedColors = {
+            fill: [],
+            stroke: [],
+            FILL: '#FF5522',
+            STROKE: 'black'
+        };
+        const hoveredColors = {
+            fill: [],
+            stroke: [],
+            FILL: '#FF552255',
+            STROKE: '#00000055'
+        };
 
-        const oldFill = [];
-        const oldStroke = [];
-
-        function higlightBody(body) {
-            oldFill.length = 0;
-            oldStroke.length = 0;
+        function higlightBody(body, colors) {
+            colors.fill.length = 0;
+            colors.stroke.length = 0;
             body.render_group.children.forEach(entity => {
-                oldFill.push(entity.fill);
-                oldStroke.push(entity.stroke);
-                entity.fill = 'gold';
-                entity.stroke = 'red';
+                colors.fill.push(entity.fill);
+                colors.stroke.push(entity.stroke);
+                entity.fill = colors.FILL;
+                entity.stroke = colors.STROKE;
             });
         }
-        function unhiglightBody(body) {
+
+        function unhiglightBody(body, colors) {
             body.render_group.children.forEach((entity, index) => {
-                entity.fill = oldFill[index];
-                entity.stroke = oldStroke[index];
+                entity.fill = colors.fill[index];
+                entity.stroke = colors.stroke[index];
             });
         }
 
         this.mouseup = (body, screen, world, isMoved) => {
             if(!isMoved) {
                 if(body) {
-                    if(this.selected) unhiglightBody(this.selected);
                     if(this.selected !== body) {
+                        if(!IS_TOUCH) {
+                            if(this.hovered) unhiglightBody(this.hovered, hoveredColors);
+                            this.hovered = null;
+                        }
+                        if(this.selected) unhiglightBody(this.selected, selectedColors);
                         this.selected = body;
-                        higlightBody(body);
+                        higlightBody(body, selectedColors);
                     }
                 } else {
-                    if(this.selected) unhiglightBody(this.selected);
+                    if(this.selected) unhiglightBody(this.selected, selectedColors);
                     this.selected = null;
                 }
             }
@@ -58,32 +72,28 @@
         };
 
         this.mousemove = (screen, world) => {
-                        //console.log('mousemove', screen, world, this.selected && this.lastPos)
             if(this.selected && this.lastPos) {
                 var delta = new Newton.vec2(world.x - this.lastPos.x, world.y - this.lastPos.y);
                 this.selected.translateWithDelta(delta);
-                console.log(delta)
                 this.lastPos = world;
                 this.state.runner.redraw();
             }
-            this.hovered = this.state.runner.world.findBodyByPoint(world);
-        }
-/*
-        this.beforeRenderFrame = () => this.state.runner.initFrame();
-
-        this.beforeRenderBody = (body, colors) => {
-            if(body === this.selected) {
-                colors.outline = '#FFFFFF';
-                colors.body = SELECTED_COLOR;
-            } else {
-                if(body === this.hovered && !IS_TOUCH) {
-                    colors.body = HOVER_COLOR;
+            if(!IS_TOUCH) {
+                var hovered = this.state.runner.world.findBodyByPoint(world);
+                if(this.selected && this.selected === hovered) hovered = null;
+                if(hovered) {
+                    if(this.hovered !== hovered) {
+                        if(this.hovered) unhiglightBody(this.hovered, hoveredColors);
+                        this.hovered = hovered;
+                        higlightBody(hovered, hoveredColors);
+                    }
+                } else {
+                    if(this.hovered) unhiglightBody(this.hovered, hoveredColors);
+                    this.hovered = null;
                 }
             }
-        };
-*/
-        //if(!IS_TOUCH) this.state.runner.on('beforeRenderFrame', this.beforeRenderFrame);
-        //this.state.runner.on('beforeRenderBody', this.beforeRenderBody);
+        }
+
         this.interaction.on('mouseup', this.mouseup);
         this.interaction.on('mousedown', this.mousedown);
         this.interaction.on('mousemove', this.mousemove);

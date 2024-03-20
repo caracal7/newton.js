@@ -334,33 +334,29 @@ function Interaction(runner, settings) {
                     createMouseJoint(world_pos_vec);
         	}
         }
-        window.addEventListener('mousemove', mousemove, false);
-        window.addEventListener('mouseup', mouseup, false);
     }
     //------------------------------ mousemove
     const mousemove = event => {
-        if(this.state.mouseDown) this.state.pointerDownMoving = true;
-
-        if (dragging) {
-            const rect = runner.renderer.canvas.getBoundingClientRect();
-            const world_pos = zui.clientToSurface(event.offsetX - rect.left, event.offsetY - rect.top);
-            const world_pos_vec = new vec2(world_pos.x, -world_pos.y);
-            interaction.mouseBody.p.copy(world_pos_vec);
-            interaction.mouseBody.syncTransform();
-        } else {
-            var dx = event.clientX - mouse.x;
-            var dy = event.clientY - mouse.y;
-            zui.translateSurface(dx, dy);
-            mouse.set(event.clientX, event.clientY);
+        if (this.state.mouseDown) {
+            this.state.pointerDownMoving = true;
+            if (dragging) {
+                const world_pos = zui.clientToSurface(event.offsetX, event.offsetY);
+                const world_pos_vec = new vec2(world_pos.x, -world_pos.y);
+                interaction.mouseBody.p.copy(world_pos_vec);
+                interaction.mouseBody.syncTransform();
+            } else {
+                var dx = event.clientX - mouse.x;
+                var dy = event.clientY - mouse.y;
+                zui.translateSurface(dx, dy);
+                mouse.set(event.clientX, event.clientY);
+            }
         }
 
         if(this[Events]?.mousemove?.length) {
             const rect = runner.renderer.canvas.getBoundingClientRect();
-            var x = event.offsetX - rect.left;
-            var y = event.offsetY - rect.top;
-            const world_pos = zui.clientToSurface(x, y);
+            const world_pos = zui.clientToSurface(event.offsetX, event.offsetY);
             const world_pos_vec = new vec2(world_pos.x, -world_pos.y);
-            this[Events].mousemove.forEach(callback => callback(new vec2(x, y), world_pos_vec));
+            this[Events].mousemove.forEach(callback => callback(new vec2(event.offsetX, event.offsetY), world_pos_vec));
             if(this.runner.pause) this.runner.drawFrame(0);
         };
     }
@@ -380,8 +376,6 @@ function Interaction(runner, settings) {
 
         this.state.mouseDown = false;
         interaction.removeJoint();
-        window.removeEventListener('mousemove', mousemove, false);
-        window.removeEventListener('mouseup', mouseup, false);
     }
     //------------------------------ mouseleave
     const mouseleave = event => {
@@ -493,6 +487,9 @@ function Interaction(runner, settings) {
     domElement.addEventListener('touchend', touchend, false);
     domElement.addEventListener('touchcancel', touchend, false);
 
+    domElement.addEventListener('mousemove', mousemove, false);
+
+    window.addEventListener('mouseup', mouseup, false);
 }
 
 
