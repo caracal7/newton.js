@@ -152,7 +152,7 @@ class Camera {
     }
 
     zoomSet(zoom, clientX = 0, clientY = 0) {
-        const newScale = this.fitToLimits(zoom);
+        const newScale = this.fitScaleToLimits(zoom);
         this.zoom = Camera.ScaleToPosition(newScale);
 
         if (newScale === this.scale) return this;
@@ -176,6 +176,10 @@ class Camera {
         Camera.TranslateMatrix(this.surfaceMatrix, x, y);
         this.updateSurface();
         return this;
+    }
+
+    fitScaleToLimits(scale) {
+        return Camera.Clamp(scale, this.limits.scale.min, this.limits.scale.max);
     }
 
     moveCameraTo(x, y) {
@@ -222,9 +226,6 @@ class Camera {
         return this;
     }
 
-    fitToLimits(s) {
-        return Camera.Clamp(s, this.limits.scale.min, this.limits.scale.max);
-    }
 
 }
 

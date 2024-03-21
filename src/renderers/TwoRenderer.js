@@ -48,7 +48,7 @@ function TwoRenderer(Newton, canvas) {
 
 
 	this.camera = new Two.Camera(this.stage, this.two.renderer.domElement, this);
-	this.camera.addLimits(0.06, 1000);
+	this.camera.addLimits(1, 1000);
 	this.resize();
 
 	this.camera.translateSurface(this.width / 2, this.height / 2);

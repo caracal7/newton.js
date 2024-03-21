@@ -8272,7 +8272,7 @@ var _Camera = class _Camera {
     return this;
   }
   zoomSet(zoom, clientX = 0, clientY = 0) {
-    const newScale = this.fitToLimits(zoom);
+    const newScale = this.fitScaleToLimits(zoom);
     this.zoom = _Camera.ScaleToPosition(newScale);
     if (newScale === this.scale)
       return this;
@@ -8290,6 +8290,9 @@ var _Camera = class _Camera {
     _Camera.TranslateMatrix(this.surfaceMatrix, x, y);
     this.updateSurface();
     return this;
+  }
+  fitScaleToLimits(scale) {
+    return _Camera.Clamp(scale, this.limits.scale.min, this.limits.scale.max);
   }
   moveCameraTo(x, y) {
     const c = this.surfaceToClient(x, -y);
@@ -8321,9 +8324,6 @@ var _Camera = class _Camera {
     this.scale = 1;
     this.surfaceMatrix.identity();
     return this;
-  }
-  fitToLimits(s) {
-    return _Camera.Clamp(s, this.limits.scale.min, this.limits.scale.max);
   }
 };
 __publicField(_Camera, "Surface", Surface);
@@ -8358,7 +8358,7 @@ function TwoRenderer(Newton, canvas) {
   this.joints_group = new two_min_default.Group();
   this.stage.add(this.joints_group);
   this.camera = new two_min_default.Camera(this.stage, this.two.renderer.domElement, this);
-  this.camera.addLimits(0.06, 1e3);
+  this.camera.addLimits(1, 1e3);
   this.resize();
   this.camera.translateSurface(this.width / 2, this.height / 2);
   this.camera.zoomSet(35, this.width / 2, this.height / 2);
