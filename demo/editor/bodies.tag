@@ -1,19 +1,10 @@
 <!import Newton from ../../dist/newton.esm.js>
 
-<button text('moveCameraTo') @click{
-    console.log('moveCameraTo button', !!this.SELECTED )
-    if(this.SELECTED) {
-        this.state.runner.renderer.camera.moveCameraTo(
-            this.SELECTED.p.x,
-            this.SELECTED.p.y
-        );
-    }
-} style{ 'z-index': 10000, position: 'absolute' }/>
 
 <button text('fitCameraToBounds') @click{
     console.log('fitCameraToBounds button', !!this.SELECTED )
     if(this.SELECTED) {
-        this.state.runner.renderer.camera.fitCameraToBounds(this.SELECTED.bounds);
+        this.state.runner.renderer.camera.fitCameraToBounds(this.state.runner.world.getBounds());
     }
 } style{ 'z-index': 10000, position: 'absolute' }/>
 

@@ -152,16 +152,16 @@ class Camera {
     }
 
     zoomSet(zoom, clientX = 0, clientY = 0) {
-        const newScale = this.fitScaleToLimits(zoom);
-        this.zoom = Camera.ScaleToPosition(newScale);
+        const scale = this.fitScaleToLimits(zoom);
+        this.zoom = Camera.ScaleToPosition(scale);
 
-        if (newScale === this.scale) return this;
+        if (scale === this.scale) return this;
 
         const sf = this.clientToSurface(clientX, clientY);
-        const scaleBy = newScale / this.scale;
+        const scaleBy = scale / this.scale;
 
         this.surfaceMatrix.scale(scaleBy);
-        this.scale = newScale;
+        this.scale = scale;
 
         const c = this.surfaceToClient(sf);
 
