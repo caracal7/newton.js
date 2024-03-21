@@ -271,7 +271,7 @@ function Interaction(runner, settings) {
         // Remove previous mouse joint
         interaction.removeJoint();
 
-        const world_pos = camera.clientToSurface(x, y);
+        const world_pos = camera.screenToWorld(x, y);
         const p = new vec2(world_pos.x, -world_pos.y);
         // If we picked shape then create mouse joint
         dragging = runner.world.findBodyByPoint(p);
@@ -307,7 +307,7 @@ function Interaction(runner, settings) {
         // Remove previous mouse joint
         interaction.removeJoint();
 
-        const world_pos = camera.clientToSurface(event.offsetX, event.offsetY);
+        const world_pos = camera.screenToWorld(event.offsetX, event.offsetY);
         const world_pos_vec = new vec2(world_pos.x, -world_pos.y);
         // If we picked shape then create mouse joint
         dragging = runner.world.findBodyByPoint(world_pos_vec);
@@ -338,7 +338,7 @@ function Interaction(runner, settings) {
         if (this.state.mouseDown) {
             this.state.pointerDownMoving = true;
             if (dragging) {
-                const world_pos = camera.clientToSurface(event.offsetX, event.offsetY);
+                const world_pos = camera.screenToWorld(event.offsetX, event.offsetY);
                 const world_pos_vec = new vec2(world_pos.x, -world_pos.y);
                 interaction.mouseBody.p.copy(world_pos_vec);
                 interaction.mouseBody.syncTransform();
@@ -352,7 +352,7 @@ function Interaction(runner, settings) {
 
         if(this[Events]?.mousemove?.length) {
             const rect = runner.renderer.canvas.getBoundingClientRect();
-            const world_pos = camera.clientToSurface(event.offsetX, event.offsetY);
+            const world_pos = camera.screenToWorld(event.offsetX, event.offsetY);
             const world_pos_vec = new vec2(world_pos.x, -world_pos.y);
             this[Events].mousemove.forEach(callback => callback(new vec2(event.offsetX, event.offsetY), world_pos_vec));
             if(this.runner.pause) this.runner.drawFrame(0);
@@ -364,7 +364,7 @@ function Interaction(runner, settings) {
             const rect = runner.renderer.canvas.getBoundingClientRect();
             var x = event.offsetX - rect.left;
             var y = event.offsetY - rect.top;
-            const world_pos = camera.clientToSurface(x, y);
+            const world_pos = camera.screenToWorld(x, y);
             const world_pos_vec = new vec2(world_pos.x, -world_pos.y);
             this[Events].mouseup.forEach(callback => callback(
                 event.type == 'mouseleave' ? undefined : runner.world.findBodyByPoint(world_pos_vec),
@@ -435,7 +435,7 @@ function Interaction(runner, settings) {
         var touch = event.touches[0];
         if (dragging) {
             const rect = runner.renderer.canvas.getBoundingClientRect();
-            const world_pos = camera.clientToSurface(touch.clientX - rect.left, touch.clientY - rect.top);
+            const world_pos = camera.screenToWorld(touch.clientX - rect.left, touch.clientY - rect.top);
             const p = new vec2(world_pos.x, -world_pos.y);
             interaction.mouseBody.p.copy(p);
             interaction.mouseBody.syncTransform();
