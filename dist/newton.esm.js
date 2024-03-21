@@ -8170,24 +8170,16 @@ var Camera = class {
     this.moveCameraTo((bounds.maxs.x + bounds.mins.x) * 0.5, (bounds.maxs.y + bounds.mins.y) * 0.5);
   }
   validateCameraBounds(x, y) {
+    if (this.limits.maxX === Infinity || this.limits.minX === -Infinity || this.limits.maxY === Infinity || this.limits.minY === -Infinity)
+      return { x, y };
     var pos = this.screenToWorld(x, y);
     const world_min = this.screenToWorld(0, 0);
     const world_max = this.screenToWorld(this.renderer.width, this.renderer.height);
-    console.log(world_min, world_max, this.limits, pos);
+    console.log(pos.x, pos.y);
     var minX = world_min.x < this.limits.minX;
     var maxX = world_max.x > this.limits.maxX;
     var minY = world_min.y < this.limits.minY;
     var maxY = world_max.y > this.limits.maxY;
-    if (minX)
-      pos.x = this.limits.maxX + world_min.x;
-    if (maxX)
-      pos.x = this.limits.minX + world_max.x;
-    if (minY)
-      pos.y = this.limits.maxY + world_min.y;
-    if (maxY)
-      pos.y = this.limits.minY + world_max.y;
-    pos.x = (this.limits.maxX - this.limits.minX) * 0.5 + (world_max.x - world_min.x) * 0.5;
-    pos.y = (this.limits.maxY - this.limits.minY) * 0.5 + (world_max.y - world_min.y) * 0.5;
     return this.worldToScreen(pos.x, pos.y);
     var scale = this.scale;
     var wx = x / scale;

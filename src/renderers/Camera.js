@@ -55,6 +55,11 @@ class Camera {
     }
 
     validateCameraBounds(x, y) {
+        if(
+            this.limits.maxX === Infinity || this.limits.minX === -Infinity ||
+            this.limits.maxY === Infinity || this.limits.minY === -Infinity
+        ) return { x, y}
+
         var pos = this.screenToWorld(x, y);
 
 
@@ -62,7 +67,12 @@ class Camera {
         const world_min = this.screenToWorld(0, 0);
         const world_max = this.screenToWorld(this.renderer.width, this.renderer.height);
 
-        console.log(world_min, world_max, this.limits, pos)
+    //    console.log(world_min, world_max, this.limits, pos)
+    console.log(pos.x, pos.y)
+/*    console.info(
+        (this.limits.maxX - this.limits.minX) * 0.5 - (world_max.x - world_min.x) * 0.5,
+        (this.limits.maxY - this.limits.minY) * 0.5 - (world_max.y - world_min.y) * 0.5
+    )*/
 
         //const world_pos = camera.screenToWorld(event.offsetX, event.offsetY);
         //const world_pos_vec = new vec2(world_pos.x, -world_pos.y);
@@ -78,20 +88,20 @@ class Camera {
         //console.log(maxX, pos.x, world_max.x, world_min.x, this.limits.maxX)
 
         //if(minX && maxX) console.warn('minX && maxX')
-
+/*
         if(minX) pos.x = this.limits.maxX + world_min.x;
         if(maxX) pos.x = this.limits.minX + world_max.x;
         if(minY) pos.y = this.limits.maxY + world_min.y;
         if(maxY) pos.y = this.limits.minY + world_max.y;
-
+*/
 //        if(minX && maxX) {
-            pos.x = (this.limits.maxX - this.limits.minX) * 0.5 + (world_max.x - world_min.x) * 0.5;
+    //        pos.x = 0.1;//world_max.x * 0.5//(this.limits.maxX - this.limits.minX) * 0.5 - (world_max.x - world_min.x) * 0.5;
         //    pos.x = (this.limits.minX + world_max.x + this.limits.maxX + world_min.x) * 0.5;
 //        } else {
 
 //        }
     //    if(minY && maxY) {
-            pos.y = (this.limits.maxY - this.limits.minY) * 0.5 + (world_max.y - world_min.y) * 0.5;
+    //        pos.y = 0//(this.limits.maxY - this.limits.minY) * 0.5 - (world_max.y - world_min.y) * 0.5;
         //    pos.y = ((this.limits.maxY - this.limits.minY) + (world_max.y - world_min.y)) * 0.5;
     //    } else {
 
