@@ -2,10 +2,21 @@
 
 
 <button text('fitCameraToBounds') @click{
+    /*
     console.log('fitCameraToBounds button', !!this.SELECTED )
     if(this.SELECTED) {
         this.state.runner.renderer.camera.fitCameraToBounds(this.state.runner.world.getBounds());
-    }
+    }*/
+    this.state.runner.renderer.camera.fitCameraToBounds({
+        mins: {
+            x: -4.4 - 12/2,
+            y: 3 - 7/2
+        },
+        maxs: {
+            x: -4.4 + 12/2,
+            y: 3 + 7/2
+        }
+    });
 } style{ 'z-index': 10000, position: 'absolute' }/>
 
 

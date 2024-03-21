@@ -41,15 +41,35 @@ function TwoRenderer(Newton, canvas) {
 
 	this.stage = new Two.Group();
 	this.two.add(this.stage);
-
-
 	this.joints_group = new Two.Group();
 	this.stage.add(this.joints_group);
 
 
+	var rect = this.two.makeRectangle(-4.4, 3, 12, 7);
+	rect.stroke = '#aaaaaa';
+	rect.fill ='none'
+	rect.linewidth = 0.2;
+	this.stage.add(rect);
+
+
+
 	this.camera = new Two.Camera(this.stage, this.two.renderer.domElement, this);
 	this.camera.setScaleLimits(10, 1000);
+
+
 	this.resize();
+
+	this.camera.setWorldLimits({
+		mins: {
+			x: -4.4 - 12/2,
+			y: 3 - 7/2
+		},
+		maxs: {
+			x: -4.4 + 12/2,
+			y: 3 + 7/2
+		}
+	}, false, 4);
+
 
 	this.camera.translateSurface(this.width / 2, this.height / 2);
 	this.camera.zoomSet(35, this.width / 2, this.height / 2);

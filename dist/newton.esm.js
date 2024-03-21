@@ -2811,23 +2811,6 @@ function Interaction(runner, settings) {
   var touches = {};
   var distance2 = 0;
   var dragging = false;
-  const startDrag = (x, y) => {
-    console.log("startDrag");
-    interaction.removeJoint();
-    const world_pos = camera.screenToWorld(x, y);
-    const p = new vec22(world_pos.x, -world_pos.y);
-    dragging = runner.world.findBodyByPoint(p);
-    if (dragging) {
-      if (dragging.isStatic())
-        return dragging = void 0;
-      interaction.mouseBody.p.copy(p);
-      interaction.mouseBody.syncTransform();
-      interaction.mouseJoint = new MouseJoint(interaction.mouseBody, dragging, p);
-      interaction.mouseJoint.maxForce = dragging.m * 5e4;
-      runner.world.addJoint(interaction.mouseJoint);
-    }
-    return world_pos;
-  };
   const createMouseJoint = (world_pos_vec) => {
     interaction.mouseBody.p.copy(world_pos_vec);
     interaction.mouseBody.syncTransform();
@@ -3017,21 +3000,6 @@ Interaction.prototype.removeJoint = function() {
     this.runner.world.removeJoint(this.mouseJoint);
     this.mouseJoint = null;
   }
-};
-Interaction.prototype.getMousePosition = function(event) {
-  return new vec22(event.offsetX, event.offsetY);
-};
-Interaction.prototype.getTouchPosition = function(event) {
-  var rect = this.runner.renderer.canvas.getBoundingClientRect();
-  return new vec22(event.clientX - rect.left, event.clientY - rect.top);
-};
-Interaction.prototype.scrollView = function(dx, dy) {
-  this.runner.camera.origin = this.runner.validateCameraBounds(
-    this.runner.camera.origin.x + dx,
-    this.runner.camera.origin.y + dy
-  );
-  this.runner.dirtyBoundsToFullscreen();
-  this.runner.static_outdated = true;
 };
 Interaction.prototype.on = function(event, callback) {
   if (!events2.includes(event))
@@ -8178,6 +8146,59 @@ var Camera = class {
     this.limits.minScale = min;
     this.limits.maxScale = max;
   }
+  setWorldLimits(bounds, max = false, scaleFactor = 4) {
+    return;
+    this.limits.minX = bounds.mins.x;
+    this.limits.maxX = bounds.maxs.x;
+    this.limits.minY = bounds.mins.y;
+    this.limits.maxY = bounds.maxs.y;
+    var scale = {
+      x: this.renderer.width / (bounds.maxs.x - bounds.mins.x),
+      y: this.renderer.height / (bounds.maxs.y - bounds.mins.y)
+    };
+    this.limits.minScale = Math[max ? "max" : "min"](scale.x, scale.y);
+    this.limits.maxScale = this.limits.minScale * scaleFactor;
+    this.scale = this.fitScaleToLimits(this.scale);
+    this.zoomSet(this.scale);
+    console.log(this.limits);
+  }
+  fitCameraToBounds(bounds, max = false) {
+    var scale = {
+      x: this.renderer.width / (bounds.maxs.x - bounds.mins.x),
+      y: this.renderer.height / (bounds.maxs.y - bounds.mins.y)
+    };
+    this.zoomSet(Math[max ? "max" : "min"](scale.x, scale.y));
+    this.moveCameraTo((bounds.maxs.x + bounds.mins.x) * 0.5, (bounds.maxs.y + bounds.mins.y) * 0.5);
+  }
+  validateCameraBounds(x, y) {
+    var pos = { x, y };
+    var rw2 = this.renderer.width * 0.5;
+    var rh2 = this.renderer.height * 0.5;
+    var scale = this.scale;
+    var wx = x / scale;
+    var wy = y / scale;
+    var minX = (wx - this.limits.minX) * scale < rw2;
+    var maxX = (this.limits.maxX - wx) * scale < rw2;
+    var minY = (wy - this.limits.minY) * scale < rh2;
+    var maxY = (this.limits.maxY - wy) * scale < rh2;
+    if (minX && maxX)
+      pos.x = (this.limits.maxX + this.limits.minX) * 0.5 * scale;
+    else {
+      if (minX)
+        pos.x = this.limits.minX * scale + rw2;
+      if (maxX)
+        pos.x = this.limits.maxX * scale - rw2;
+    }
+    if (minY && maxY)
+      pos.y = (this.limits.maxY + this.limits.minY) * 0.5 * scale;
+    else {
+      if (minY)
+        pos.y = this.limits.minY * scale + rh2;
+      if (maxY)
+        pos.y = this.limits.maxY * scale - rh2;
+    }
+    return pos;
+  }
   screenToWorld(x, y) {
     const n = this.viewportMatrix.inverse().multiply(x, y, 1);
     const r = this.surfaceMatrix.inverse().multiply(n[0], n[1], n[2]);
@@ -8188,18 +8209,19 @@ var Camera = class {
     const r = this.viewportMatrix.multiply(s[0], s[1], s[2]);
     return { x: r[0], y: r[1], z: r[2] };
   }
+  fitScaleToLimits(scale) {
+    return Math.min(Math.max(scale, this.limits.minScale), this.limits.maxScale);
+  }
   zoomBy(byF, clientX = 0, clientY = 0) {
-    this.zoomSet(Math.exp(this.zoom + byF), clientX, clientY);
+    this.zoomSet(Math.exp(Math.log(this.scale) + byF), clientX, clientY);
   }
   zoomSet(zoom, clientX = 0, clientY = 0) {
     const scale = this.fitScaleToLimits(zoom);
-    this.zoom = Math.log(scale);
     if (scale === this.scale)
       return this;
-    const world_pos = this.screenToWorld(clientX, clientY);
-    const scaleBy = scale / this.scale;
-    this.surfaceMatrix.scale(scaleBy);
+    this.surfaceMatrix.scale(scale / this.scale);
     this.scale = scale;
+    const world_pos = this.screenToWorld(clientX, clientY);
     const c = this.worldToScreen(world_pos.x, world_pos.y);
     const dx = clientX - c.x;
     const dy = clientY - c.y;
@@ -8215,20 +8237,9 @@ var Camera = class {
     this.surface.translation.set(e2[2], e2[5]);
     this.surface.scale = new two_min_default.Vector(e2[0], -e2[0]);
   }
-  fitScaleToLimits(scale) {
-    return Math.min(Math.max(scale, this.limits.minScale), this.limits.maxScale);
-  }
   moveCameraTo(x, y) {
     const c = this.worldToScreen(x, -y);
     this.translateSurface(this.renderer.width * 0.5 - c.x, this.renderer.height * 0.5 - c.y);
-  }
-  fitCameraToBounds(bounds, max = false) {
-    var scale = {
-      x: this.renderer.width / (bounds.maxs.x - bounds.mins.x),
-      y: this.renderer.height / (bounds.maxs.y - bounds.mins.y)
-    };
-    this.zoomSet(Math[max ? "max" : "min"](scale.x, scale.y));
-    this.moveCameraTo((bounds.maxs.x + bounds.mins.x) * 0.5, (bounds.maxs.y + bounds.mins.y) * 0.5);
   }
 };
 var Camera_default = Camera;
@@ -8250,9 +8261,24 @@ function TwoRenderer(Newton, canvas) {
   this.two.add(this.stage);
   this.joints_group = new two_min_default.Group();
   this.stage.add(this.joints_group);
+  var rect = this.two.makeRectangle(-4.4, 3, 12, 7);
+  rect.stroke = "#aaaaaa";
+  rect.fill = "none";
+  rect.linewidth = 0.2;
+  this.stage.add(rect);
   this.camera = new two_min_default.Camera(this.stage, this.two.renderer.domElement, this);
   this.camera.setScaleLimits(10, 1e3);
   this.resize();
+  this.camera.setWorldLimits({
+    mins: {
+      x: -4.4 - 12 / 2,
+      y: 3 - 7 / 2
+    },
+    maxs: {
+      x: -4.4 + 12 / 2,
+      y: 3 + 7 / 2
+    }
+  }, false, 4);
   this.camera.translateSurface(this.width / 2, this.height / 2);
   this.camera.zoomSet(35, this.width / 2, this.height / 2);
 }

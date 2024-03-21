@@ -266,8 +266,8 @@ function Interaction(runner, settings) {
     var distance = 0;
     var dragging = false;
 
+/*
     const startDrag = (x,y) => {
-        console.log('startDrag')
         // Remove previous mouse joint
         interaction.removeJoint();
 
@@ -287,6 +287,7 @@ function Interaction(runner, settings) {
         }
         return world_pos;
     }
+*/
 
     const createMouseJoint = world_pos_vec => {
         interaction.mouseBody.p.copy(world_pos_vec);
@@ -490,9 +491,6 @@ function Interaction(runner, settings) {
     window.addEventListener('mouseup', mouseup, false);
 }
 
-
-
-
 Interaction.prototype.destroy = function() {
     /*
     ["mousedown", "mousemove", "mouseup", "mouseleave", "mousewheel"]
@@ -513,6 +511,22 @@ Interaction.prototype.removeJoint = function() {
     }
 }
 
+Interaction.prototype.on = function(event, callback) {
+    if(!events.includes(event)) throw `Unknown event "${event}"`;
+    if(this[Events][event]) {
+        if(this[Events][event].find(cb => cb === callback)) return;
+    } else this[Events][event] = [];
+    this[Events][event].push(callback);
+}
+
+Interaction.prototype.off = function(event, callback) {
+    if(!events.includes(event)) throw `Unknown event "${event}"`;
+    if(!this[Events][event]) return;
+    const index = this[Events][event].findIndex(cb => cb === callback);
+    if(index !== -1) this[Events][event].splice(index, 1);
+}
+
+/*
 Interaction.prototype.getMousePosition = function(event) {
 	return new vec2(event.offsetX, event.offsetY);
 }
@@ -530,22 +544,7 @@ Interaction.prototype.scrollView = function(dx, dy) {
     this.runner.dirtyBoundsToFullscreen();
 	this.runner.static_outdated = true;
 }
-
-Interaction.prototype.on = function(event, callback) {
-    if(!events.includes(event)) throw `Unknown event "${event}"`;
-    if(this[Events][event]) {
-        if(this[Events][event].find(cb => cb === callback)) return;
-    } else this[Events][event] = [];
-    this[Events][event].push(callback);
-}
-
-Interaction.prototype.off = function(event, callback) {
-    if(!events.includes(event)) throw `Unknown event "${event}"`;
-    if(!this[Events][event]) return;
-    const index = this[Events][event].findIndex(cb => cb === callback);
-    if(index !== -1) this[Events][event].splice(index, 1);
-}
-
+*/
 
 export {
     Interaction
