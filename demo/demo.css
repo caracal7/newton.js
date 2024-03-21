@@ -10,13 +10,6 @@
     box-sizing: border-box;
 }
 
-canvas {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: calc(100% - 42px);
-}
-
 button.edit {
     position: absolute;
     right: 15px;

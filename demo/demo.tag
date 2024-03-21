@@ -6,12 +6,13 @@
     <@controls id="controls" runner=state.runner/>
     <@toggle-button checked=state.showJoints @changed=showJoints text('Joints')/>
     <button class="edit" @click=edit text("Edit")/>
+
 </header>
 <@editor if(state.edit) runner=state.runner @play/>
 
-
-<canvas/>
 <main/>
+
+
 
 
 <!import Newton         from ../dist/newton.esm.js>
@@ -64,17 +65,18 @@
     }
 
     connected() {
-        const { Runner, TwoRenderer, CanvasRenderer, Interaction } = Newton;
+        const { Runner, TwoRenderer, Interaction } = Newton;
 
         const firstApp      = Car(Newton);
 
         // const renderer      = new CanvasRenderer(Newton, this.$('canvas'));
 
-        const renderer      = new (this.hash[0] == 'canvas' ? CanvasRenderer : TwoRenderer)(Newton, this.$(this.hash[0] == 'canvas' ? 'canvas' : 'main'));
+        const renderer      = new TwoRenderer(Newton, this.$('main'));
         const runner        = new Runner(renderer, firstApp);
         const interaction   = new Interaction(runner);
 
         this.state.demos = { Car, Compound, Bounce, Circles, Crank, Pyramid, RagDoll, Rope, Web, SeeSaw, 'Matter - Newtons Cradle':NewtonsCradle };
         this.state.runner = runner;
+        this.state.renderer = renderer;
         this.render();
     }

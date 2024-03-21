@@ -258,7 +258,7 @@ function Interaction(runner, settings) {
     var renderer =  this.runner.renderer;
     var interaction = this;
 
-    const { Two, two, stage, zui } = renderer;
+    const { Two, two, stage, camera } = renderer;
 
     var domElement = two.renderer.domElement;
     var mouse = new Two.Vector();
@@ -266,14 +266,14 @@ function Interaction(runner, settings) {
     var distance = 0;
     var dragging = false;
 
-    zui.addLimits(0.06, 100);
+    camera.addLimits(0.06, 100);
 
     const startDrag = (x,y) => {
         console.log('startDrag')
         // Remove previous mouse joint
         interaction.removeJoint();
 
-        const world_pos = zui.clientToSurface(x, y);
+        const world_pos = camera.clientToSurface(x, y);
         const p = new vec2(world_pos.x, -world_pos.y);
         // If we picked shape then create mouse joint
         dragging = runner.world.findBodyByPoint(p);
@@ -309,7 +309,7 @@ function Interaction(runner, settings) {
         // Remove previous mouse joint
         interaction.removeJoint();
 
-        const world_pos = zui.clientToSurface(event.offsetX, event.offsetY);
+        const world_pos = camera.clientToSurface(event.offsetX, event.offsetY);
         const world_pos_vec = new vec2(world_pos.x, -world_pos.y);
         // If we picked shape then create mouse joint
         dragging = runner.world.findBodyByPoint(world_pos_vec);
@@ -340,21 +340,21 @@ function Interaction(runner, settings) {
         if (this.state.mouseDown) {
             this.state.pointerDownMoving = true;
             if (dragging) {
-                const world_pos = zui.clientToSurface(event.offsetX, event.offsetY);
+                const world_pos = camera.clientToSurface(event.offsetX, event.offsetY);
                 const world_pos_vec = new vec2(world_pos.x, -world_pos.y);
                 interaction.mouseBody.p.copy(world_pos_vec);
                 interaction.mouseBody.syncTransform();
             } else {
                 var dx = event.clientX - mouse.x;
                 var dy = event.clientY - mouse.y;
-                zui.translateSurface(dx, dy);
+                camera.translateSurface(dx, dy);
                 mouse.set(event.clientX, event.clientY);
             }
         }
 
         if(this[Events]?.mousemove?.length) {
             const rect = runner.renderer.canvas.getBoundingClientRect();
-            const world_pos = zui.clientToSurface(event.offsetX, event.offsetY);
+            const world_pos = camera.clientToSurface(event.offsetX, event.offsetY);
             const world_pos_vec = new vec2(world_pos.x, -world_pos.y);
             this[Events].mousemove.forEach(callback => callback(new vec2(event.offsetX, event.offsetY), world_pos_vec));
             if(this.runner.pause) this.runner.drawFrame(0);
@@ -366,7 +366,7 @@ function Interaction(runner, settings) {
             const rect = runner.renderer.canvas.getBoundingClientRect();
             var x = event.offsetX - rect.left;
             var y = event.offsetY - rect.top;
-            const world_pos = zui.clientToSurface(x, y);
+            const world_pos = camera.clientToSurface(x, y);
             const world_pos_vec = new vec2(world_pos.x, -world_pos.y);
             this[Events].mouseup.forEach(callback => callback(
                 event.type == 'mouseleave' ? undefined : runner.world.findBodyByPoint(world_pos_vec),
@@ -386,7 +386,7 @@ function Interaction(runner, settings) {
     const mousewheel = event => {
         var dy = (event.wheelDeltaY || - event.deltaY) / 1000;
         var rect = domElement.getBoundingClientRect();
-        zui.zoomBy(dy, event.clientX - rect.left, event.clientY - rect.top);
+        camera.zoomBy(dy, event.clientX - rect.left, event.clientY - rect.top);
         event.preventDefault();
     }
     //------------------------------ touchstart
@@ -437,14 +437,14 @@ function Interaction(runner, settings) {
         var touch = event.touches[0];
         if (dragging) {
             const rect = runner.renderer.canvas.getBoundingClientRect();
-            const world_pos = zui.clientToSurface(touch.clientX - rect.left, touch.clientY - rect.top);
+            const world_pos = camera.clientToSurface(touch.clientX - rect.left, touch.clientY - rect.top);
             const p = new vec2(world_pos.x, -world_pos.y);
             interaction.mouseBody.p.copy(p);
             interaction.mouseBody.syncTransform();
         } else {
             var dx = touch.clientX - mouse.x;
             var dy = touch.clientY - mouse.y;
-            zui.translateSurface(dx, dy);
+            camera.translateSurface(dx, dy);
             mouse.set(touch.clientX, touch.clientY);
         }
     }
@@ -466,14 +466,14 @@ function Interaction(runner, settings) {
 
         var mx = dx / 2 + a.clientX;
         var my = dy / 2 + a.clientY;
-        zui.translateSurface(mx - mouse.x, my - mouse.y);
+        camera.translateSurface(mx - mouse.x, my - mouse.y);
         mouse.x = mx;
         mouse.y = my;
 
         var d = Math.sqrt(dx * dx + dy * dy);
         var delta = d - distance;
         var rect = domElement.getBoundingClientRect();
-        zui.zoomBy(delta / 250, mouse.x - rect.left, mouse.y - rect.top);
+        camera.zoomBy(delta / 250, mouse.x - rect.left, mouse.y - rect.top);
         distance = d;
     }
 

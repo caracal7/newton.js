@@ -1,5 +1,22 @@
 <!import Newton from ../../dist/newton.esm.js>
 
+<button text('moveCameraTo') @click{
+    //state.renderer.
+    console.log('moveCameraTo', this.SELECTED )
+
+    if(this.SELECTED) {
+
+
+        this.state.runner.renderer.moveCameraTo(
+            this.SELECTED.p.x,
+            this.SELECTED.p.y
+        );
+
+
+    }
+
+} style{ 'z-index': 10000, position: 'absolute' }/>
+
 <!state>
     runner: undefined
 
@@ -12,14 +29,14 @@
         body.render_group.children.forEach(entity => {
             colors.fill.push(entity.fill);
             colors.stroke.push(entity.stroke);
-            entity.fill = colors.FILL;
+            entity.fill   = colors.FILL;
             entity.stroke = colors.STROKE;
         });
     }
 
     function unhiglightBody(body, colors) {
         body.render_group.children.forEach((entity, index) => {
-            entity.fill = colors.fill[index];
+            entity.fill   = colors.fill[index];
             entity.stroke = colors.stroke[index];
         });
     }
@@ -49,6 +66,7 @@
                         }
                         if(this.selected) unhiglightBody(this.selected, this.selectedColors);
                         this.selected = body;
+                        this.SELECTED = body;
                         higlightBody(body, this.selectedColors);
                     }
                 } else {
@@ -94,7 +112,7 @@
     }
 
     disconnected() {
-        if(this.hovered) unhiglightBody(this.hovered, this.hoveredColors);
+        if(this.hovered)  unhiglightBody(this.hovered, this.hoveredColors);
         if(this.selected) unhiglightBody(this.selected, this.selectedColors);
 
         this.state.runner.interaction.off('mouseup', this.mouseup);

@@ -13,7 +13,6 @@
         <button>Vertices</button>
         <button>Joints</button>
     </@buttons-group>
-
     <button class="play" @click=this.emit("play") text("Play")/>
 </header>
 
@@ -22,7 +21,7 @@
 <@edges  runner=state.runner if(state.selection_type == 'Edges')/>
 
 <!state>
-    selection_type: 'Shapes',
+    selection_type: 'Bodies',
     runner: undefined
 
 <!class>

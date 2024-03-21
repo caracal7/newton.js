@@ -420,7 +420,7 @@ World.prototype.genTemporalContactSolvers = function() {
 			var active1 = body1.isAwake() && !body1.isStatic();
 			var active2 = body2.isAwake() && !body2.isStatic();
 
-			if (!active1 && !active2) continue;
+			if (!active1 && !active2) 		continue;
 			if (!body1.isCollidable(body2)) continue;
 
 			if (!body1.bounds.intersectsBounds(body2.bounds)) continue;
@@ -445,11 +445,9 @@ World.prototype.genTemporalContactSolvers = function() {
 					if (contactSolver) {
 						contactSolver.update(contactArr);
 						newContactSolverArr.push(contactSolver);
-					}
-					else {
+					} else {
 						body1.awake(true);
 						body2.awake(true);
-
 						var newContactSolver = new ContactSolver(shape1, shape2);
 						newContactSolver.contactArr = contactArr;
 						newContactSolver.e = Math.max(shape1.e, shape2.e);

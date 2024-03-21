@@ -18,7 +18,7 @@
 */
 
 import Two from './two.min.js';
-import ZUI from './ZUI.js';
+import Camera from './Camera.js';
 
 var ARROW_TYPE_NONE = 0;
 var ARROW_TYPE_NORMAL = 1;
@@ -28,7 +28,7 @@ var ARROW_TYPE_BOX = 3;
 function TwoRenderer(Newton, canvas) {
 	this.Newton = Newton;
     this.canvas = canvas;
-	Two.ZUI = ZUI;
+	Two.Camera = Camera;
 	this.Two = Two;
 	this.two = new Two({
 	//	type: Two.Types.canvas,
@@ -47,11 +47,11 @@ function TwoRenderer(Newton, canvas) {
 	this.stage.add(this.joints_group);
 
 
-	this.zui = new Two.ZUI(this.stage, this.two.renderer.domElement);
+	this.camera = new Two.Camera(this.stage, this.two.renderer.domElement, this);
 	this.resize();
 
-	this.zui.translateSurface(this.width / 2, this.height / 2);
-	this.zui.zoomSet(35, this.width / 2, this.height / 2);
+	this.camera.translateSurface(this.width / 2, this.height / 2);
+	this.camera.zoomSet(35, this.width / 2, this.height / 2);
 };
 
 TwoRenderer.prototype.resize = function() {
@@ -60,7 +60,11 @@ TwoRenderer.prototype.resize = function() {
 	this.width  = this.canvas.offsetWidth;
 	this.height = this.canvas.offsetHeight;
 	this.two.renderer.setSize(this.width, this.height);
-	this.zui.translateSurface(dx / 2, dy / 2);
+	this.camera.translateSurface(dx / 2, dy / 2);
+}
+
+TwoRenderer.prototype.moveCameraTo = function(x, y) {
+	console.log('moveCameraTo', x, y, this.camera.x, this.camera.y)
 }
 
 TwoRenderer.prototype.jointsVisible = function(visible) {

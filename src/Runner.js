@@ -194,8 +194,11 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
 
     this[Events]?.beforeRenderFrame?.forEach(callback => callback(frameTime));
 
+
     for (var i = 0; i < this.world.bodyArr.length; i++) {
-        this.renderer.updateBody(this.world.bodyArr[i]);
+        var body = this.world.bodyArr[i]
+        this[Events]?.beforeRenderBody?.forEach(callback => callback(body));
+        this.renderer.updateBody(body);
     }
 
     for (var i = 0; i < this.world.jointArr.length; i++) {
@@ -203,7 +206,7 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
     }
 
     this[Events]?.afterRenderFrame?.forEach(callback => callback(frameTime));
-        
+
 /*
 	// camera.bounds for culling
 	this.camera.bounds.set(

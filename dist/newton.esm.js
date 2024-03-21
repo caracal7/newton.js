@@ -2648,15 +2648,17 @@ Runner.prototype.redraw = function() {
   this.drawFrame(0);
 };
 Runner.prototype.drawFrame = function(frameTime = 0) {
-  var _a, _b, _c, _d, _e;
+  var _a, _b, _c, _d, _e, _f, _g;
   (_b = (_a = this[Events]) == null ? void 0 : _a.beforeRenderFrame) == null ? void 0 : _b.forEach((callback) => callback(frameTime));
   for (var i = 0; i < this.world.bodyArr.length; i++) {
-    this.renderer.updateBody(this.world.bodyArr[i]);
+    var body = this.world.bodyArr[i];
+    (_d = (_c = this[Events]) == null ? void 0 : _c.beforeRenderBody) == null ? void 0 : _d.forEach((callback) => callback(body));
+    this.renderer.updateBody(body);
   }
   for (var i = 0; i < this.world.jointArr.length; i++) {
-    (_c = this.renderer) == null ? void 0 : _c.updateJoint(this.world.jointArr[i]);
+    (_e = this.renderer) == null ? void 0 : _e.updateJoint(this.world.jointArr[i]);
   }
-  (_e = (_d = this[Events]) == null ? void 0 : _d.afterRenderFrame) == null ? void 0 : _e.forEach((callback) => callback(frameTime));
+  (_g = (_f = this[Events]) == null ? void 0 : _f.afterRenderFrame) == null ? void 0 : _g.forEach((callback) => callback(frameTime));
 };
 Runner.prototype.worldToCanvas = function(p) {
   return new vec22(
@@ -2803,17 +2805,17 @@ function Interaction(runner, settings) {
     return;
   var renderer = this.runner.renderer;
   var interaction = this;
-  const { Two: Two2, two, stage, zui } = renderer;
+  const { Two: Two2, two, stage, camera } = renderer;
   var domElement = two.renderer.domElement;
   var mouse = new Two2.Vector();
   var touches = {};
   var distance2 = 0;
   var dragging = false;
-  zui.addLimits(0.06, 100);
+  camera.addLimits(0.06, 100);
   const startDrag = (x, y) => {
     console.log("startDrag");
     interaction.removeJoint();
-    const world_pos = zui.clientToSurface(x, y);
+    const world_pos = camera.clientToSurface(x, y);
     const p = new vec22(world_pos.x, -world_pos.y);
     dragging = runner.world.findBodyByPoint(p);
     if (dragging) {
@@ -2841,7 +2843,7 @@ function Interaction(runner, settings) {
     mouse.x = event.clientX;
     mouse.y = event.clientY;
     interaction.removeJoint();
-    const world_pos = zui.clientToSurface(event.offsetX, event.offsetY);
+    const world_pos = camera.clientToSurface(event.offsetX, event.offsetY);
     const world_pos_vec = new vec22(world_pos.x, -world_pos.y);
     dragging = runner.world.findBodyByPoint(world_pos_vec);
     var block = false;
@@ -2870,20 +2872,20 @@ function Interaction(runner, settings) {
     if (this.state.mouseDown) {
       this.state.pointerDownMoving = true;
       if (dragging) {
-        const world_pos = zui.clientToSurface(event.offsetX, event.offsetY);
+        const world_pos = camera.clientToSurface(event.offsetX, event.offsetY);
         const world_pos_vec = new vec22(world_pos.x, -world_pos.y);
         interaction.mouseBody.p.copy(world_pos_vec);
         interaction.mouseBody.syncTransform();
       } else {
         var dx = event.clientX - mouse.x;
         var dy = event.clientY - mouse.y;
-        zui.translateSurface(dx, dy);
+        camera.translateSurface(dx, dy);
         mouse.set(event.clientX, event.clientY);
       }
     }
     if ((_b = (_a = this[Events2]) == null ? void 0 : _a.mousemove) == null ? void 0 : _b.length) {
       const rect = runner.renderer.canvas.getBoundingClientRect();
-      const world_pos = zui.clientToSurface(event.offsetX, event.offsetY);
+      const world_pos = camera.clientToSurface(event.offsetX, event.offsetY);
       const world_pos_vec = new vec22(world_pos.x, -world_pos.y);
       this[Events2].mousemove.forEach((callback) => callback(new vec22(event.offsetX, event.offsetY), world_pos_vec));
       if (this.runner.pause)
@@ -2897,7 +2899,7 @@ function Interaction(runner, settings) {
       const rect = runner.renderer.canvas.getBoundingClientRect();
       var x = event.offsetX - rect.left;
       var y = event.offsetY - rect.top;
-      const world_pos = zui.clientToSurface(x, y);
+      const world_pos = camera.clientToSurface(x, y);
       const world_pos_vec = new vec22(world_pos.x, -world_pos.y);
       this[Events2].mouseup.forEach((callback) => callback(
         event.type == "mouseleave" ? void 0 : runner.world.findBodyByPoint(world_pos_vec),
@@ -2916,7 +2918,7 @@ function Interaction(runner, settings) {
   const mousewheel = (event) => {
     var dy = (event.wheelDeltaY || -event.deltaY) / 1e3;
     var rect = domElement.getBoundingClientRect();
-    zui.zoomBy(dy, event.clientX - rect.left, event.clientY - rect.top);
+    camera.zoomBy(dy, event.clientX - rect.left, event.clientY - rect.top);
     event.preventDefault();
   };
   const touchstart = (event) => {
@@ -2962,14 +2964,14 @@ function Interaction(runner, settings) {
     var touch = event.touches[0];
     if (dragging) {
       const rect = runner.renderer.canvas.getBoundingClientRect();
-      const world_pos = zui.clientToSurface(touch.clientX - rect.left, touch.clientY - rect.top);
+      const world_pos = camera.clientToSurface(touch.clientX - rect.left, touch.clientY - rect.top);
       const p = new vec22(world_pos.x, -world_pos.y);
       interaction.mouseBody.p.copy(p);
       interaction.mouseBody.syncTransform();
     } else {
       var dx = touch.clientX - mouse.x;
       var dy = touch.clientY - mouse.y;
-      zui.translateSurface(dx, dy);
+      camera.translateSurface(dx, dy);
       mouse.set(touch.clientX, touch.clientY);
     }
   };
@@ -2987,13 +2989,13 @@ function Interaction(runner, settings) {
     var dy = b.clientY - a.clientY;
     var mx = dx / 2 + a.clientX;
     var my = dy / 2 + a.clientY;
-    zui.translateSurface(mx - mouse.x, my - mouse.y);
+    camera.translateSurface(mx - mouse.x, my - mouse.y);
     mouse.x = mx;
     mouse.y = my;
     var d = Math.sqrt(dx * dx + dy * dy);
     var delta = d - distance2;
     var rect = domElement.getBoundingClientRect();
-    zui.zoomBy(delta / 250, mouse.x - rect.left, mouse.y - rect.top);
+    camera.zoomBy(delta / 250, mouse.x - rect.left, mouse.y - rect.top);
     distance2 = d;
   };
   domElement.addEventListener("mousedown", mousedown, false);
@@ -8154,7 +8156,7 @@ var Two = (() => {
 })().default;
 var two_min_default = Two;
 
-// src/renderers/ZUI.js
+// src/renderers/Camera.js
 var Surface = class {
   constructor(object) {
     this.object = object;
@@ -8174,12 +8176,13 @@ var Surface = class {
     return this;
   }
 };
-var _ZUI = class _ZUI {
-  constructor(group, domElement) {
+var _Camera = class _Camera {
+  constructor(group, domElement, renderer) {
+    this.renderer = renderer;
     this.limits = {
-      scale: _ZUI.Limit.clone(),
-      x: _ZUI.Limit.clone(),
-      y: _ZUI.Limit.clone()
+      scale: _Camera.Limit.clone(),
+      x: _Camera.Limit.clone(),
+      y: _Camera.Limit.clone()
     };
     this.viewport = domElement;
     this.viewportOffset = {
@@ -8192,6 +8195,8 @@ var _ZUI = class _ZUI {
     this.reset();
     this.updateSurface();
     this.add(new Surface(group));
+    this.x = 0;
+    this.y = 0;
   }
   static Clamp(v, min, max) {
     return Math.min(Math.max(v, min), max);
@@ -8267,13 +8272,13 @@ var _ZUI = class _ZUI {
     return { x: r[0], y: r[1], z: r[2] };
   }
   zoomBy(byF, clientX = 0, clientY = 0) {
-    const s = _ZUI.PositionToScale(this.zoom + byF);
+    const s = _Camera.PositionToScale(this.zoom + byF);
     this.zoomSet(s, clientX, clientY);
     return this;
   }
   zoomSet(zoom, clientX = 0, clientY = 0) {
     const newScale = this.fitToLimits(zoom);
-    this.zoom = _ZUI.ScaleToPosition(newScale);
+    this.zoom = _Camera.ScaleToPosition(newScale);
     if (newScale === this.scale)
       return this;
     const sf = this.clientToSurface(clientX, clientY);
@@ -8287,8 +8292,11 @@ var _ZUI = class _ZUI {
     return this;
   }
   translateSurface(x, y) {
-    _ZUI.TranslateMatrix(this.surfaceMatrix, x, y);
+    _Camera.TranslateMatrix(this.surfaceMatrix, x, y);
     this.updateSurface();
+    const world_pos = this.clientToSurface(this.renderer.width / 2, this.renderer.height / 2);
+    this.x = world_pos.x;
+    this.y = -world_pos.y;
     return this;
   }
   updateOffset() {
@@ -8311,11 +8319,11 @@ var _ZUI = class _ZUI {
     return this;
   }
   fitToLimits(s) {
-    return _ZUI.Clamp(s, this.limits.scale.min, this.limits.scale.max);
+    return _Camera.Clamp(s, this.limits.scale.min, this.limits.scale.max);
   }
 };
-__publicField(_ZUI, "Surface", Surface);
-__publicField(_ZUI, "Limit", {
+__publicField(_Camera, "Surface", Surface);
+__publicField(_Camera, "Limit", {
   min: -Infinity,
   max: Infinity,
   clone: function() {
@@ -8325,14 +8333,14 @@ __publicField(_ZUI, "Limit", {
     return result;
   }
 });
-var ZUI = _ZUI;
-var ZUI_default = ZUI;
+var Camera = _Camera;
+var Camera_default = Camera;
 
 // src/renderers/TwoRenderer.js
 function TwoRenderer(Newton, canvas) {
   this.Newton = Newton;
   this.canvas = canvas;
-  two_min_default.ZUI = ZUI_default;
+  two_min_default.Camera = Camera_default;
   this.Two = two_min_default;
   this.two = new two_min_default({
     //	type: Two.Types.canvas,
@@ -8345,10 +8353,10 @@ function TwoRenderer(Newton, canvas) {
   this.two.add(this.stage);
   this.joints_group = new two_min_default.Group();
   this.stage.add(this.joints_group);
-  this.zui = new two_min_default.ZUI(this.stage, this.two.renderer.domElement);
+  this.camera = new two_min_default.Camera(this.stage, this.two.renderer.domElement, this);
   this.resize();
-  this.zui.translateSurface(this.width / 2, this.height / 2);
-  this.zui.zoomSet(35, this.width / 2, this.height / 2);
+  this.camera.translateSurface(this.width / 2, this.height / 2);
+  this.camera.zoomSet(35, this.width / 2, this.height / 2);
 }
 TwoRenderer.prototype.resize = function() {
   var dx = this.canvas.offsetWidth - (this.width || this.canvas.offsetWidth);
@@ -8356,7 +8364,10 @@ TwoRenderer.prototype.resize = function() {
   this.width = this.canvas.offsetWidth;
   this.height = this.canvas.offsetHeight;
   this.two.renderer.setSize(this.width, this.height);
-  this.zui.translateSurface(dx / 2, dy / 2);
+  this.camera.translateSurface(dx / 2, dy / 2);
+};
+TwoRenderer.prototype.moveCameraTo = function(x, y) {
+  console.log("moveCameraTo", x, y, this.camera.x, this.camera.y);
 };
 TwoRenderer.prototype.jointsVisible = function(visible) {
   this.joints_group.visible = visible;

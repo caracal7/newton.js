@@ -17,24 +17,25 @@ class Surface {
     apply(px, py, s) {
         this.object.translation.set(px, py);
         this.object.scale = new Two.Vector(s, -s);
-    //    this.object.scale = new Two.Vector(1, 1);
         return this;
     }
 }
 
 /**
-* @name Two.ZUI
+* @name Two.Camera
 * @class
 * @param {Two.Group} group - The scene or group to
 * @param {HTMLElement} [domElement=document.body] - The HTML Element to attach event listeners to.
 */
-class ZUI {
+class Camera {
 
-    constructor(group, domElement) {
+    constructor(group, domElement, renderer) {
+        this.renderer = renderer;
+
         this.limits = {
-            scale: ZUI.Limit.clone(),
-            x: ZUI.Limit.clone(),
-            y: ZUI.Limit.clone()
+            scale: Camera.Limit.clone(),
+            x: Camera.Limit.clone(),
+            y: Camera.Limit.clone()
         };
 
         this.viewport = domElement;
@@ -50,6 +51,11 @@ class ZUI {
         this.reset();
         this.updateSurface();
         this.add(new Surface(group));
+
+        // camera world position;
+        this.x = 0;
+        this.y = 0;
+
     }
 
     static Surface = Surface;
@@ -147,14 +153,14 @@ class ZUI {
     }
 
     zoomBy(byF, clientX = 0, clientY = 0) {
-        const s = ZUI.PositionToScale(this.zoom + byF);
+        const s = Camera.PositionToScale(this.zoom + byF);
         this.zoomSet(s, clientX, clientY);
         return this;
     }
 
     zoomSet(zoom, clientX = 0, clientY = 0) {
         const newScale = this.fitToLimits(zoom);
-        this.zoom = ZUI.ScaleToPosition(newScale);
+        this.zoom = Camera.ScaleToPosition(newScale);
 
         if (newScale === this.scale) return this;
 
@@ -174,8 +180,19 @@ class ZUI {
 
 
     translateSurface(x, y) {
-        ZUI.TranslateMatrix(this.surfaceMatrix, x, y);
+
+
+        Camera.TranslateMatrix(this.surfaceMatrix, x, y);
         this.updateSurface();
+
+        const world_pos = this.clientToSurface(this.renderer.width / 2, this.renderer.height / 2);
+        //const world_pos_vec = new vec2(world_pos.x, -world_pos.y);
+
+        this.x =  world_pos.x;
+        this.y = -world_pos.y;
+        //console.log(x, y, this.x, this.y, world_pos)
+
+
         return this;
     }
 
@@ -210,9 +227,9 @@ class ZUI {
     }
 
     fitToLimits(s) {
-        return ZUI.Clamp(s, this.limits.scale.min, this.limits.scale.max);
+        return Camera.Clamp(s, this.limits.scale.min, this.limits.scale.max);
     }
 
 }
 
-export default ZUI;
+export default Camera;
