@@ -45,7 +45,8 @@ function TwoRenderer(Newton, canvas) {
 	this.stage.add(this.joints_group);
 
 
-	var rect = this.two.makeRectangle(-4.4, 3, 12, 7);
+	//var rect = this.two.makeRectangle(-4.4, 3, 12, 7);
+	var rect = this.two.makeRectangle(0, 0, 12, 6);
 	rect.stroke = '#aaaaaa';
 	rect.fill ='none'
 	rect.linewidth = 0.2;
@@ -61,6 +62,17 @@ function TwoRenderer(Newton, canvas) {
 
 	this.camera.setWorldLimits({
 		mins: {
+			x: -6,
+			y: -3
+		},
+		maxs: {
+			x: 6,
+			y: 3
+		}
+	}, false, 4);
+/*
+	this.camera.setWorldLimits({
+		mins: {
 			x: -4.4 - 12/2,
 			y: 3 - 7/2
 		},
@@ -69,6 +81,7 @@ function TwoRenderer(Newton, canvas) {
 			y: 3 + 7/2
 		}
 	}, false, 4);
+*/
 
 
 	this.camera.translateSurface(this.width / 2, this.height / 2);

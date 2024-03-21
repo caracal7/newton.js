@@ -2691,30 +2691,30 @@ Runner.prototype.fitCameraToWorld = function(max = false) {
 };
 Runner.prototype.validateCameraBounds = function(x, y) {
   var pos = new vec22(x, y);
-  var rw2 = this.renderer.width * 0.5;
-  var rh2 = this.renderer.height * 0.5;
+  var rw22 = this.renderer.width * 0.5;
+  var rh22 = this.renderer.height * 0.5;
   var scale = this.camera.scale * meter2pixel(1);
   var wx = pos.x / scale;
   var wy = pos.y / scale;
-  var minX = (wx - this.camera.minX) * scale < rw2;
-  var maxX = (this.camera.maxX - wx) * scale < rw2;
-  var minY = (wy - this.camera.minY) * scale < rh2;
-  var maxY = (this.camera.maxY - wy) * scale < rh2;
+  var minX = (wx - this.camera.minX) * scale < rw22;
+  var maxX = (this.camera.maxX - wx) * scale < rw22;
+  var minY = (wy - this.camera.minY) * scale < rh22;
+  var maxY = (this.camera.maxY - wy) * scale < rh22;
   if (minX && maxX)
     pos.x = (this.camera.maxX + this.camera.minX) * 0.5 * scale;
   else {
     if (minX)
-      pos.x = this.camera.minX * scale + rw2;
+      pos.x = this.camera.minX * scale + rw22;
     if (maxX)
-      pos.x = this.camera.maxX * scale - rw2;
+      pos.x = this.camera.maxX * scale - rw22;
   }
   if (minY && maxY)
     pos.y = (this.camera.maxY + this.camera.minY) * 0.5 * scale;
   else {
     if (minY)
-      pos.y = this.camera.minY * scale + rh2;
+      pos.y = this.camera.minY * scale + rh22;
     if (maxY)
-      pos.y = this.camera.maxY * scale - rh2;
+      pos.y = this.camera.maxY * scale - rh22;
   }
   return pos;
 };
@@ -8138,7 +8138,6 @@ var Camera = class {
     this.viewport = domElement;
     this.viewportMatrix = new two_min_default.Matrix();
     this.surfaceMatrix = new two_min_default.Matrix();
-    this.zoom = 0;
     this.scale = 1;
     this.surface = group;
   }
@@ -8147,20 +8146,20 @@ var Camera = class {
     this.limits.maxScale = max;
   }
   setWorldLimits(bounds, max = false, scaleFactor = 4) {
-    return;
     this.limits.minX = bounds.mins.x;
     this.limits.maxX = bounds.maxs.x;
     this.limits.minY = bounds.mins.y;
     this.limits.maxY = bounds.maxs.y;
-    var scale = {
+    var scaleBounds = {
       x: this.renderer.width / (bounds.maxs.x - bounds.mins.x),
       y: this.renderer.height / (bounds.maxs.y - bounds.mins.y)
     };
-    this.limits.minScale = Math[max ? "max" : "min"](scale.x, scale.y);
+    this.limits.minScale = Math[max ? "max" : "min"](scaleBounds.x, scaleBounds.y);
     this.limits.maxScale = this.limits.minScale * scaleFactor;
-    this.scale = this.fitScaleToLimits(this.scale);
-    this.zoomSet(this.scale);
-    console.log(this.limits);
+    var scale = this.fitScaleToLimits(this.scale);
+    if (scale !== this.scale)
+      this.zoomSet(scale);
+    this.translateSurface(0, 0);
   }
   fitCameraToBounds(bounds, max = false) {
     var scale = {
@@ -8171,9 +8170,25 @@ var Camera = class {
     this.moveCameraTo((bounds.maxs.x + bounds.mins.x) * 0.5, (bounds.maxs.y + bounds.mins.y) * 0.5);
   }
   validateCameraBounds(x, y) {
-    var pos = { x, y };
-    var rw2 = this.renderer.width * 0.5;
-    var rh2 = this.renderer.height * 0.5;
+    var pos = this.screenToWorld(x, y);
+    const world_min = this.screenToWorld(0, 0);
+    const world_max = this.screenToWorld(this.renderer.width, this.renderer.height);
+    console.log(world_min, world_max, this.limits, pos);
+    var minX = world_min.x < this.limits.minX;
+    var maxX = world_max.x > this.limits.maxX;
+    var minY = world_min.y < this.limits.minY;
+    var maxY = world_max.y > this.limits.maxY;
+    if (minX)
+      pos.x = this.limits.maxX + world_min.x;
+    if (maxX)
+      pos.x = this.limits.minX + world_max.x;
+    if (minY)
+      pos.y = this.limits.maxY + world_min.y;
+    if (maxY)
+      pos.y = this.limits.minY + world_max.y;
+    pos.x = (this.limits.maxX - this.limits.minX) * 0.5 + (world_max.x - world_min.x) * 0.5;
+    pos.y = (this.limits.maxY - this.limits.minY) * 0.5 + (world_max.y - world_min.y) * 0.5;
+    return this.worldToScreen(pos.x, pos.y);
     var scale = this.scale;
     var wx = x / scale;
     var wy = y / scale;
@@ -8198,6 +8213,7 @@ var Camera = class {
         pos.y = this.limits.maxY * scale - rh2;
     }
     return pos;
+    return pos;
   }
   screenToWorld(x, y) {
     const n = this.viewportMatrix.inverse().multiply(x, y, 1);
@@ -8219,17 +8235,18 @@ var Camera = class {
     const scale = this.fitScaleToLimits(zoom);
     if (scale === this.scale)
       return this;
+    const world_pos = this.screenToWorld(clientX, clientY);
     this.surfaceMatrix.scale(scale / this.scale);
     this.scale = scale;
-    const world_pos = this.screenToWorld(clientX, clientY);
     const c = this.worldToScreen(world_pos.x, world_pos.y);
     const dx = clientX - c.x;
     const dy = clientY - c.y;
     this.translateSurface(dx, dy);
   }
-  translateSurface(x, y) {
-    this.surfaceMatrix.elements[2] += x;
-    this.surfaceMatrix.elements[5] += y;
+  translateSurface(dx, dy) {
+    var { x, y } = this.validateCameraBounds(this.surfaceMatrix.elements[2] + dx, this.surfaceMatrix.elements[5] + dy);
+    this.surfaceMatrix.elements[2] = x;
+    this.surfaceMatrix.elements[5] = y;
     this.updateSurface();
   }
   updateSurface() {
@@ -8261,7 +8278,7 @@ function TwoRenderer(Newton, canvas) {
   this.two.add(this.stage);
   this.joints_group = new two_min_default.Group();
   this.stage.add(this.joints_group);
-  var rect = this.two.makeRectangle(-4.4, 3, 12, 7);
+  var rect = this.two.makeRectangle(0, 0, 12, 6);
   rect.stroke = "#aaaaaa";
   rect.fill = "none";
   rect.linewidth = 0.2;
@@ -8271,12 +8288,12 @@ function TwoRenderer(Newton, canvas) {
   this.resize();
   this.camera.setWorldLimits({
     mins: {
-      x: -4.4 - 12 / 2,
-      y: 3 - 7 / 2
+      x: -6,
+      y: -3
     },
     maxs: {
-      x: -4.4 + 12 / 2,
-      y: 3 + 7 / 2
+      x: 6,
+      y: 3
     }
   }, false, 4);
   this.camera.translateSurface(this.width / 2, this.height / 2);
