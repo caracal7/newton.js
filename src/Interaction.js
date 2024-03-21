@@ -266,8 +266,6 @@ function Interaction(runner, settings) {
     var distance = 0;
     var dragging = false;
 
-    camera.addLimits(0.06, 100);
-
     const startDrag = (x,y) => {
         console.log('startDrag')
         // Remove previous mouse joint

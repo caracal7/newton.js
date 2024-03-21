@@ -51,11 +51,6 @@ class Camera {
         this.reset();
         this.updateSurface();
         this.add(new Surface(group));
-
-        // camera world position;
-        this.x = 0;
-        this.y = 0;
-
     }
 
     static Surface = Surface;
@@ -119,10 +114,9 @@ class Camera {
         const m = this.surfaceMatrix.inverse();
         let x, y, z;
         if (arguments.length === 1) {
-            const v = a;
-            x = typeof v.x === 'number' ? v.x : 0;
-            y = typeof v.y === 'number' ? v.y : 0;
-            z = typeof v.z === 'number' ? v.z : 1;
+            x = typeof a.x === 'number' ? a.x : 0;
+            y = typeof a.y === 'number' ? a.y : 0;
+            z = typeof a.z === 'number' ? a.z : 1;
         } else {
             x = typeof a === 'number' ? a : 0;
             y = typeof b === 'number' ? b : 0;
@@ -138,10 +132,9 @@ class Camera {
         const vo = this.viewportOffset.matrix.clone();
         let x, y, z;
         if (arguments.length === 1) {
-          const v = a;
-          x = typeof v.x === 'number' ? v.x : 0;
-          y = typeof v.y === 'number' ? v.y : 0;
-          z = typeof v.z === 'number' ? v.z : 1;
+          x = typeof a.x === 'number' ? a.x : 0;
+          y = typeof a.y === 'number' ? a.y : 0;
+          z = typeof a.z === 'number' ? a.z : 1;
         } else {
           x = typeof a === 'number' ? a : 0;
           y = typeof b === 'number' ? b : 0;
@@ -180,20 +173,23 @@ class Camera {
 
 
     translateSurface(x, y) {
-
-
         Camera.TranslateMatrix(this.surfaceMatrix, x, y);
         this.updateSurface();
-
-        const world_pos = this.clientToSurface(this.renderer.width / 2, this.renderer.height / 2);
-        //const world_pos_vec = new vec2(world_pos.x, -world_pos.y);
-
-        this.x =  world_pos.x;
-        this.y = -world_pos.y;
-        //console.log(x, y, this.x, this.y, world_pos)
-
-
         return this;
+    }
+
+    moveCameraTo(x, y) {
+    	const c = this.surfaceToClient(x, -y);
+    	this.translateSurface(this.renderer.width * 0.5 - c.x, this.renderer.height * 0.5 - c.y);
+    }
+
+    fitCameraToBounds(bounds, max = false) {
+        var scale = {
+            x: this.renderer.width  / (bounds.maxs.x - bounds.mins.x),
+            y: this.renderer.height / (bounds.maxs.y - bounds.mins.y)
+        };
+        this.zoomSet(Math[max ? 'max' : 'min'](scale.x, scale.y));
+        this.moveCameraTo((bounds.maxs.x + bounds.mins.x) * 0.5, (bounds.maxs.y + bounds.mins.y) * 0.5);
     }
 
     updateOffset() {

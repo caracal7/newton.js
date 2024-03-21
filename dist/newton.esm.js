@@ -2811,7 +2811,6 @@ function Interaction(runner, settings) {
   var touches = {};
   var distance2 = 0;
   var dragging = false;
-  camera.addLimits(0.06, 100);
   const startDrag = (x, y) => {
     console.log("startDrag");
     interaction.removeJoint();
@@ -8195,8 +8194,6 @@ var _Camera = class _Camera {
     this.reset();
     this.updateSurface();
     this.add(new Surface(group));
-    this.x = 0;
-    this.y = 0;
   }
   static Clamp(v, min, max) {
     return Math.min(Math.max(v, min), max);
@@ -8240,10 +8237,9 @@ var _Camera = class _Camera {
     const m = this.surfaceMatrix.inverse();
     let x, y, z;
     if (arguments.length === 1) {
-      const v = a;
-      x = typeof v.x === "number" ? v.x : 0;
-      y = typeof v.y === "number" ? v.y : 0;
-      z = typeof v.z === "number" ? v.z : 1;
+      x = typeof a.x === "number" ? a.x : 0;
+      y = typeof a.y === "number" ? a.y : 0;
+      z = typeof a.z === "number" ? a.z : 1;
     } else {
       x = typeof a === "number" ? a : 0;
       y = typeof b === "number" ? b : 0;
@@ -8258,10 +8254,9 @@ var _Camera = class _Camera {
     const vo = this.viewportOffset.matrix.clone();
     let x, y, z;
     if (arguments.length === 1) {
-      const v = a;
-      x = typeof v.x === "number" ? v.x : 0;
-      y = typeof v.y === "number" ? v.y : 0;
-      z = typeof v.z === "number" ? v.z : 1;
+      x = typeof a.x === "number" ? a.x : 0;
+      y = typeof a.y === "number" ? a.y : 0;
+      z = typeof a.z === "number" ? a.z : 1;
     } else {
       x = typeof a === "number" ? a : 0;
       y = typeof b === "number" ? b : 0;
@@ -8294,10 +8289,19 @@ var _Camera = class _Camera {
   translateSurface(x, y) {
     _Camera.TranslateMatrix(this.surfaceMatrix, x, y);
     this.updateSurface();
-    const world_pos = this.clientToSurface(this.renderer.width / 2, this.renderer.height / 2);
-    this.x = world_pos.x;
-    this.y = -world_pos.y;
     return this;
+  }
+  moveCameraTo(x, y) {
+    const c = this.surfaceToClient(x, -y);
+    this.translateSurface(this.renderer.width * 0.5 - c.x, this.renderer.height * 0.5 - c.y);
+  }
+  fitCameraToBounds(bounds, max = false) {
+    var scale = {
+      x: this.renderer.width / (bounds.maxs.x - bounds.mins.x),
+      y: this.renderer.height / (bounds.maxs.y - bounds.mins.y)
+    };
+    this.zoomSet(Math[max ? "max" : "min"](scale.x, scale.y));
+    this.moveCameraTo((bounds.maxs.x + bounds.mins.x) * 0.5, (bounds.maxs.y + bounds.mins.y) * 0.5);
   }
   updateOffset() {
     const rect = this.viewport.getBoundingClientRect();
@@ -8354,6 +8358,7 @@ function TwoRenderer(Newton, canvas) {
   this.joints_group = new two_min_default.Group();
   this.stage.add(this.joints_group);
   this.camera = new two_min_default.Camera(this.stage, this.two.renderer.domElement, this);
+  this.camera.addLimits(0.06, 1e3);
   this.resize();
   this.camera.translateSurface(this.width / 2, this.height / 2);
   this.camera.zoomSet(35, this.width / 2, this.height / 2);
@@ -8365,9 +8370,6 @@ TwoRenderer.prototype.resize = function() {
   this.height = this.canvas.offsetHeight;
   this.two.renderer.setSize(this.width, this.height);
   this.camera.translateSurface(dx / 2, dy / 2);
-};
-TwoRenderer.prototype.moveCameraTo = function(x, y) {
-  console.log("moveCameraTo", x, y, this.camera.x, this.camera.y);
 };
 TwoRenderer.prototype.jointsVisible = function(visible) {
   this.joints_group.visible = visible;

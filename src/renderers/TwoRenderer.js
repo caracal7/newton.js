@@ -48,6 +48,7 @@ function TwoRenderer(Newton, canvas) {
 
 
 	this.camera = new Two.Camera(this.stage, this.two.renderer.domElement, this);
+	this.camera.addLimits(0.06, 1000);
 	this.resize();
 
 	this.camera.translateSurface(this.width / 2, this.height / 2);
@@ -63,9 +64,7 @@ TwoRenderer.prototype.resize = function() {
 	this.camera.translateSurface(dx / 2, dy / 2);
 }
 
-TwoRenderer.prototype.moveCameraTo = function(x, y) {
-	console.log('moveCameraTo', x, y, this.camera.x, this.camera.y)
-}
+
 
 TwoRenderer.prototype.jointsVisible = function(visible) {
 	this.joints_group.visible = visible;
