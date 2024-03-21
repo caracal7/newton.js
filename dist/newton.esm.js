@@ -2691,30 +2691,30 @@ Runner.prototype.fitCameraToWorld = function(max = false) {
 };
 Runner.prototype.validateCameraBounds = function(x, y) {
   var pos = new vec22(x, y);
-  var rw22 = this.renderer.width * 0.5;
-  var rh22 = this.renderer.height * 0.5;
+  var rw2 = this.renderer.width * 0.5;
+  var rh2 = this.renderer.height * 0.5;
   var scale = this.camera.scale * meter2pixel(1);
   var wx = pos.x / scale;
   var wy = pos.y / scale;
-  var minX = (wx - this.camera.minX) * scale < rw22;
-  var maxX = (this.camera.maxX - wx) * scale < rw22;
-  var minY = (wy - this.camera.minY) * scale < rh22;
-  var maxY = (this.camera.maxY - wy) * scale < rh22;
+  var minX = (wx - this.camera.minX) * scale < rw2;
+  var maxX = (this.camera.maxX - wx) * scale < rw2;
+  var minY = (wy - this.camera.minY) * scale < rh2;
+  var maxY = (this.camera.maxY - wy) * scale < rh2;
   if (minX && maxX)
     pos.x = (this.camera.maxX + this.camera.minX) * 0.5 * scale;
   else {
     if (minX)
-      pos.x = this.camera.minX * scale + rw22;
+      pos.x = this.camera.minX * scale + rw2;
     if (maxX)
-      pos.x = this.camera.maxX * scale - rw22;
+      pos.x = this.camera.maxX * scale - rw2;
   }
   if (minY && maxY)
     pos.y = (this.camera.maxY + this.camera.minY) * 0.5 * scale;
   else {
     if (minY)
-      pos.y = this.camera.minY * scale + rh22;
+      pos.y = this.camera.minY * scale + rh2;
     if (maxY)
-      pos.y = this.camera.maxY * scale - rh22;
+      pos.y = this.camera.maxY * scale - rh2;
   }
   return pos;
 };
@@ -8170,42 +8170,25 @@ var Camera = class {
     this.moveCameraTo((bounds.maxs.x + bounds.mins.x) * 0.5, (bounds.maxs.y + bounds.mins.y) * 0.5);
   }
   validateCameraBounds(x, y) {
+    var d = { x, y };
     if (this.limits.maxX === Infinity || this.limits.minX === -Infinity || this.limits.maxY === Infinity || this.limits.minY === -Infinity)
       return { x, y };
-    var pos = this.screenToWorld(x, y);
+    var pos = this.screenToWorld(this.renderer.width * 0.5 - x, this.renderer.height * 0.5 - y);
     const world_min = this.screenToWorld(0, 0);
     const world_max = this.screenToWorld(this.renderer.width, this.renderer.height);
-    console.log(pos.x, pos.y);
-    var minX = world_min.x < this.limits.minX;
-    var maxX = world_max.x > this.limits.maxX;
-    var minY = world_min.y < this.limits.minY;
-    var maxY = world_max.y > this.limits.maxY;
-    return this.worldToScreen(pos.x, pos.y);
-    var scale = this.scale;
-    var wx = x / scale;
-    var wy = y / scale;
-    var minX = (wx - this.limits.minX) * scale < rw2;
-    var maxX = (this.limits.maxX - wx) * scale < rw2;
-    var minY = (wy - this.limits.minY) * scale < rh2;
-    var maxY = (this.limits.maxY - wy) * scale < rh2;
-    if (minX && maxX)
-      pos.x = (this.limits.maxX + this.limits.minX) * 0.5 * scale;
-    else {
-      if (minX)
-        pos.x = this.limits.minX * scale + rw2;
-      if (maxX)
-        pos.x = this.limits.maxX * scale - rw2;
+    const wX = (world_max.x - world_min.x) * 0.5;
+    const wY = (world_max.y - world_min.y) * 0.5;
+    const mX = (this.limits.maxX + this.limits.minX) * 0.5;
+    const mY = (this.limits.maxY + this.limits.minY) * 0.5;
+    var minX = pos.x - wX < this.limits.minX;
+    var minY = pos.y - wY < this.limits.minY;
+    var maxX = pos.x + wX > this.limits.maxX;
+    var maxY = pos.y + wY > this.limits.maxY;
+    if (minY && maxY) {
+      const c = this.worldToScreen(0, mY + world_min.y);
+      d.y = c.y;
     }
-    if (minY && maxY)
-      pos.y = (this.limits.maxY + this.limits.minY) * 0.5 * scale;
-    else {
-      if (minY)
-        pos.y = this.limits.minY * scale + rh2;
-      if (maxY)
-        pos.y = this.limits.maxY * scale - rh2;
-    }
-    return pos;
-    return pos;
+    return d;
   }
   screenToWorld(x, y) {
     const n = this.viewportMatrix.inverse().multiply(x, y, 1);
@@ -8236,9 +8219,9 @@ var Camera = class {
     this.translateSurface(dx, dy);
   }
   translateSurface(dx, dy) {
-    var { x, y } = this.validateCameraBounds(this.surfaceMatrix.elements[2] + dx, this.surfaceMatrix.elements[5] + dy);
-    this.surfaceMatrix.elements[2] = x;
-    this.surfaceMatrix.elements[5] = y;
+    var { x, y } = this.validateCameraBounds(dx, dy);
+    this.surfaceMatrix.elements[2] += x;
+    this.surfaceMatrix.elements[5] += y;
     this.updateSurface();
   }
   updateSurface() {
