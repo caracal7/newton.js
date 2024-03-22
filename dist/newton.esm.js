@@ -8197,13 +8197,13 @@ var Camera = class {
     const world_max = this.screenToWorld(this.renderer.width, this.renderer.height);
     const wX = (world_max.x - world_min.x) * 0.5;
     const wY = (world_max.y - world_min.y) * 0.5;
-    const mX = (this.limits.maxX + this.limits.minX) * 0.5;
-    const mY = (this.limits.maxY + this.limits.minY) * 0.5;
     var minX = pos.x - wX <= this.limits.minX;
     var maxX = pos.x + wX >= this.limits.maxX;
     var minY = -pos.y - wY <= this.limits.minY;
     var maxY = -pos.y + wY >= this.limits.maxY;
     if (minX && maxX) {
+      const mX = (this.limits.maxX + this.limits.minX) * 0.5;
+      const mY = (this.limits.maxY + this.limits.minY) * 0.5;
       const c = this.worldToScreen(mX, mY);
       d.x = this.renderer.width * 0.5 - c.x;
     } else {
@@ -8217,6 +8217,8 @@ var Camera = class {
       }
     }
     if (minY && maxY) {
+      const mX = (this.limits.maxX + this.limits.minX) * 0.5;
+      const mY = (this.limits.maxY + this.limits.minY) * 0.5;
       const c = this.worldToScreen(mX, -mY);
       d.y = this.renderer.height * 0.5 - c.y;
     } else {

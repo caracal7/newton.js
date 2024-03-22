@@ -7,7 +7,7 @@
     if(this.SELECTED) {
         this.state.runner.renderer.camera.fitCameraToBounds(this.state.runner.world.getBounds());
     }*/
-    this.state.runner.renderer.camera.fitCameraToBounds({
+    this.state.runner.renderer.camera.setWorldLimits({
         mins: {
             x: -4.4 - 12/2,
             y: 3 - 7/2
@@ -16,7 +16,9 @@
             x: -4.4 + 12/2,
             y: 3 + 7/2
         }
-    });
+    }, false, 4);
+
+
 } style{ 'z-index': 10000, position: 'absolute' }/>
 
 
