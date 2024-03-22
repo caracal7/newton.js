@@ -45,8 +45,8 @@ function TwoRenderer(Newton, canvas) {
 	this.stage.add(this.joints_group);
 
 
-	//var rect = this.two.makeRectangle(-4.4, 3, 12, 7);
-	var rect = this.two.makeRectangle(0, 0, 12, 6);
+//	var rect = this.two.makeRectangle(-5, 2, 10, 10);
+	var rect = this.two.makeRectangle(-4.4, +2, 12, 6);
 	rect.stroke = '#aaaaaa';
 	rect.fill ='none'
 	rect.linewidth = 0.2;
@@ -62,28 +62,32 @@ function TwoRenderer(Newton, canvas) {
 	this.camera.translateSurface(this.width / 2, this.height / 2);
 	this.camera.zoomSet(35, this.width / 2, this.height / 2);
 
-	this.camera.setWorldLimits({
-		mins: {
-			x: -6,
-			y: -3
-		},
-		maxs: {
-			x: 6,
-			y: 3
-		}
-	}, true, 4);
+
+	this.camera.moveCameraTo(-4.4, 3);
 /*
 	this.camera.setWorldLimits({
 		mins: {
-			x: -4.4 - 12/2,
-			y: 3 - 7/2
+			x: -6 -1,
+			y: -3 +2
 		},
 		maxs: {
-			x: -4.4 + 12/2,
-			y: 3 + 7/2
+			x: 6 -1,
+			y: 3 +2
 		}
 	}, false, 4);
 */
+
+	this.camera.setWorldLimits({
+		mins: {
+			x: -12/2 -4.4,
+			y: -6/2 +2
+		},
+		maxs: {
+			x: 12/2 -4.4,
+			y: 6/2 +2
+		}
+	}, false, 4);
+
 
 
 
@@ -95,7 +99,6 @@ TwoRenderer.prototype.resize = function() {
 	this.width  = this.canvas.offsetWidth;
 	this.height = this.canvas.offsetHeight;
 	this.two.renderer.setSize(this.width, this.height);
-
 	this.camera.translateSurface(dx / 2, dy / 2);
 	this.camera.updateScaleLimits();
 }

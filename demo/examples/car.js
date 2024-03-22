@@ -24,7 +24,7 @@ export default Newton => {
 	function init(world) {
 
 		var staticBody = new Body(Body.STATIC);
-		staticBody.addShape(new ShapeBox(0, 0, 1, 1));
+		staticBody.addShape(new ShapeBox(0, 0, 2, 2));
 		staticBody.addShape(new ShapeBox(-6, 0, 1, 1));
 
 

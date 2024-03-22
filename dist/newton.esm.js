@@ -8156,6 +8156,12 @@ var Camera = class {
     this.limits.scaleFactor = scaleFactor;
     this.updateScaleLimits();
   }
+  resetWorldLimits() {
+    this.limits.minX = -Infinity;
+    this.limits.maxX = Infinity;
+    this.limits.minY = -Infinity;
+    this.limits.maxY = Infinity;
+  }
   updateScaleLimits() {
     if (this.limits.maxX === Infinity || this.limits.minX === -Infinity || this.limits.maxY === Infinity || this.limits.minY === -Infinity)
       return;
@@ -8178,6 +8184,10 @@ var Camera = class {
     this.zoomSet(Math[max ? "max" : "min"](scale.x, scale.y));
     this.moveCameraTo((bounds.maxs.x + bounds.mins.x) * 0.5, (bounds.maxs.y + bounds.mins.y) * 0.5);
   }
+  moveCameraTo(x, y) {
+    const c = this.worldToScreen(x, -y);
+    this.translateSurface(this.renderer.width * 0.5 - c.x, this.renderer.height * 0.5 - c.y);
+  }
   validateCameraBounds(x, y) {
     var d = { x, y };
     if (this.limits.maxX === Infinity || this.limits.minX === -Infinity || this.limits.maxY === Infinity || this.limits.minY === -Infinity)
@@ -8190,9 +8200,9 @@ var Camera = class {
     const mX = (this.limits.maxX + this.limits.minX) * 0.5;
     const mY = (this.limits.maxY + this.limits.minY) * 0.5;
     var minX = pos.x - wX <= this.limits.minX;
-    var minY = pos.y - wY <= this.limits.minY;
     var maxX = pos.x + wX >= this.limits.maxX;
-    var maxY = pos.y + wY >= this.limits.maxY;
+    var minY = -pos.y - wY <= this.limits.minY;
+    var maxY = -pos.y + wY >= this.limits.maxY;
     if (minX && maxX) {
       const c = this.worldToScreen(mX, mY);
       d.x = this.renderer.width * 0.5 - c.x;
@@ -8207,16 +8217,16 @@ var Camera = class {
       }
     }
     if (minY && maxY) {
-      const c = this.worldToScreen(mX, mY);
+      const c = this.worldToScreen(mX, -mY);
       d.y = this.renderer.height * 0.5 - c.y;
     } else {
       if (minY) {
-        const c = this.worldToScreen(this.limits.minX, this.limits.minY);
-        d.y = -c.y;
+        const c = this.worldToScreen(this.limits.minX, -this.limits.minY);
+        d.y = this.renderer.height - c.y;
       }
       if (maxY) {
-        const c = this.worldToScreen(this.limits.maxX, this.limits.maxY);
-        d.y = this.renderer.height - c.y;
+        const c = this.worldToScreen(this.limits.maxX, -this.limits.maxY);
+        d.y = -c.y;
       }
     }
     return d;
@@ -8260,10 +8270,6 @@ var Camera = class {
     this.surface.translation.set(e2[2], e2[5]);
     this.surface.scale = new two_min_default.Vector(e2[0], -e2[0]);
   }
-  moveCameraTo(x, y) {
-    const c = this.worldToScreen(x, -y);
-    this.translateSurface(this.renderer.width * 0.5 - c.x, this.renderer.height * 0.5 - c.y);
-  }
 };
 var Camera_default = Camera;
 
@@ -8284,7 +8290,7 @@ function TwoRenderer(Newton, canvas) {
   this.two.add(this.stage);
   this.joints_group = new two_min_default.Group();
   this.stage.add(this.joints_group);
-  var rect = this.two.makeRectangle(0, 0, 12, 6);
+  var rect = this.two.makeRectangle(-4.4, 2, 12, 6);
   rect.stroke = "#aaaaaa";
   rect.fill = "none";
   rect.linewidth = 0.2;
@@ -8294,16 +8300,17 @@ function TwoRenderer(Newton, canvas) {
   this.resize();
   this.camera.translateSurface(this.width / 2, this.height / 2);
   this.camera.zoomSet(35, this.width / 2, this.height / 2);
+  this.camera.moveCameraTo(-4.4, 3);
   this.camera.setWorldLimits({
     mins: {
-      x: -6,
-      y: -3
+      x: -12 / 2 - 4.4,
+      y: -6 / 2 + 2
     },
     maxs: {
-      x: 6,
-      y: 3
+      x: 12 / 2 - 4.4,
+      y: 6 / 2 + 2
     }
-  }, true, 4);
+  }, false, 4);
 }
 TwoRenderer.prototype.resize = function() {
   var dx = this.canvas.offsetWidth - (this.width || this.canvas.offsetWidth);

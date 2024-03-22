@@ -40,6 +40,13 @@ class Camera {
         this.updateScaleLimits();
     }
 
+    resetWorldLimits() {
+        this.limits.minX = -Infinity;
+        this.limits.maxX =  Infinity;
+        this.limits.minY = -Infinity;
+        this.limits.maxY =  Infinity;
+    }
+
     updateScaleLimits() {
         if(
             this.limits.maxX === Infinity || this.limits.minX === -Infinity ||
@@ -65,6 +72,11 @@ class Camera {
         this.moveCameraTo((bounds.maxs.x + bounds.mins.x) * 0.5, (bounds.maxs.y + bounds.mins.y) * 0.5);
     }
 
+    moveCameraTo(x, y) {
+    	const c = this.worldToScreen(x, -y);
+    	this.translateSurface(this.renderer.width * 0.5 - c.x, this.renderer.height * 0.5 - c.y);
+    }
+
     validateCameraBounds(x, y) {
         var d = { x, y };
 
@@ -85,11 +97,10 @@ class Camera {
         const mX = (this.limits.maxX + this.limits.minX) * 0.5;
         const mY = (this.limits.maxY + this.limits.minY) * 0.5;
 
-
         var minX = pos.x - wX <= this.limits.minX;
-        var minY = pos.y - wY <= this.limits.minY;
         var maxX = pos.x + wX >= this.limits.maxX;
-        var maxY = pos.y + wY >= this.limits.maxY;
+        var minY = -pos.y - wY <= this.limits.minY;
+        var maxY = -pos.y + wY >= this.limits.maxY;
 
         if(minX && maxX) {
             const c = this.worldToScreen(mX, mY);
@@ -106,16 +117,16 @@ class Camera {
         }
 
         if(minY && maxY) {
-            const c = this.worldToScreen(mX, mY);
+            const c = this.worldToScreen(mX, -mY);
             d.y = this.renderer.height * 0.5 - c.y;
         } else {
             if(minY) {
-                const c = this.worldToScreen(this.limits.minX, this.limits.minY);
-                d.y = -c.y;
+                const c = this.worldToScreen(this.limits.minX, -this.limits.minY);
+                d.y =  this.renderer.height - c.y
             }
             if(maxY) {
-                const c = this.worldToScreen(this.limits.maxX, this.limits.maxY);
-                d.y =  this.renderer.height - c.y
+                const c = this.worldToScreen(this.limits.maxX, -this.limits.maxY);
+                d.y = -c.y;
             }
         }
         return d;
@@ -167,10 +178,6 @@ class Camera {
         this.surface.scale = new Two.Vector(e[0], -e[0]);
     }
 
-    moveCameraTo(x, y) {
-    	const c = this.worldToScreen(x, -y);
-    	this.translateSurface(this.renderer.width * 0.5 - c.x, this.renderer.height * 0.5 - c.y);
-    }
 
 }
 
