@@ -83,9 +83,7 @@ class Camera {
         if(
             this.limits.maxX === Infinity || this.limits.minX === -Infinity ||
             this.limits.maxY === Infinity || this.limits.minY === -Infinity
-        ) return { x, y };
-
-        var pos = this.screenToWorld(this.renderer.width * 0.5 - x, this.renderer.height * 0.5 - y);
+        ) return d;
 
 
         const world_min = this.screenToWorld(0, 0);
@@ -94,16 +92,24 @@ class Camera {
         const wX = (world_max.x - world_min.x) * 0.5;
         const wY = (world_max.y - world_min.y) * 0.5;
 
+        const mX = (this.limits.maxX + this.limits.minX) * 0.5;
+        const mY = (this.limits.maxY + this.limits.minY) * 0.5;
+
+        const checkLimits = () => {
+            var pos = this.screenToWorld(this.renderer.width * 0.5 - d.x, this.renderer.height * 0.5 - d.y);
+            return {
+                minX:  pos.x - wX <= this.limits.minX,
+                maxX:  pos.x + wX >= this.limits.maxX,
+                minY: -pos.y - wY <= this.limits.minY,
+                maxY: -pos.y + wY >= this.limits.maxY
+            }
+        }
 
 
-        var minX =  pos.x - wX <= this.limits.minX;
-        var maxX =  pos.x + wX >= this.limits.maxX;
-        var minY = -pos.y - wY <= this.limits.minY;
-        var maxY = -pos.y + wY >= this.limits.maxY;
+        const { minX, maxX, minY, maxY } = checkLimits();
+
 
         if(minX && maxX) {
-            const mX = (this.limits.maxX + this.limits.minX) * 0.5;
-            const mY = (this.limits.maxY + this.limits.minY) * 0.5;
             const c = this.worldToScreen(mX, mY);
             d.x = this.renderer.width * 0.5 - c.x;
         } else {
@@ -118,16 +124,17 @@ class Camera {
         }
 
         if(minY && maxY) {
-            const mX = (this.limits.maxX + this.limits.minX) * 0.5;
-            const mY = (this.limits.maxY + this.limits.minY) * 0.5;
             const c = this.worldToScreen(mX, -mY);
             d.y = this.renderer.height * 0.5 - c.y;
         } else {
             if(minY) {
+                console.log('minY');
                 const c = this.worldToScreen(this.limits.minX, -this.limits.minY);
-                d.y =  this.renderer.height - c.y
+                d.y =  this.renderer.height - c.y;
+
             }
             if(maxY) {
+                console.log('maxY');
                 const c = this.worldToScreen(this.limits.maxX, -this.limits.maxY);
                 d.y = -c.y;
             }
