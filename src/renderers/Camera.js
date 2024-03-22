@@ -72,9 +72,7 @@ class Camera {
         const wY = (world_max.y - world_min.y) * 0.5;
 
         const mX = (this.limits.maxX + this.limits.minX) * 0.5;
-        const mY = (this.limits.maxY + this.limits.minY) * 0.5;
-
-    //    console.log((pos.x - wX).toFixed(1), wX.toFixed(1),  mX.toFixed(2));
+        const mY = (this.limits.maxY - this.limits.minY) * 0.5;
 
 
         var minX = pos.x - wX < this.limits.minX;
@@ -82,10 +80,19 @@ class Camera {
         var maxX = pos.x + wX > this.limits.maxX;
         var maxY = pos.y + wY > this.limits.maxY;
 
+
+        //console.log(minX, minY, maxX, maxY);
+        if(minX) {
+            const c = this.worldToScreen(this.limits.minX + world_max.x, 0);
+            d.x = this.renderer.width * 0.5 - c.x;
+        }
+
+
         if(minY && maxY) {
 
-            const c = this.worldToScreen(0, mY + world_min.y);
-            d.y = c.y;
+        //    const c = this.worldToScreen(0, mY - wY );
+        //    console.log(c.y, world_min.y)
+        //    d.y = (pos.y - wY + pos.y + wY) / 2;
         //    this.translateSurface(this.renderer.width * 0.5 - c.x, this.renderer.height * 0.5 - c.y);
 
 
