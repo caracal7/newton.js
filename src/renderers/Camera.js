@@ -13,6 +13,8 @@ class Camera {
             maxX: Infinity,
             minY: -Infinity,
             maxY: Infinity,
+            scaleFactor: 4,
+            Max: false
         };
 
         this.viewport = domElement;
@@ -33,17 +35,26 @@ class Camera {
         this.limits.maxX = bounds.maxs.x;
         this.limits.minY = bounds.mins.y;
         this.limits.maxY = bounds.maxs.y;
+        this.limits.Max = max;
+        this.limits.scaleFactor = scaleFactor;
+        this.updateScaleLimits();
+    }
+
+    updateScaleLimits() {
+        if(
+            this.limits.maxX === Infinity || this.limits.minX === -Infinity ||
+            this.limits.maxY === Infinity || this.limits.minY === -Infinity
+        ) return;
         var scaleBounds = {
-            x: this.renderer.width  / (bounds.maxs.x - bounds.mins.x),
-            y: this.renderer.height / (bounds.maxs.y - bounds.mins.y)
+            x: this.renderer.width  / (this.limits.maxX - this.limits.minX),
+            y: this.renderer.height / (this.limits.maxY - this.limits.minY)
         };
-        this.limits.minScale = Math[max ? 'max' : 'min'](scaleBounds.x, scaleBounds.y);
-        this.limits.maxScale = this.limits.minScale * scaleFactor;
+        this.limits.minScale = Math[this.limits.Max ? 'max' : 'min'](scaleBounds.x, scaleBounds.y);
+        this.limits.maxScale = this.limits.minScale * this.limits.scaleFactor;
         var scale = this.fitScaleToLimits(this.scale);
         if(scale !== this.scale) this.zoomSet(scale);
         this.translateSurface(0, 0);
     }
-
 
     fitCameraToBounds(bounds, max = false) {
         var scale = {
@@ -60,7 +71,7 @@ class Camera {
         if(
             this.limits.maxX === Infinity || this.limits.minX === -Infinity ||
             this.limits.maxY === Infinity || this.limits.minY === -Infinity
-        ) return { x, y }
+        ) return { x, y };
 
         var pos = this.screenToWorld(this.renderer.width * 0.5 - x, this.renderer.height * 0.5 - y);
 
@@ -72,35 +83,41 @@ class Camera {
         const wY = (world_max.y - world_min.y) * 0.5;
 
         const mX = (this.limits.maxX + this.limits.minX) * 0.5;
-        const mY = (this.limits.maxY - this.limits.minY) * 0.5;
+        const mY = (this.limits.maxY + this.limits.minY) * 0.5;
 
 
-        var minX = pos.x - wX < this.limits.minX;
-        var minY = pos.y - wY < this.limits.minY;
-        var maxX = pos.x + wX > this.limits.maxX;
-        var maxY = pos.y + wY > this.limits.maxY;
+        var minX = pos.x - wX <= this.limits.minX;
+        var minY = pos.y - wY <= this.limits.minY;
+        var maxX = pos.x + wX >= this.limits.maxX;
+        var maxY = pos.y + wY >= this.limits.maxY;
 
-
-        //console.log(minX, minY, maxX, maxY);
-        if(minX) {
-            const c = this.worldToScreen(this.limits.minX + world_max.x, 0);
+        if(minX && maxX) {
+            const c = this.worldToScreen(mX, mY);
             d.x = this.renderer.width * 0.5 - c.x;
+        } else {
+            if(minX) {
+                const c = this.worldToScreen(this.limits.minX, this.limits.minY);
+                d.x = -c.x;
+            }
+            if(maxX) {
+                const c = this.worldToScreen(this.limits.maxX, this.limits.maxY);
+                d.x =  this.renderer.width - c.x
+            }
         }
-
 
         if(minY && maxY) {
-
-        //    const c = this.worldToScreen(0, mY - wY );
-        //    console.log(c.y, world_min.y)
-        //    d.y = (pos.y - wY + pos.y + wY) / 2;
-        //    this.translateSurface(this.renderer.width * 0.5 - c.x, this.renderer.height * 0.5 - c.y);
-
-
-            //console.log(maxY && minY);
+            const c = this.worldToScreen(mX, mY);
+            d.y = this.renderer.height * 0.5 - c.y;
+        } else {
+            if(minY) {
+                const c = this.worldToScreen(this.limits.minX, this.limits.minY);
+                d.y = -c.y;
+            }
+            if(maxY) {
+                const c = this.worldToScreen(this.limits.maxX, this.limits.maxY);
+                d.y =  this.renderer.height - c.y
+            }
         }
-
-
-
         return d;
     }
 

@@ -8133,7 +8133,9 @@ var Camera = class {
       minX: -Infinity,
       maxX: Infinity,
       minY: -Infinity,
-      maxY: Infinity
+      maxY: Infinity,
+      scaleFactor: 4,
+      Max: false
     };
     this.viewport = domElement;
     this.viewportMatrix = new two_min_default.Matrix();
@@ -8150,12 +8152,19 @@ var Camera = class {
     this.limits.maxX = bounds.maxs.x;
     this.limits.minY = bounds.mins.y;
     this.limits.maxY = bounds.maxs.y;
+    this.limits.Max = max;
+    this.limits.scaleFactor = scaleFactor;
+    this.updateScaleLimits();
+  }
+  updateScaleLimits() {
+    if (this.limits.maxX === Infinity || this.limits.minX === -Infinity || this.limits.maxY === Infinity || this.limits.minY === -Infinity)
+      return;
     var scaleBounds = {
-      x: this.renderer.width / (bounds.maxs.x - bounds.mins.x),
-      y: this.renderer.height / (bounds.maxs.y - bounds.mins.y)
+      x: this.renderer.width / (this.limits.maxX - this.limits.minX),
+      y: this.renderer.height / (this.limits.maxY - this.limits.minY)
     };
-    this.limits.minScale = Math[max ? "max" : "min"](scaleBounds.x, scaleBounds.y);
-    this.limits.maxScale = this.limits.minScale * scaleFactor;
+    this.limits.minScale = Math[this.limits.Max ? "max" : "min"](scaleBounds.x, scaleBounds.y);
+    this.limits.maxScale = this.limits.minScale * this.limits.scaleFactor;
     var scale = this.fitScaleToLimits(this.scale);
     if (scale !== this.scale)
       this.zoomSet(scale);
@@ -8179,16 +8188,36 @@ var Camera = class {
     const wX = (world_max.x - world_min.x) * 0.5;
     const wY = (world_max.y - world_min.y) * 0.5;
     const mX = (this.limits.maxX + this.limits.minX) * 0.5;
-    const mY = (this.limits.maxY - this.limits.minY) * 0.5;
-    var minX = pos.x - wX < this.limits.minX;
-    var minY = pos.y - wY < this.limits.minY;
-    var maxX = pos.x + wX > this.limits.maxX;
-    var maxY = pos.y + wY > this.limits.maxY;
-    if (minX) {
-      const c = this.worldToScreen(this.limits.minX + world_max.x, 0);
+    const mY = (this.limits.maxY + this.limits.minY) * 0.5;
+    var minX = pos.x - wX <= this.limits.minX;
+    var minY = pos.y - wY <= this.limits.minY;
+    var maxX = pos.x + wX >= this.limits.maxX;
+    var maxY = pos.y + wY >= this.limits.maxY;
+    if (minX && maxX) {
+      const c = this.worldToScreen(mX, mY);
       d.x = this.renderer.width * 0.5 - c.x;
+    } else {
+      if (minX) {
+        const c = this.worldToScreen(this.limits.minX, this.limits.minY);
+        d.x = -c.x;
+      }
+      if (maxX) {
+        const c = this.worldToScreen(this.limits.maxX, this.limits.maxY);
+        d.x = this.renderer.width - c.x;
+      }
     }
     if (minY && maxY) {
+      const c = this.worldToScreen(mX, mY);
+      d.y = this.renderer.height * 0.5 - c.y;
+    } else {
+      if (minY) {
+        const c = this.worldToScreen(this.limits.minX, this.limits.minY);
+        d.y = -c.y;
+      }
+      if (maxY) {
+        const c = this.worldToScreen(this.limits.maxX, this.limits.maxY);
+        d.y = this.renderer.height - c.y;
+      }
     }
     return d;
   }
@@ -8263,6 +8292,8 @@ function TwoRenderer(Newton, canvas) {
   this.camera = new two_min_default.Camera(this.stage, this.two.renderer.domElement, this);
   this.camera.setScaleLimits(10, 1e3);
   this.resize();
+  this.camera.translateSurface(this.width / 2, this.height / 2);
+  this.camera.zoomSet(35, this.width / 2, this.height / 2);
   this.camera.setWorldLimits({
     mins: {
       x: -6,
@@ -8272,9 +8303,7 @@ function TwoRenderer(Newton, canvas) {
       x: 6,
       y: 3
     }
-  }, false, 4);
-  this.camera.translateSurface(this.width / 2, this.height / 2);
-  this.camera.zoomSet(35, this.width / 2, this.height / 2);
+  }, true, 4);
 }
 TwoRenderer.prototype.resize = function() {
   var dx = this.canvas.offsetWidth - (this.width || this.canvas.offsetWidth);
@@ -8283,6 +8312,7 @@ TwoRenderer.prototype.resize = function() {
   this.height = this.canvas.offsetHeight;
   this.two.renderer.setSize(this.width, this.height);
   this.camera.translateSurface(dx / 2, dy / 2);
+  this.camera.updateScaleLimits();
 };
 TwoRenderer.prototype.jointsVisible = function(visible) {
   this.joints_group.visible = visible;

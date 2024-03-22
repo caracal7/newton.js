@@ -59,6 +59,8 @@ function TwoRenderer(Newton, canvas) {
 
 
 	this.resize();
+	this.camera.translateSurface(this.width / 2, this.height / 2);
+	this.camera.zoomSet(35, this.width / 2, this.height / 2);
 
 	this.camera.setWorldLimits({
 		mins: {
@@ -69,7 +71,7 @@ function TwoRenderer(Newton, canvas) {
 			x: 6,
 			y: 3
 		}
-	}, false, 4);
+	}, true, 4);
 /*
 	this.camera.setWorldLimits({
 		mins: {
@@ -84,8 +86,7 @@ function TwoRenderer(Newton, canvas) {
 */
 
 
-	this.camera.translateSurface(this.width / 2, this.height / 2);
-	this.camera.zoomSet(35, this.width / 2, this.height / 2);
+
 };
 
 TwoRenderer.prototype.resize = function() {
@@ -94,7 +95,9 @@ TwoRenderer.prototype.resize = function() {
 	this.width  = this.canvas.offsetWidth;
 	this.height = this.canvas.offsetHeight;
 	this.two.renderer.setSize(this.width, this.height);
+
 	this.camera.translateSurface(dx / 2, dy / 2);
+	this.camera.updateScaleLimits();
 }
 
 
