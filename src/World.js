@@ -187,6 +187,7 @@ World.prototype.addBody = function(body) {
 
 	this.renderer?.addBody(body);
 
+
 	body.awake(true);
 	body.world = this;
 	body.cacheData();

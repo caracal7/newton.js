@@ -8191,7 +8191,7 @@ function TwoRenderer(Newton, canvas) {
   this.joints_group = new two_min_default.Group();
   this.stage.add(this.joints_group);
   this.camera = new two_min_default.Camera(this.stage, this.two.renderer.domElement, this);
-  this.camera.setScaleLimits(10, 1e3);
+  this.camera.setScaleLimits(10, 500);
   this.resize();
   this.camera.translateSurface(this.width / 2, this.height / 2);
   this.camera.zoomSet(35, this.width / 2, this.height / 2);

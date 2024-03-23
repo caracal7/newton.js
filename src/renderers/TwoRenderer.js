@@ -55,7 +55,7 @@ function TwoRenderer(Newton, canvas) {
 
 
 	this.camera = new Two.Camera(this.stage, this.two.renderer.domElement, this);
-	this.camera.setScaleLimits(10, 1000);
+	this.camera.setScaleLimits(10, 500);
 
 
 	this.resize();
@@ -76,19 +76,6 @@ function TwoRenderer(Newton, canvas) {
 		}
 	}, false, 4);
 */
-/*
-	this.camera.setWorldLimits({
-		mins: {
-			x: -12/2 -4.4,
-			y: -6/2 +2
-		},
-		maxs: {
-			x: 12/2 -4.4,
-			y: 6/2 +2
-		}
-	}, false, 4);
-*/
-
 
 
 };
