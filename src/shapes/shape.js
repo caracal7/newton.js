@@ -20,11 +20,9 @@
 import { Bounds, vec2 } from './../utils/math.js';
 
 const Shape = function(type) {
-	if (arguments.length == 0)
-		return;
+	if (arguments.length == 0) return;
 
-	if (Shape.id_counter == undefined)
-		Shape.id_counter = 0;
+	if (Shape.id_counter == undefined) Shape.id_counter = 0;
 
 	this.id = Shape.id_counter++;
 	this.type = type;

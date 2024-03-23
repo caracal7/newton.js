@@ -87,8 +87,8 @@ function Runner(renderer, app) {
 
     this.onResize = () => {
         this.renderer.resize();
-        this.dirtyBoundsToFullscreen();
-        this.static_outdated = true;
+        //this.dirtyBoundsToFullscreen();
+        //this.static_outdated = true;
         if(this[Pause]) this.drawFrame(0);
     }
 
@@ -131,8 +131,8 @@ Runner.prototype.initFrame = function() {
         lastTime:       Date.now(),
         timeDelta:      0
     }
-    this.dirtyBoundsToFullscreen();
-    this.static_outdated = true;
+//    this.dirtyBoundsToFullscreen();
+//    this.static_outdated = true;
 }
 
 Runner.prototype.runFrame = function() {
@@ -185,8 +185,8 @@ Runner.prototype.render = function(frameTime) {
 }
 
 Runner.prototype.redraw = function() {
-    this.dirtyBoundsToFullscreen();
-	this.static_outdated = true;
+//    this.dirtyBoundsToFullscreen();
+//	this.static_outdated = true;
     this.drawFrame(0);
 }
 
@@ -342,7 +342,7 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
 
 //    this.renderer.endDynamic();
 }
-
+/*
 Runner.prototype.worldToCanvas = function(p) {
     return new vec2(
         this.renderer.width  * 0.5 + (p.x * (this.camera.scale * meter2pixel(1)) - this.camera.origin.x),
@@ -353,13 +353,6 @@ Runner.prototype.canvasToWorld = function(p) {
     return new vec2(
         (this.camera.origin.x + (p.x - this.renderer.width  * 0.5)) / (this.camera.scale * meter2pixel(1)),
         (this.camera.origin.y - (p.y - this.renderer.height * 0.5)) / (this.camera.scale * meter2pixel(1)));
-}
-
-Runner.prototype.dirtyBoundsToFullscreen = function() {
-    this.dirtyBounds.set(
-        this.canvasToWorld(new vec2(0, this.renderer.height)),
-        this.canvasToWorld(new vec2(this.renderer.width, 0))
-    );
 }
 
 Runner.prototype.fitCameraToBounds = function(bounds, max = false) {
@@ -441,7 +434,7 @@ Runner.prototype.moveCameraTo = function(x, y) {
     );
     this.redraw();
 }
-
+*/
 Runner.prototype.on = function(event, callback) {
     if(!events.includes(event)) throw `Unknown event "${event}"`;
     if(this[Events][event]) {

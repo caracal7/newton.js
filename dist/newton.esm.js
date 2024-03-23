@@ -2563,8 +2563,6 @@ function Runner(renderer, app) {
   });
   this.onResize = () => {
     this.renderer.resize();
-    this.dirtyBoundsToFullscreen();
-    this.static_outdated = true;
     if (this[Pause])
       this.drawFrame(0);
   };
@@ -2602,8 +2600,6 @@ Runner.prototype.initFrame = function() {
     lastTime: Date.now(),
     timeDelta: 0
   };
-  this.dirtyBoundsToFullscreen();
-  this.static_outdated = true;
 };
 Runner.prototype.runFrame = function() {
   var time = Date.now();
@@ -2643,8 +2639,6 @@ Runner.prototype.render = function(frameTime) {
   stats.timeDrawFrame = Date.now() - t0;
 };
 Runner.prototype.redraw = function() {
-  this.dirtyBoundsToFullscreen();
-  this.static_outdated = true;
   this.drawFrame(0);
 };
 Runner.prototype.drawFrame = function(frameTime = 0) {
@@ -2659,100 +2653,6 @@ Runner.prototype.drawFrame = function(frameTime = 0) {
     (_e = this.renderer) == null ? void 0 : _e.updateJoint(this.world.jointArr[i]);
   }
   (_g = (_f = this[Events]) == null ? void 0 : _f.afterRenderFrame) == null ? void 0 : _g.forEach((callback) => callback(frameTime));
-};
-Runner.prototype.worldToCanvas = function(p) {
-  return new vec22(
-    this.renderer.width * 0.5 + (p.x * (this.camera.scale * meter2pixel(1)) - this.camera.origin.x),
-    this.renderer.height * 0.5 - (p.y * (this.camera.scale * meter2pixel(1)) - this.camera.origin.y)
-  );
-};
-Runner.prototype.canvasToWorld = function(p) {
-  return new vec22(
-    (this.camera.origin.x + (p.x - this.renderer.width * 0.5)) / (this.camera.scale * meter2pixel(1)),
-    (this.camera.origin.y - (p.y - this.renderer.height * 0.5)) / (this.camera.scale * meter2pixel(1))
-  );
-};
-Runner.prototype.dirtyBoundsToFullscreen = function() {
-  this.dirtyBounds.set(
-    this.canvasToWorld(new vec22(0, this.renderer.height)),
-    this.canvasToWorld(new vec22(this.renderer.width, 0))
-  );
-};
-Runner.prototype.fitCameraToBounds = function(bounds, max = false) {
-  var scale = new vec22(
-    this.renderer.width / meter2pixel(1) / (bounds.maxs.x - bounds.mins.x),
-    this.renderer.height / meter2pixel(1) / (bounds.maxs.y - bounds.mins.y)
-  );
-  this.camera.scale = Math[max ? "max" : "min"](scale.x, scale.y);
-  this.moveCameraTo((bounds.maxs.x + bounds.mins.x) * 0.5, (bounds.maxs.y + bounds.mins.y) * 0.5);
-};
-Runner.prototype.fitCameraToWorld = function(max = false) {
-  this.fitCameraToBounds(this.world.getBounds(), max);
-};
-Runner.prototype.validateCameraBounds = function(x, y) {
-  var pos = new vec22(x, y);
-  var rw2 = this.renderer.width * 0.5;
-  var rh2 = this.renderer.height * 0.5;
-  var scale = this.camera.scale * meter2pixel(1);
-  var wx = pos.x / scale;
-  var wy = pos.y / scale;
-  var minX = (wx - this.camera.minX) * scale < rw2;
-  var maxX = (this.camera.maxX - wx) * scale < rw2;
-  var minY = (wy - this.camera.minY) * scale < rh2;
-  var maxY = (this.camera.maxY - wy) * scale < rh2;
-  if (minX && maxX)
-    pos.x = (this.camera.maxX + this.camera.minX) * 0.5 * scale;
-  else {
-    if (minX)
-      pos.x = this.camera.minX * scale + rw2;
-    if (maxX)
-      pos.x = this.camera.maxX * scale - rw2;
-  }
-  if (minY && maxY)
-    pos.y = (this.camera.maxY + this.camera.minY) * 0.5 * scale;
-  else {
-    if (minY)
-      pos.y = this.camera.minY * scale + rh2;
-    if (maxY)
-      pos.y = this.camera.maxY * scale - rh2;
-  }
-  return pos;
-};
-Runner.prototype.restrictCameraToBounds = function(bounds, max = false, scaleFactor = 4) {
-  this.camera.minX = bounds.mins.x;
-  this.camera.maxX = bounds.maxs.x;
-  this.camera.minY = bounds.mins.y;
-  this.camera.maxY = bounds.maxs.y;
-  var scale_v = new vec22(
-    this.renderer.width / meter2pixel(1) / (bounds.maxs.x - bounds.mins.x),
-    this.renderer.height / meter2pixel(1) / (bounds.maxs.y - bounds.mins.y)
-  );
-  this.camera.minScale = Math[max ? "max" : "min"](scale_v.x, scale_v.y);
-  this.camera.maxScale = this.camera.minScale * scaleFactor;
-  this.camera.scale = Clamp(this.camera.scale, this.camera.minScale, this.camera.maxScale);
-  this.camera.origin = this.validateCameraBounds(
-    this.camera.origin.x,
-    this.camera.origin.y
-  );
-  this.redraw();
-};
-Runner.prototype.restrictCameraToWorld = function(max = false, scaleFactor = 4) {
-  this.restrictCameraToBounds(this.world.getBounds(), max, scaleFactor);
-};
-Runner.prototype.resetCameraRestriction = function() {
-  this.camera.minX = -Infinity;
-  this.camera.maxX = Infinity;
-  this.camera.minY = -Infinity;
-  this.camera.minScale = 0.1;
-  this.camera.maxScale = 10;
-  this.redraw();
-};
-Runner.prototype.moveCameraTo = function(x, y) {
-  this.camera.origin = this.validateCameraBounds(
-    x * this.camera.scale * meter2pixel(1),
-    y * this.camera.scale * meter2pixel(1)
-  );
-  this.redraw();
 };
 Runner.prototype.on = function(event, callback) {
   if (!events.includes(event))
@@ -4027,7 +3927,7 @@ PrismaticJoint2.prototype.getReactionTorque = function(dt_inv) {
 };
 
 // src/renderers/CanvasRenderer.js
-function drawLine2(ctx, p1, p2, lineWidth, strokeStyle) {
+function drawLine(ctx, p1, p2, lineWidth, strokeStyle) {
   ctx.beginPath();
   ctx.moveTo(p1.x, p1.y);
   ctx.lineTo(p2.x, p2.y);
@@ -4035,7 +3935,7 @@ function drawLine2(ctx, p1, p2, lineWidth, strokeStyle) {
   ctx.strokeStyle = strokeStyle;
   ctx.stroke();
 }
-function drawBox2(ctx, center, rvec, uvec, lineWidth, strokeStyle, fillStyle, Newton) {
+function drawBox(ctx, center, rvec, uvec, lineWidth, strokeStyle, fillStyle, Newton) {
   ctx.beginPath();
   var l = Newton.vec2.sub(center, rvec);
   var r = Newton.vec2.add(center, rvec);
@@ -4059,7 +3959,7 @@ function drawBox2(ctx, center, rvec, uvec, lineWidth, strokeStyle, fillStyle, Ne
     ctx.stroke();
   }
 }
-function drawCircle2(ctx, center, radius, angle, lineWidth, strokeStyle, fillStyle, Newton) {
+function drawCircle(ctx, center, radius, angle, lineWidth, strokeStyle, fillStyle, Newton) {
   ctx.beginPath();
   ctx.arc(center.x, center.y, radius, 0, Math.PI * 2, false);
   if (fillStyle) {
@@ -4077,7 +3977,7 @@ function drawCircle2(ctx, center, radius, angle, lineWidth, strokeStyle, fillSty
     ctx.stroke();
   }
 }
-function drawSegment2(ctx, a, b, radius, lineWidth, strokeStyle, fillStyle, Newton) {
+function drawSegment(ctx, a, b, radius, lineWidth, strokeStyle, fillStyle, Newton) {
   ctx.beginPath();
   var dn = Newton.vec2.normalize(Newton.vec2.perp(Newton.vec2.sub(b, a)));
   var start_angle = dn.toAngle();
@@ -4101,7 +4001,7 @@ function drawSegment2(ctx, a, b, radius, lineWidth, strokeStyle, fillStyle, Newt
     ctx.stroke();
   }
 }
-function drawPolygon2(ctx, verts, lineWidth, strokeStyle, fillStyle) {
+function drawPolygon(ctx, verts, lineWidth, strokeStyle, fillStyle) {
   ctx.beginPath();
   ctx.moveTo(verts[0].x, verts[0].y);
   for (var i = 0; i < verts.length; i++) {
@@ -4137,16 +4037,16 @@ function CanvasRenderer(Newton, canvas) {
 CanvasRenderer.prototype.drawShape = function(shape, isStatic, lineWidth, outlineColor, fillColor) {
   switch (shape.type) {
     case this.Newton.Shape.TYPE_CIRCLE:
-      drawCircle2(isStatic ? this.bg.ctx : this.fg.ctx, shape.tc, shape.r, shape.body.a, lineWidth, outlineColor, fillColor, this.Newton);
+      drawCircle(isStatic ? this.bg.ctx : this.fg.ctx, shape.tc, shape.r, shape.body.a, lineWidth, outlineColor, fillColor, this.Newton);
       break;
     case this.Newton.Shape.TYPE_SEGMENT:
-      drawSegment2(isStatic ? this.bg.ctx : this.fg.ctx, shape.ta, shape.tb, shape.r, lineWidth, outlineColor, fillColor, this.Newton);
+      drawSegment(isStatic ? this.bg.ctx : this.fg.ctx, shape.ta, shape.tb, shape.r, lineWidth, outlineColor, fillColor, this.Newton);
       break;
     case this.Newton.Shape.TYPE_POLY:
       if (shape.convexity)
-        drawPolygon2(isStatic ? this.bg.ctx : this.fg.ctx, shape.tverts, lineWidth, outlineColor, fillColor);
+        drawPolygon(isStatic ? this.bg.ctx : this.fg.ctx, shape.tverts, lineWidth, outlineColor, fillColor);
       else
-        drawPolygon2(isStatic ? this.bg.ctx : this.fg.ctx, shape.tverts, lineWidth, outlineColor, fillColor);
+        drawPolygon(isStatic ? this.bg.ctx : this.fg.ctx, shape.tverts, lineWidth, outlineColor, fillColor);
       break;
   }
 };
@@ -4188,12 +4088,12 @@ CanvasRenderer.prototype.resize = function() {
 CanvasRenderer.prototype.drawHelperJointAnchors = function(p1, p2, radius, lineWidth, jointAnchorColor) {
   var rvec = new this.Newton.vec2(radius, 0);
   var uvec = new this.Newton.vec2(0, radius);
-  drawBox2(this.fg.ctx, p1, rvec, uvec, 0, "", jointAnchorColor, this.Newton);
-  drawBox2(this.fg.ctx, p2, rvec, uvec, 0, "", jointAnchorColor, this.Newton);
-  drawLine2(this.fg.ctx, p1, p2, lineWidth, jointAnchorColor);
+  drawBox(this.fg.ctx, p1, rvec, uvec, 0, "", jointAnchorColor, this.Newton);
+  drawBox(this.fg.ctx, p2, rvec, uvec, 0, "", jointAnchorColor, this.Newton);
+  drawLine(this.fg.ctx, p1, p2, lineWidth, jointAnchorColor);
 };
 CanvasRenderer.prototype.drawLine = function(p1, p2, lineWidth, strokeStyle) {
-  drawLine2(this.fg.ctx, p1, p2, lineWidth, strokeStyle);
+  drawLine(this.fg.ctx, p1, p2, lineWidth, strokeStyle);
 };
 
 // src/renderers/two.min.js
@@ -8290,27 +8190,11 @@ function TwoRenderer(Newton, canvas) {
   this.two.add(this.stage);
   this.joints_group = new two_min_default.Group();
   this.stage.add(this.joints_group);
-  var rect = this.two.makeRectangle(-4.4, 2, 12, 6);
-  rect.stroke = "#aaaaaa";
-  rect.fill = "none";
-  rect.linewidth = 0.2;
-  this.stage.add(rect);
   this.camera = new two_min_default.Camera(this.stage, this.two.renderer.domElement, this);
   this.camera.setScaleLimits(10, 1e3);
   this.resize();
   this.camera.translateSurface(this.width / 2, this.height / 2);
   this.camera.zoomSet(35, this.width / 2, this.height / 2);
-  this.camera.moveCameraTo(-4.4, 3);
-  this.camera.setWorldLimits({
-    mins: {
-      x: -12 / 2 - 4.4,
-      y: -6 / 2 + 2
-    },
-    maxs: {
-      x: 12 / 2 - 4.4,
-      y: 6 / 2 + 2
-    }
-  }, false, 4);
 }
 TwoRenderer.prototype.resize = function() {
   var dx = this.canvas.offsetWidth - (this.width || this.canvas.offsetWidth);
@@ -8369,6 +8253,10 @@ TwoRenderer.prototype.addBody = function(body) {
   this.stage.add(body.render_group);
   for (var k = 0; k < body.shapeArr.length; k++) {
     var shape = body.shapeArr[k];
+    if (shape.createRenderEntity) {
+      shape.createRenderEntity(body.render_group, shape, body);
+      continue;
+    }
     switch (shape.type) {
       case this.Newton.Shape.TYPE_CIRCLE:
         this.createCircle(body.render_group, shape, body);
@@ -8475,59 +8363,6 @@ TwoRenderer.prototype.updateJoint = function(joint) {
     b.x = p2.x;
     b.y = p2.y;
   }
-};
-TwoRenderer.prototype.drawShape = function(shape, isStatic, lineWidth, outlineColor, fillColor) {
-  return;
-  switch (shape.type) {
-    case this.Newton.Shape.TYPE_CIRCLE:
-      drawCircle(isStatic ? this.bg.ctx : this.fg.ctx, shape.tc, shape.r, shape.body.a, lineWidth, outlineColor, fillColor, this.Newton);
-      break;
-    case this.Newton.Shape.TYPE_SEGMENT:
-      drawSegment(isStatic ? this.bg.ctx : this.fg.ctx, shape.ta, shape.tb, shape.r, lineWidth, outlineColor, fillColor, this.Newton);
-      break;
-    case this.Newton.Shape.TYPE_POLY:
-      if (shape.convexity)
-        drawPolygon(isStatic ? this.bg.ctx : this.fg.ctx, shape.tverts, lineWidth, outlineColor, fillColor);
-      else
-        drawPolygon(isStatic ? this.bg.ctx : this.fg.ctx, shape.tverts, lineWidth, outlineColor, fillColor);
-      break;
-  }
-};
-TwoRenderer.prototype.copyBackground = function(x, y, w, h, x1, y1, w1, h1) {
-  return;
-  this.fg.ctx.drawImage(this.bg.canvas, x, y, w, h, x1, y1, w1, h1);
-};
-TwoRenderer.prototype.beginStatic = function(camera, backgroundColor) {
-  return;
-  this.bg.ctx.fillStyle = backgroundColor;
-  this.bg.ctx.fillRect(0, 0, this.width, this.height);
-  this.bg.ctx.save();
-  this.bg.ctx.setTransform(camera.scale * this.Newton.meter2pixel(1), 0, 0, -(camera.scale * this.Newton.meter2pixel(1)), this.width * 0.5 - camera.origin.x, this.height * 0.5 + camera.origin.y);
-};
-TwoRenderer.prototype.endStatic = function() {
-  return;
-  this.bg.ctx.restore();
-};
-TwoRenderer.prototype.beginDynamic = function(camera) {
-  return;
-  this.fg.ctx.save();
-  this.fg.ctx.setTransform(camera.scale * this.Newton.meter2pixel(1), 0, 0, -(camera.scale * this.Newton.meter2pixel(1)), this.width * 0.5 - camera.origin.x, this.height * 0.5 + camera.origin.y);
-};
-TwoRenderer.prototype.endDynamic = function() {
-  return;
-  this.fg.ctx.restore();
-};
-TwoRenderer.prototype.drawHelperJointAnchors = function(p1, p2, radius, lineWidth, jointAnchorColor) {
-  return;
-  var rvec = new this.Newton.vec2(radius, 0);
-  var uvec = new this.Newton.vec2(0, radius);
-  drawBox(this.fg.ctx, p1, rvec, uvec, 0, "", jointAnchorColor, this.Newton);
-  drawBox(this.fg.ctx, p2, rvec, uvec, 0, "", jointAnchorColor, this.Newton);
-  drawLine(this.fg.ctx, p1, p2, lineWidth, jointAnchorColor);
-};
-TwoRenderer.prototype.drawLine = function(p1, p2, lineWidth, strokeStyle) {
-  return;
-  drawLine(this.fg.ctx, p1, p2, lineWidth, strokeStyle);
 };
 
 // src/utils/animate.js

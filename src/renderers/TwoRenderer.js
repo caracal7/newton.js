@@ -44,14 +44,14 @@ function TwoRenderer(Newton, canvas) {
 	this.joints_group = new Two.Group();
 	this.stage.add(this.joints_group);
 
-
+/*
 //	var rect = this.two.makeRectangle(-5, 2, 10, 10);
 	var rect = this.two.makeRectangle(-4.4, +2, 12, 6);
 	rect.stroke = '#aaaaaa';
 	rect.fill ='none'
 	rect.linewidth = 0.2;
 	this.stage.add(rect);
-
+*/
 
 
 	this.camera = new Two.Camera(this.stage, this.two.renderer.domElement, this);
@@ -63,7 +63,7 @@ function TwoRenderer(Newton, canvas) {
 	this.camera.zoomSet(35, this.width / 2, this.height / 2);
 
 
-	this.camera.moveCameraTo(-4.4, 3);
+//	this.camera.moveCameraTo(-4.4, 3);
 /*
 	this.camera.setWorldLimits({
 		mins: {
@@ -76,7 +76,7 @@ function TwoRenderer(Newton, canvas) {
 		}
 	}, false, 4);
 */
-
+/*
 	this.camera.setWorldLimits({
 		mins: {
 			x: -12/2 -4.4,
@@ -87,7 +87,7 @@ function TwoRenderer(Newton, canvas) {
 			y: 6/2 +2
 		}
 	}, false, 4);
-
+*/
 
 
 
@@ -160,6 +160,10 @@ TwoRenderer.prototype.addBody = function(body) {
 
 	for (var k = 0; k < body.shapeArr.length; k++) {
 		var shape = body.shapeArr[k];
+		if(shape.createRenderEntity) {
+			shape.createRenderEntity(body.render_group, shape, body);
+			continue;
+		}
 		switch (shape.type) {
 			case this.Newton.Shape.TYPE_CIRCLE:
 				this.createCircle(body.render_group, shape, body);
@@ -282,68 +286,7 @@ TwoRenderer.prototype.updateJoint = function(joint) {
 	}
 }
 
-TwoRenderer.prototype.drawShape = function(shape, isStatic, lineWidth, outlineColor, fillColor) {
-	return;
-	switch (shape.type) {
-		case this.Newton.Shape.TYPE_CIRCLE:
-			drawCircle(isStatic ? this.bg.ctx : this.fg.ctx, shape.tc, shape.r, shape.body.a, lineWidth, outlineColor, fillColor, this.Newton);
-			break;
-		case this.Newton.Shape.TYPE_SEGMENT:
-			drawSegment(isStatic ? this.bg.ctx : this.fg.ctx, shape.ta, shape.tb, shape.r, lineWidth, outlineColor, fillColor, this.Newton);
-			break;
-		case this.Newton.Shape.TYPE_POLY:
-			if (shape.convexity)
-			     drawPolygon(isStatic ? this.bg.ctx : this.fg.ctx, shape.tverts, lineWidth, outlineColor, fillColor);
-			else drawPolygon(isStatic ? this.bg.ctx : this.fg.ctx, shape.tverts, lineWidth, outlineColor, fillColor);
-			break;
-	}
-}
 
-TwoRenderer.prototype.copyBackground = function(x, y, w, h, x1, y1, w1, h1) {
-	return;
-	this.fg.ctx.drawImage(this.bg.canvas, x, y, w, h, x1, y1, w1, h1);
-};
-
-TwoRenderer.prototype.beginStatic = function(camera, backgroundColor) {
-	return;
-	this.bg.ctx.fillStyle = backgroundColor;
-	this.bg.ctx.fillRect(0, 0, this.width, this.height);
-	this.bg.ctx.save();
-	this.bg.ctx.setTransform(camera.scale * this.Newton.meter2pixel(1), 0, 0, -(camera.scale * this.Newton.meter2pixel(1)), this.width * 0.5 - camera.origin.x, this.height * 0.5 + camera.origin.y);
-}
-
-TwoRenderer.prototype.endStatic = function() {
-	return;
-	this.bg.ctx.restore();
-};
-
-
-TwoRenderer.prototype.beginDynamic = function(camera) {
-	return;
-	this.fg.ctx.save();
-	this.fg.ctx.setTransform(camera.scale * this.Newton.meter2pixel(1), 0, 0, -(camera.scale * this.Newton.meter2pixel(1)), this.width * 0.5 - camera.origin.x, this.height * 0.5 + camera.origin.y);
-};
-
-TwoRenderer.prototype.endDynamic = function() {
-	return;
-	this.fg.ctx.restore();
-};
-
-
-
-TwoRenderer.prototype.drawHelperJointAnchors = function(p1, p2, radius, lineWidth, jointAnchorColor) {
-	return;
-	var rvec = new this.Newton.vec2(radius, 0);
-	var uvec = new this.Newton.vec2(0, radius);
-	drawBox(this.fg.ctx, p1, rvec, uvec, 0, "", jointAnchorColor, this.Newton);
-	drawBox(this.fg.ctx, p2, rvec, uvec, 0, "", jointAnchorColor, this.Newton);
-	drawLine(this.fg.ctx, p1, p2, lineWidth, jointAnchorColor);
-}
-
-TwoRenderer.prototype.drawLine = function(p1, p2, lineWidth, strokeStyle) {
-	return;
-	drawLine(this.fg.ctx, p1, p2, lineWidth, strokeStyle);
-}
 
 
 export {
