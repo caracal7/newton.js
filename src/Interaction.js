@@ -266,28 +266,38 @@ function Interaction(runner, settings) {
     var distance = 0;
     var dragging = false;
 
-/*
-    const startDrag = (x,y) => {
+
+    const startDrag = (x, y) => {
         // Remove previous mouse joint
         interaction.removeJoint();
 
         const world_pos = camera.screenToWorld(x, y);
-        const p = new vec2(world_pos.x, -world_pos.y);
+        const world_pos_vec = new vec2(world_pos.x, -world_pos.y);
         // If we picked shape then create mouse joint
-        dragging = runner.world.findBodyByPoint(p);
+        dragging = runner.world.findBodyByPoint(world_pos_vec);
 
-        if (dragging) {
-            if(dragging.isStatic()) return (dragging = undefined);
-
-            interaction.mouseBody.p.copy(p);
-            interaction.mouseBody.syncTransform();
-            interaction.mouseJoint = new MouseJoint(interaction.mouseBody, dragging, p);
-            interaction.mouseJoint.maxForce = dragging.m * 50000;
-            runner.world.addJoint(interaction.mouseJoint);
+        var block = false;
+        if(this[Events]?.mousedown?.length) {
+            this[Events].mousedown.forEach(callback => {
+                if(callback(dragging, new vec2(x, y), world_pos_vec))
+                    block = true;
+            });
+            if(this.runner.pause) this.runner.drawFrame(0);
         }
-        return world_pos;
+
+        if(block) {
+            dragging = undefined;
+            this.state.mouseDown = false;
+        } else {
+            if (this.settings.pick && dragging) {
+                if(dragging.isStatic())
+                    dragging = undefined;
+                else
+                    createMouseJoint(world_pos_vec);
+        	}
+        }
     }
-*/
+
 
     const createMouseJoint = world_pos_vec => {
         interaction.mouseBody.p.copy(world_pos_vec);
@@ -305,34 +315,7 @@ function Interaction(runner, settings) {
         mouse.x = event.clientX;
         mouse.y = event.clientY;
 
-        // Remove previous mouse joint
-        interaction.removeJoint();
-
-        const world_pos = camera.screenToWorld(event.offsetX, event.offsetY);
-        const world_pos_vec = new vec2(world_pos.x, -world_pos.y);
-        // If we picked shape then create mouse joint
-        dragging = runner.world.findBodyByPoint(world_pos_vec);
-
-        var block = false;
-        if(this[Events]?.mousedown?.length) {
-            this[Events].mousedown.forEach(callback => {
-                if(callback(dragging, new vec2(event.offsetX, event.offsetY), world_pos_vec))
-                    block = true;
-            });
-            if(this.runner.pause) this.runner.drawFrame(0);
-        }
-
-        if(block) {
-            dragging = undefined;
-            this.state.mouseDown = false;
-        } else {
-            if (this.settings.pick && dragging) {
-                if(dragging.isStatic())
-                    dragging = undefined;
-                else
-                    createMouseJoint(world_pos_vec);
-        	}
-        }
+        startDrag(event.offsetX, event.offsetY);
     }
     //------------------------------ mousemove
     const mousemove = event => {
@@ -398,7 +381,7 @@ function Interaction(runner, settings) {
                 panstart(event)
                 break;
         }
-        e.preventDefault();
+        event.preventDefault();
     }
     //------------------------------ touchmove
     const touchmove = event => {
@@ -428,8 +411,10 @@ function Interaction(runner, settings) {
         var touch = event.touches[ 0 ];
         mouse.x = touch.clientX;
         mouse.y = touch.clientY;
+
         var rect = runner.renderer.canvas.getBoundingClientRect();
-        startDrag(touch.clientX - rect.left, touch.clientY - rect.top);
+        startDrag(mouse.x - rect.left, mouse.y - rect.top);
+
     }
     //------------------------------ panmove
     const panmove = event => {
