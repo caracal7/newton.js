@@ -382,7 +382,12 @@
                 item.opts.push({ type: "stringAttribute", key: a, value: b.slice(1, -1) });
               } else {
                 if (b.length) {
-                  item.opts.push({ type: "jsAttribute", key: a, value: b.endsWith("/") ? b.substring(0, b.length - 1) : b });
+                  const c = b.endsWith("/") ? b.substring(0, b.length - 1) : b;
+                  if (c.startsWith('"') && c.endsWith('"') || c.startsWith("`") && c.endsWith("`") || c.startsWith("'") && c.endsWith("'")) {
+                    item.opts.push({ type: "stringAttribute", key: a, value: c.slice(1, -1) });
+                  } else {
+                    item.opts.push({ type: "jsAttribute", key: a, value: c });
+                  }
                 } else {
                   if (!AAA.length) {
                     throw `ui.js template parse error: unxpected end of attribute "...${a}=" inside "<${tag}>" declaration`;
@@ -8147,7 +8152,7 @@ Parse Error: ${e.stack}`);
   }
 
   // src/index.js
-  var VERSION = "0.7.5-dev";
+  var VERSION = "0.7.6-dev";
   !VERSION.endsWith("-dev") && console.log(`ui.js \u2764\uFE0F ${VERSION} alpha experiment. Make user interfaces great again!`);
   var UIjs = {
     VERSION,
