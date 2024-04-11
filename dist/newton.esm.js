@@ -679,6 +679,7 @@ Shape.TYPE_SEGMENT = 1;
 Shape.TYPE_POLY = 2;
 Shape.NUM_TYPES = 3;
 Shape.prototype.translateTo = function(pos) {
+  console.warn("Unimplemented");
   switch (this.type) {
     case Shape.TYPE_CIRCLE:
       console.warn("Shape.TYPE_CIRCLE.translateTo: TODO tests", pos);
@@ -706,9 +707,9 @@ Shape.prototype.translateTo = function(pos) {
   this.body.cacheData();
 };
 Shape.prototype.translateWithDelta = function(delta) {
+  console.warn("Unimplemented");
   switch (this.type) {
     case Shape.TYPE_CIRCLE:
-      console.log(this.body.a.toFixed(2), delta.x.toFixed(2), delta.y.toFixed(2));
       var wc = vec2.add(this.tc, delta);
       this.c.copy(this.body.getLocalPoint(wc));
       break;
@@ -721,8 +722,6 @@ Shape.prototype.translateWithDelta = function(delta) {
     case Shape.TYPE_POLY:
       var transformCenter = this.body.p;
       var a = this.body.a;
-      console.log(this.body.a);
-      this.body.a = 0;
       for (var j = 0; j < this.tverts.length; j++) {
         var wv = vec2.add(this.tverts[j], delta);
         this.verts[j].copy(this.body.getLocalPoint(wv));
