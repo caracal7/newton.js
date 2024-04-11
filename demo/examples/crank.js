@@ -19,10 +19,11 @@
 
 export default Newton => {
 
-	const { Body, ShapeBox, ShapeSegment, RevoluteJoint, PrismaticJoint, vec2, deg2rad } = Newton;
+	const { Body, ShapeBox, ShapeCircle, ShapeSegment, RevoluteJoint, PrismaticJoint, vec2, deg2rad } = Newton;
 
 	function init(world) {
 		const staticBody = new Body(Body.STATIC);
+
 		staticBody.addShape(new ShapeBox(0, 0.2, 20.48, 0.4));
 		staticBody.addShape(new ShapeBox(0, 15.16, 20.48, 0.4));
 		staticBody.addShape(new ShapeBox(-10.04, 7.68, 0.4, 14.56));

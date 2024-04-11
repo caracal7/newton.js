@@ -6,17 +6,56 @@
 <!static>
     const IS_TOUCH = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
 
+    function highlightShape(shape, colors) {
+        colors.fill = shape.render_entity.fill;
+        colors.stroke = shape.render_entity.stroke;
+        shape.render_entity.fill = colors.FILL;
+        shape.render_entity.stroke = colors.STROKE;
+    }
+
+    function unhighlightShape(shape, colors) {
+        shape.render_entity.fill = colors.fill;
+        shape.render_entity.stroke = colors.stroke;
+    }
+
 <!class>
     connected() {
-        const HOVER_COLOR = '#FFFF00';
-        const SELECTED_COLOR = '#FF0000';
-
-        this.interaction = this.state.runner.interaction;
+        this.selectedColors = {
+            fill: undefined,
+            stroke: undefined,
+            FILL: '#FF5522',
+            STROKE: 'black'
+        };
+        this.hoveredColors = {
+            fill: undefined,
+            stroke: undefined,
+            FILL: '#FF552255',
+            STROKE: '#00000055'
+        };
 
         this.mouseup = (body, screen, world, isMoved) => {
             if(!isMoved) {
-                this.selected = body && this.state.runner.world.findShapeByPoint(world);
-                this.state.runner.redraw();
+                if(body) {
+                    var shape = this.state.runner.world.findShapeByPoint(world);
+                    if(shape) {
+                        if(this.selected !== shape) {
+                            if(!IS_TOUCH) {
+                                if(this.hovered) unhighlightShape(this.hovered, this.hoveredColors);
+                                this.hovered = null;
+                            }
+                            if(this.selected) unhighlightShape(this.selected, this.selectedColors);
+                            this.selected = shape;
+                            this.selectedBody = body;
+                            highlightShape(shape, this.selectedColors);
+                        }
+                    } else {
+                        if(this.selected) unhighlightShape(this.selected, this.selectedColors);
+                        this.selected = null;
+                    }
+                } else {
+                    if(this.selected) unhighlightShape(this.selected, this.selectedColors);
+                    this.selected = null;
+                }
             }
             this.lastPos = undefined;
         };
@@ -33,35 +72,48 @@
                 var delta = new Newton.vec2(world.x - this.lastPos.x, world.y - this.lastPos.y);
                 this.selected.translateWithDelta(delta);
                 this.lastPos = world;
+
+                //set(body.p.x, body.p.y);
+                /*
+                this.selected.render_entity.position.set(
+                    this.selected.render_entity.position.x + delta.x,
+                    this.selected.render_entity.position.y + delta.y,
+                )*/
+
+
+            	this.state.runner.renderer.removeBody(this.selectedBody);
+            	this.state.runner.renderer.addBody(this.selectedBody);
+
+                //console.log(this.selected);
+
+                //this.state.runner.redraw();
             }
-            this.hovered = this.state.runner.world.findShapeByPoint(world);
-        }
-
-        this.beforeRenderFrame = () => this.state.runner.initFrame();
-
-        this.beforeRenderShape = (shape, colors) => {
-            if(shape === this.selected) {
-                colors.outline = '#FFFFFF';
-                colors.body = SELECTED_COLOR;
-            } else {
-                if(shape === this.hovered && !IS_TOUCH) {
-                    colors.body = HOVER_COLOR;
+            if(!IS_TOUCH) {
+                var hovered = this.state.runner.world.findShapeByPoint(world);
+                if(this.selected && this.selected === hovered) hovered = null;
+                if(hovered) {
+                    if(this.hovered !== hovered) {
+                        if(this.hovered) unhighlightShape(this.hovered, this.hoveredColors);
+                        this.hovered = hovered;
+                        highlightShape(hovered, this.hoveredColors);
+                    }
+                } else {
+                    if(this.hovered) unhighlightShape(this.hovered, this.hoveredColors);
+                    this.hovered = null;
                 }
             }
-        };
+        }
 
-
-        if(!IS_TOUCH) this.state.runner.on('beforeRenderFrame', this.beforeRenderFrame);
-        this.state.runner.on('beforeRenderShape', this.beforeRenderShape);
-        this.interaction.on('mouseup', this.mouseup);
-        this.interaction.on('mousedown', this.mousedown);
-        this.interaction.on('mousemove', this.mousemove);
+        this.state.runner.interaction.on('mouseup', this.mouseup);
+        this.state.runner.interaction.on('mousedown', this.mousedown);
+        this.state.runner.interaction.on('mousemove', this.mousemove);
     }
+
     disconnected() {
-        if(!IS_TOUCH) this.state.runner.off('beforeRenderFrame', this.beforeRenderFrame);
-        this.state.runner.off('beforeRenderShape', this.beforeRenderShape);
-        this.interaction.off('mouseup', this.mouseup);
-        this.interaction.off('mousedown', this.mousedown);
-        this.interaction.off('mousemove', this.mousemove);
-        this.state.runner.redraw();
+        if(this.hovered) unhighlightShape(this.hovered, this.hoveredColors);
+        if(this.selected) unhighlightShape(this.selected, this.selectedColors);
+
+        this.state.runner.interaction.off('mouseup', this.mouseup);
+        this.state.runner.interaction.off('mousedown', this.mousedown);
+        this.state.runner.interaction.off('mousemove', this.mousemove);
     }

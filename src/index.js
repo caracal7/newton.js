@@ -1,8 +1,8 @@
-import { Runner }       from "./Runner.js";
-import { Interaction }  from "./Interaction.js";
+import { Runner }           from "./Runner.js";
+import { Interaction }      from "./Interaction.js";
 
-import { World }        from "./World.js";
-import { Body }         from "./Body.js";
+import { World }            from "./World.js";
+import { Body }             from "./Body.js";
 
 import { Shape }                                from "./shapes/shape.js";
 import { ShapeCircle }                          from "./shapes/shape_circle.js";
@@ -18,12 +18,13 @@ import { DistanceJoint }    from "./joints/joint_distance.js";
 import { RevoluteJoint }    from './joints/joint_revolute.js';
 import { PrismaticJoint }   from './joints/joint_prismatic.js';
 
-import { collision } from "./utils/collision.js";
-import { stats } from "./utils/stats.js";
+import { collision }        from "./utils/collision.js";
+import { stats }            from "./utils/stats.js";
 
 import { Bounds, pixel2meter, meter2pixel, vec2, deg2rad } from './utils/math.js';
 
-import { CanvasRenderer } from "./renderers/CanvasRenderer.js";
+//import { CanvasRenderer }   from "./renderers/CanvasRenderer.js";
+import { TwoRenderer }      from "./renderers/TwoRenderer.js";
 
 import { animate, animateBatch, easings } from "./utils/animate.js";
 
@@ -59,7 +60,8 @@ export {
     vec2,
     deg2rad,
 
-    CanvasRenderer,
+//    CanvasRenderer,
+    TwoRenderer,
 
     animate,
     animateBatch,
@@ -98,7 +100,8 @@ export default {
     vec2,
     deg2rad,
 
-    CanvasRenderer,
+//    CanvasRenderer,
+    TwoRenderer,
 
     animate,
     animateBatch,

@@ -1,22 +1,83 @@
 <!import Newton from ../../dist/newton.esm.js>
 
+
+<button text('fitCameraToBounds') @click{
+    /*
+    console.log('fitCameraToBounds button', !!this.SELECTED )
+    if(this.SELECTED) {
+        this.state.runner.renderer.camera.fitCameraToBounds(this.state.runner.world.getBounds());
+    }*/
+    this.state.runner.renderer.camera.setWorldLimits({
+        mins: {
+            x: -4.4 - 12/2,
+            y: 3 - 7/2
+        },
+        maxs: {
+            x: -4.4 + 12/2,
+            y: 3 + 7/2
+        }
+    }, false, 4);
+
+
+} style{ 'z-index': 10000, position: 'absolute' }/>
+
+
 <!state>
     runner: undefined
 
 <!static>
     const IS_TOUCH = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
 
+    function higlightBody(body, colors) {
+        colors.fill.length = 0;
+        colors.stroke.length = 0;
+        body.render_group.children.forEach(entity => {
+            colors.fill.push(entity.fill);
+            colors.stroke.push(entity.stroke);
+            entity.fill   = colors.FILL;
+            entity.stroke = colors.STROKE;
+        });
+    }
+
+    function unhiglightBody(body, colors) {
+        body.render_group.children.forEach((entity, index) => {
+            entity.fill   = colors.fill[index];
+            entity.stroke = colors.stroke[index];
+        });
+    }
+
 <!class>
     connected() {
-        const HOVER_COLOR = '#FFFF00';
-        const SELECTED_COLOR = '#FF0000';
-
-        this.interaction = this.state.runner.interaction;
+        this.selectedColors = {
+            fill: [],
+            stroke: [],
+            FILL: '#FF5522',
+            STROKE: 'black'
+        };
+        this.hoveredColors = {
+            fill: [],
+            stroke: [],
+            FILL: '#FF552255',
+            STROKE: '#00000055'
+        };
 
         this.mouseup = (body, screen, world, isMoved) => {
             if(!isMoved) {
-                this.selected = body;
-                this.state.runner.redraw();
+                if(body) {
+                    if(this.selected !== body) {
+                        if(!IS_TOUCH) {
+                            if(this.hovered) unhiglightBody(this.hovered, this.hoveredColors);
+                            this.hovered = null;
+                        }
+                        if(this.selected) unhiglightBody(this.selected, this.selectedColors);
+                        this.selected = body;
+                        this.SELECTED = body;
+                        higlightBody(body, this.selectedColors);
+                    }
+                } else {
+                    if(this.selected) unhiglightBody(this.selected, this.selectedColors);
+                    this.selected = null;
+                }
             }
             this.lastPos = undefined;
         };
@@ -34,33 +95,32 @@
                 this.selected.translateWithDelta(delta);
                 this.lastPos = world;
             }
-            this.hovered = this.state.runner.world.findBodyByPoint(world);
-        }
-
-        this.beforeRenderFrame = () => this.state.runner.initFrame();
-
-        this.beforeRenderBody = (body, colors) => {
-            if(body === this.selected) {
-                colors.outline = '#FFFFFF';
-                colors.body = SELECTED_COLOR;
-            } else {
-                if(body === this.hovered && !IS_TOUCH) {
-                    colors.body = HOVER_COLOR;
+            if(!IS_TOUCH) {
+                var hovered = this.state.runner.world.findBodyByPoint(world);
+                if(this.selected && this.selected === hovered) hovered = null;
+                if(hovered) {
+                    if(this.hovered !== hovered) {
+                        if(this.hovered) unhiglightBody(this.hovered, this.hoveredColors);
+                        this.hovered = hovered;
+                        higlightBody(hovered, this.hoveredColors);
+                    }
+                } else {
+                    if(this.hovered) unhiglightBody(this.hovered, this.hoveredColors);
+                    this.hovered = null;
                 }
             }
-        };
+        }
 
-        if(!IS_TOUCH) this.state.runner.on('beforeRenderFrame', this.beforeRenderFrame);
-        this.state.runner.on('beforeRenderBody', this.beforeRenderBody);
-        this.interaction.on('mouseup', this.mouseup);
-        this.interaction.on('mousedown', this.mousedown);
-        this.interaction.on('mousemove', this.mousemove);
+        this.state.runner.interaction.on('mouseup', this.mouseup);
+        this.state.runner.interaction.on('mousedown', this.mousedown);
+        this.state.runner.interaction.on('mousemove', this.mousemove);
     }
+
     disconnected() {
-        if(!IS_TOUCH) this.state.runner.off('beforeRenderFrame', this.beforeRenderFrame);
-        this.state.runner.off('beforeRenderBody', this.beforeRenderBody);
-        this.interaction.off('mouseup', this.mouseup);
-        this.interaction.off('mousedown', this.mousedown);
-        this.interaction.off('mousemove', this.mousemove);
-        this.state.runner.redraw();
+        if(this.hovered)  unhiglightBody(this.hovered, this.hoveredColors);
+        if(this.selected) unhiglightBody(this.selected, this.selectedColors);
+
+        this.state.runner.interaction.off('mouseup', this.mouseup);
+        this.state.runner.interaction.off('mousedown', this.mousedown);
+        this.state.runner.interaction.off('mousemove', this.mousemove);
     }

@@ -25,11 +25,12 @@ function Interaction(runner, settings) {
     this.state = {
         mouseDown:          false,
         pointerDownMoving:  false,
+        /*
         mouseDownPosition:  new vec2(),
         mousePositionOld:   new vec2(),
         touchPosOld:        new Array(2),
         touchDist:          undefined,
-        gestureStartScale:  undefined,
+        gestureStartScale:  undefined,*/
     };
 
     this.mouseJoint = null;
@@ -37,7 +38,7 @@ function Interaction(runner, settings) {
     this.mouseBody = new Body(Body.KINETIC);
     this.mouseBody.resetMassData();
     this.runner.world.addBody(this.mouseBody);
-
+    /*
     //------------------------------ mousedown
     this.mousedown = event => {
         var pos = this.getMousePosition(event);
@@ -238,6 +239,7 @@ function Interaction(runner, settings) {
     	else if (this[event.type]) this[event.type](event);
     	event.preventDefault();
     }
+
     //-------------------------------------------------------------------
     ["mousedown", "mousemove", "mouseup", "mouseleave", "mousewheel"]
         .forEach(event => this.runner.renderer.canvas.addEventListener(event, this[event]));
@@ -246,17 +248,243 @@ function Interaction(runner, settings) {
     this.runner.renderer.canvas.addEventListener("touchmove",   this.touchHandler);
     this.runner.renderer.canvas.addEventListener("touchend",    this.touchHandler);
     this.runner.renderer.canvas.addEventListener("touchcancel", this.touchHandler);
-
+    */
     this[Events] = {};
+
+    if(!this.runner.renderer.two) return; // Временно
+
+
+
+    var renderer =  this.runner.renderer;
+    var interaction = this;
+
+    const { Two, two, stage, camera } = renderer;
+
+    var domElement = two.renderer.domElement;
+    var mouse = new Two.Vector();
+    var touches = {};
+    var distance = 0;
+    var dragging = false;
+
+
+    const startDrag = (x, y) => {
+        // Remove previous mouse joint
+        interaction.removeJoint();
+
+        const world_pos = camera.screenToWorld(x, y);
+        const world_pos_vec = new vec2(world_pos.x, -world_pos.y);
+        // If we picked shape then create mouse joint
+        dragging = runner.world.findBodyByPoint(world_pos_vec);
+
+        var block = false;
+        if(this[Events]?.mousedown?.length) {
+            this[Events].mousedown.forEach(callback => {
+                if(callback(dragging, new vec2(x, y), world_pos_vec))
+                    block = true;
+            });
+            if(this.runner.pause) this.runner.drawFrame(0);
+        }
+
+        if(block) {
+            dragging = undefined;
+            this.state.mouseDown = false;
+        } else {
+            if (this.settings.pick && dragging) {
+                if(dragging.isStatic())
+                    dragging = undefined;
+                else
+                    createMouseJoint(world_pos_vec);
+        	}
+        }
+    }
+
+
+    const createMouseJoint = world_pos_vec => {
+        interaction.mouseBody.p.copy(world_pos_vec);
+        interaction.mouseBody.syncTransform();
+        interaction.mouseJoint = new MouseJoint(interaction.mouseBody, dragging, world_pos_vec);
+        interaction.mouseJoint.maxForce = dragging.m * 50000;
+        runner.world.addJoint(interaction.mouseJoint);
+    }
+
+    //------------------------------ mousedown
+    const mousedown = event => {
+        this.state.mouseDown = true;
+        this.state.pointerDownMoving = false;
+
+        mouse.x = event.clientX;
+        mouse.y = event.clientY;
+
+        startDrag(event.offsetX, event.offsetY);
+    }
+    //------------------------------ mousemove
+    const mousemove = event => {
+        if (this.state.mouseDown) {
+            this.state.pointerDownMoving = true;
+            if (dragging) {
+                const world_pos = camera.screenToWorld(event.offsetX, event.offsetY);
+                const world_pos_vec = new vec2(world_pos.x, -world_pos.y);
+                interaction.mouseBody.p.copy(world_pos_vec);
+                interaction.mouseBody.syncTransform();
+            } else {
+                var dx = event.clientX - mouse.x;
+                var dy = event.clientY - mouse.y;
+                camera.translateSurface(dx, dy);
+                mouse.set(event.clientX, event.clientY);
+            }
+        }
+
+        if(this[Events]?.mousemove?.length) {
+            const rect = runner.renderer.canvas.getBoundingClientRect();
+            const world_pos = camera.screenToWorld(event.offsetX, event.offsetY);
+            const world_pos_vec = new vec2(world_pos.x, -world_pos.y);
+            this[Events].mousemove.forEach(callback => callback(new vec2(event.offsetX, event.offsetY), world_pos_vec));
+            if(this.runner.pause) this.runner.drawFrame(0);
+        };
+    }
+    //------------------------------ mouseup
+    const mouseup = event => {
+        if(this[Events]?.mouseup?.length) {
+            const rect = runner.renderer.canvas.getBoundingClientRect();
+            var x = event.offsetX - rect.left;
+            var y = event.offsetY - rect.top;
+            const world_pos = camera.screenToWorld(x, y);
+            const world_pos_vec = new vec2(world_pos.x, -world_pos.y);
+            this[Events].mouseup.forEach(callback => callback(
+                event.type == 'mouseleave' ? undefined : runner.world.findBodyByPoint(world_pos_vec),
+                new vec2(x, y), world_pos_vec, this.state.pointerDownMoving
+            ));
+        };
+
+        this.state.mouseDown = false;
+        interaction.removeJoint();
+    }
+    //------------------------------ mouseleave
+    const mouseleave = event => {
+        mouseup(event)
+    }
+
+    //------------------------------ mousewheel
+    const mousewheel = event => {
+        var dy = (event.wheelDeltaY || - event.deltaY) / 1000;
+        var rect = domElement.getBoundingClientRect();
+        camera.zoomBy(dy, event.clientX - rect.left, event.clientY - rect.top);
+        event.preventDefault();
+    }
+    //------------------------------ touchstart
+    const touchstart = event => {
+        switch (event.touches.length) {
+            case 2:
+                pinchstart(event);
+                break;
+            case 1:
+                panstart(event)
+                break;
+        }
+        event.preventDefault();
+    }
+    //------------------------------ touchmove
+    const touchmove = event => {
+        switch (event.touches.length) {
+            case 2:
+                pinchmove(event);
+                break;
+            case 1:
+                panmove(event)
+                break;
+        }
+        event.preventDefault();
+    }
+    //------------------------------ touchend
+    const touchend = event => {
+        interaction.removeJoint();
+        touches = {};
+        var touch = event.touches[0];
+        if (touch) {  // Pass through for panning after pinching
+            mouse.x = touch.clientX;
+            mouse.y = touch.clientY;
+        }
+        event.preventDefault();
+    }
+    //------------------------------ panstart
+    const panstart = event => {
+        var touch = event.touches[ 0 ];
+        mouse.x = touch.clientX;
+        mouse.y = touch.clientY;
+
+        var rect = runner.renderer.canvas.getBoundingClientRect();
+        startDrag(mouse.x - rect.left, mouse.y - rect.top);
+
+    }
+    //------------------------------ panmove
+    const panmove = event => {
+        var touch = event.touches[0];
+        if (dragging) {
+            const rect = runner.renderer.canvas.getBoundingClientRect();
+            const world_pos = camera.screenToWorld(touch.clientX - rect.left, touch.clientY - rect.top);
+            const p = new vec2(world_pos.x, -world_pos.y);
+            interaction.mouseBody.p.copy(p);
+            interaction.mouseBody.syncTransform();
+        } else {
+            var dx = touch.clientX - mouse.x;
+            var dy = touch.clientY - mouse.y;
+            camera.translateSurface(dx, dy);
+            mouse.set(touch.clientX, touch.clientY);
+        }
+    }
+    //------------------------------ pinchstart
+    const pinchstart = event => {
+        var [a, b] = event.touches;
+        var dx = b.clientX - a.clientX;
+        var dy = b.clientY - a.clientY;
+        distance = Math.sqrt(dx * dx + dy * dy);
+        mouse.x = dx / 2 + a.clientX;
+        mouse.y = dy / 2 + a.clientY;
+    }
+    //------------------------------ pinchmove
+    const pinchmove = event => {
+        var [a, b] = event.touches;
+
+        var dx = b.clientX - a.clientX;
+        var dy = b.clientY - a.clientY;
+
+        var mx = dx / 2 + a.clientX;
+        var my = dy / 2 + a.clientY;
+        camera.translateSurface(mx - mouse.x, my - mouse.y);
+        mouse.x = mx;
+        mouse.y = my;
+
+        var d = Math.sqrt(dx * dx + dy * dy);
+        var delta = d - distance;
+        var rect = domElement.getBoundingClientRect();
+        camera.zoomBy(delta / 250, mouse.x - rect.left, mouse.y - rect.top);
+        distance = d;
+    }
+
+    domElement.addEventListener('mousedown', mousedown, false);
+    domElement.addEventListener('mouseleave', mouseleave, false);
+    domElement.addEventListener('mousewheel', mousewheel, false);
+    domElement.addEventListener('wheel', mousewheel, false);
+
+    domElement.addEventListener('touchstart', touchstart, false);
+    domElement.addEventListener('touchmove', touchmove, false);
+    domElement.addEventListener('touchend', touchend, false);
+    domElement.addEventListener('touchcancel', touchend, false);
+
+    domElement.addEventListener('mousemove', mousemove, false);
+
+    window.addEventListener('mouseup', mouseup, false);
 }
 
 Interaction.prototype.destroy = function() {
+    /*
     ["mousedown", "mousemove", "mouseup", "mouseleave", "mousewheel"]
         .forEach(event => this.runner.renderer.canvas.removeEventListener(event, this[event]));
     this.runner.renderer.canvas.removeEventListener("touchstart",  this.touchHandler);
     this.runner.renderer.canvas.removeEventListener("touchmove",   this.touchHandler);
     this.runner.renderer.canvas.removeEventListener("touchend",    this.touchHandler);
     this.runner.renderer.canvas.removeEventListener("touchcancel", this.touchHandler);
+    */
     this.removeJoint();
     this.runner.world.removeBody(this.mouseBody);
 }
@@ -266,24 +494,6 @@ Interaction.prototype.removeJoint = function() {
         this.runner.world.removeJoint(this.mouseJoint);
         this.mouseJoint = null;
     }
-}
-
-Interaction.prototype.getMousePosition = function(event) {
-	return new vec2(event.offsetX, event.offsetY);
-}
-
-Interaction.prototype.getTouchPosition = function(event) {
-    var rect = this.runner.renderer.canvas.getBoundingClientRect();
-	return new vec2(event.clientX - rect.left, event.clientY - rect.top);
-}
-
-Interaction.prototype.scrollView = function(dx, dy) {
-    this.runner.camera.origin = this.runner.validateCameraBounds(
-        this.runner.camera.origin.x + dx,
-        this.runner.camera.origin.y + dy
-    );
-    this.runner.dirtyBoundsToFullscreen();
-	this.runner.static_outdated = true;
 }
 
 Interaction.prototype.on = function(event, callback) {
@@ -301,6 +511,25 @@ Interaction.prototype.off = function(event, callback) {
     if(index !== -1) this[Events][event].splice(index, 1);
 }
 
+/*
+Interaction.prototype.getMousePosition = function(event) {
+	return new vec2(event.offsetX, event.offsetY);
+}
+
+Interaction.prototype.getTouchPosition = function(event) {
+    var rect = this.runner.renderer.canvas.getBoundingClientRect();
+	return new vec2(event.clientX - rect.left, event.clientY - rect.top);
+}
+
+Interaction.prototype.scrollView = function(dx, dy) {
+    this.runner.camera.origin = this.runner.validateCameraBounds(
+        this.runner.camera.origin.x + dx,
+        this.runner.camera.origin.y + dy
+    );
+    this.runner.dirtyBoundsToFullscreen();
+	this.runner.static_outdated = true;
+}
+*/
 
 export {
     Interaction

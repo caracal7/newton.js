@@ -13,7 +13,6 @@
         <button>Vertices</button>
         <button>Joints</button>
     </@buttons-group>
-
     <button class="play" @click=this.emit("play") text("Play")/>
 </header>
 

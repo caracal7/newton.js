@@ -44,14 +44,12 @@ vec2.prototype.toString = function() {
 vec2.prototype.set = function(x, y) {
 	this.x = x;
 	this.y = y;
-
 	return this;
 }
 
 vec2.prototype.copy = function(v) {
 	this.x = v.x;
 	this.y = v.y;
-
 	return this;
 }
 
@@ -66,42 +64,36 @@ vec2.prototype.equal = function(v) {
 vec2.prototype.add = function(v1, v2) {
 	this.x = v1.x + v2.x;
 	this.y = v1.y + v2.y;
-
 	return this;
 }
 
 vec2.prototype.addself = function(v) {
 	this.x += v.x;
 	this.y += v.y;
-
 	return this;
 }
 
 vec2.prototype.sub = function(v1, v2) {
 	this.x = v1.x - v2.x;
 	this.y = v1.y - v2.y;
-
 	return this;
 }
 
 vec2.prototype.subself = function(v) {
 	this.x -= v.x;
 	this.y -= v.y;
-
 	return this;
 }
 
 vec2.prototype.scale = function(s) {
 	this.x *= s;
 	this.y *= s;
-
 	return this;
 }
 
 vec2.prototype.scale2 = function(s) {
 	this.x *= s.x;
 	this.y *= s.y;
-
 	return this;
 }
 
@@ -113,14 +105,12 @@ vec2.prototype.mad = function(v, s) {
 vec2.prototype.neg = function() {
 	this.x *= -1;
 	this.y *= -1;
-
 	return this;
 }
 
 vec2.prototype.rcp = function() {
 	this.x = 1 / this.x;
 	this.y = 1 / this.y;
-
 	return this;
 }
 
@@ -136,7 +126,6 @@ vec2.prototype.normalize = function() {
 	var inv = (this.x != 0 || this.y != 0) ? 1 / Math.sqrt(this.x * this.x + this.y * this.y) : 0;
 	this.x *= inv;
 	this.y *= inv;
-
 	return this;
 }
 
@@ -253,10 +242,7 @@ vec2.lerp = function(v1, v2, t) {
 vec2.truncate = function(v, length) {
 	var ret = v.duplicate();
 	var length_sq = v.x * v.x + v.y * v.y;
-	if (length_sq > length * length) {
-		ret.scale(length / Math.sqrt(length_sq));
-	}
-
+	if (length_sq > length * length) ret.scale(length / Math.sqrt(length_sq));
 	return ret;
 }
 

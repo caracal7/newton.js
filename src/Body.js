@@ -20,73 +20,50 @@
 import { vec2, Transform, Bounds, Clamp } from './utils/math.js';
 
 const Body = function(type, pos, angle) {
-	if (Body.id_counter == undefined) {
-		Body.id_counter = 0;
-	}
+	if (Body.id_counter == undefined) Body.id_counter = 0;
 
 	this.id = Body.id_counter++;
-
 	// Identifier
 	this.name = "body" + this.id;
-
 	// STATIC or DYNAMIC
 	this.type = type;
-
 	// Default values
 	pos = pos || new vec2(0, 0);
 	angle = angle || 0;
-
 	// Local to world transform
 	this.xf = new Transform(pos, angle);
-
 	// Local center of mass
 	this.centroid = new vec2(0, 0);
-
 	// World position of centroid
 	this.p = new vec2(pos.x, pos.y);
-
 	// Velocity
 	this.v = new vec2(0, 0);
-
 	// Force
 	this.f = new vec2(0, 0);
-
 	// Orientation (angle)
 	this.a = angle;
-
 	// Angular velocity
 	this.w = 0;
-
 	// Torque
 	this.t = 0;
-
 	// Linear damping
 	this.linearDamping = 0;
-
 	// Angular damping
 	this.angularDamping = 0;
-
 	// Sleep time
 	this.sleepTime = 0;
-
 	// Awaked flag
 	this.awaked = false;
-
 	// Shape list for this body
 	this.shapeArr = [];
-
 	// Joint list and hash for this body
 	this.jointArr = [];
 	this.jointHash = {};
-
 	// Bounds of all shapes
 	this.bounds = new Bounds;
-
 	this.fixedRotation = false;
-
 	this.categoryBits = 0x0001;
 	this.maskBits = 0xFFFF;
-
 	this.stepCount = 0;
 }
 
@@ -96,27 +73,23 @@ Body.DYNAMIC = 2;
 
 Body.prototype.duplicate = function() {
 	var body = new Body(this.type, this.xf.t, this.a);
-	for (var i = 0; i < this.shapeArr.length; i++) {
+	for (var i = 0; i < this.shapeArr.length; i++)
 		body.addShape(this.shapeArr[i].duplicate());
-	}
 	body.resetMassData();
-
 	return body;
 }
 
 Body.prototype.serialize = function() {
 	var shapes = [];
-	for (var i = 0; i < this.shapeArr.length; i++) {
-		var obj = this.shapeArr[i].serialize();
-		shapes.push(obj);
-	}
+	for (var i = 0; i < this.shapeArr.length; i++)
+		shapes.push(this.shapeArr[i].serialize());
 
 	return {
-		"type": ["static", "kinetic", "dynamic"][this.type],
-		"name": this.name,
-		"position": this.xf.t,
-		"angle": this.xf.a,
-		"shapes": shapes
+		type: 		["static", "kinetic", "dynamic"][this.type],
+		name: 		this.name,
+		position: 	this.xf.t,
+		angle: 		this.xf.a,
+		shapes: 	shapes
 	};
 }
 
@@ -133,16 +106,12 @@ Body.prototype.isKinetic = function() {
 }
 
 Body.prototype.setType = function(type) {
-	if (type == this.type) {
-		return;
-	}
-
+	if (type == this.type) return;
 	this.f.set(0, 0);
 	this.v.set(0, 0);
 	this.t = 0;
 	this.w = 0;
 	this.type = type;
-
 	this.awake(true);
 }
 
@@ -254,13 +223,9 @@ Body.prototype.resetMassData = function() {
 Body.prototype.resetJointAnchors = function() {
 	for (var i = 0; i < this.jointArr.length; i++) {
 		var joint = this.jointArr[i];
-		if (!joint) {
-			continue;
-		}
-
+		if (!joint) continue;
 		var anchor1 = joint.getWorldAnchor1();
 		var anchor2 = joint.getWorldAnchor2();
-
 		joint.setWorldAnchor1(anchor1);
 		joint.setWorldAnchor2(anchor2);
 	}
@@ -268,7 +233,6 @@ Body.prototype.resetJointAnchors = function() {
 
 Body.prototype.cacheData = function() {
 	this.bounds.clear();
-
 	for (var i = 0; i < this.shapeArr.length; i++) {
 		var shape = this.shapeArr[i];
 		shape.cacheData(this.xf);
@@ -289,7 +253,6 @@ Body.prototype.updateVelocity = function(gravity, dt, damping) {
 	// v2 = (1.0f - c * dt) * v1
 	this.v.scale(Clamp(1 - dt * (damping + this.linearDamping), 0, 1));
 	this.w *= Clamp(1 - dt * (damping + this.angularDamping), 0, 1);
-
 	this.f.set(0, 0);
 	this.t = 0;
 }
@@ -305,54 +268,34 @@ Body.prototype.resetForce = function() {
 }
 
 Body.prototype.applyForce = function(force, p) {
-	if (!this.isDynamic())
-		return;
-
-	if (!this.isAwake())
-		this.awake(true);
-
+	if (!this.isDynamic()) return;
+	if (!this.isAwake()) this.awake(true);
 	this.f.addself(force);
 	this.t += vec2.cross(vec2.sub(p, this.p), force);
 }
 
 Body.prototype.applyForceToCenter = function(force) {
-	if (!this.isDynamic())
-		return;
-
-	if (!this.isAwake())
-		this.awake(true);
-
+	if (!this.isDynamic()) return;
+	if (!this.isAwake()) this.awake(true);
 	this.f.addself(force);
 }
 
 Body.prototype.applyTorque = function(torque) {
-	if (!this.isDynamic())
-		return;
-
-	if (!this.isAwake())
-		this.awake(true);
-
+	if (!this.isDynamic()) return;
+	if (!this.isAwake()) this.awake(true);
 	this.t += torque;
 }
 
 Body.prototype.applyLinearImpulse = function(impulse, p) {
-	if (!this.isDynamic())
-		return;
-
-	if (!this.isAwake())
-		this.awake(true);
-
+	if (!this.isDynamic()) return;
+	if (!this.isAwake()) this.awake(true);
 	this.v.mad(impulse, this.m_inv);
 	this.w += vec2.cross(vec2.sub(p, this.p), impulse) * this.i_inv;
 }
 
 Body.prototype.applyAngularImpulse = function(impulse) {
-	if (!this.isDynamic())
-		return;
-
-	if (!this.isAwake())
-		this.awake(true);
-
+	if (!this.isDynamic()) return;
+	if (!this.isAwake()) this.awake(true);
 	this.w += impulse * this.i_inv;
 }
 
@@ -380,21 +323,14 @@ Body.prototype.awake = function(flag) {
 }
 
 Body.prototype.isCollidable = function(other) {
-	if (this == other)
-		return false;
-
-	if (!this.isDynamic() && !other.isDynamic())
-		return false;
-
-	if (!(this.maskBits & other.categoryBits) || !(other.maskBits & this.categoryBits))
-		return false;
+	if (this == other) return false;
+	if (!this.isDynamic() && !other.isDynamic()) return false;
+	if (!(this.maskBits & other.categoryBits) || !(other.maskBits & this.categoryBits)) return false;
 
 	for (var i = 0; i < this.jointArr.length; i++) {
 		var joint = this.jointArr[i];
 		if (!joint) continue;
-		if (!joint.collideConnected && other.jointHash[joint.id] != undefined) {
-			return false;
-		}
+		if (!joint.collideConnected && other.jointHash[joint.id] != undefined) return false;
 	}
 
 	return true;

@@ -10,13 +10,6 @@
     box-sizing: border-box;
 }
 
-canvas {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: calc(100% - 42px);
-}
-
 button.edit {
     position: absolute;
     right: 15px;
@@ -31,4 +24,15 @@ button.edit {
     box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.1), inset -1px -1px 0 rgba(0, 0, 0, 0.1);
     vertical-align: middle;
     cursor: pointer;
+}
+
+main {
+    position:absolute;
+    width: calc(100% - 300px);
+    right: 250px;
+    height: calc(100% - 42px);
+    bottom: 0;
+    overflow: hidden;
+    border: 0px solid green;
+    background: #eeeeee;
 }

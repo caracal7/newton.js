@@ -81,7 +81,7 @@ export default Newton => {
 		wheel1Body.resetMassData();
 		world.addBody(wheel1Body);
 
-		var joint = new WheelJoint(carBody, wheel1Body, new vec2(-8.5, 5), new vec2(-8.5, 4.9));
+		var joint = new WheelJoint(carBody, wheel1Body, new vec2(-8.5, 5.1), new vec2(-8.5, 4.9));
 		joint.setSpringFrequencyHz(12);
 		joint.setSpringDampingRatio(0.1);
 		joint.collideConnected = false;

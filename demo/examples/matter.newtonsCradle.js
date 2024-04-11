@@ -1,13 +1,12 @@
 
 
-function newtonsCradle(Newton, world, staticBody, xx, yy, number, size, length, e = 1) {
+function newtonsCradle(Newton, world, staticBody, _x, _y, number, size, length, e = 1) {
     var body;
     for (var i = 0; i < number; i++) {
         var separation = 1.9;
-		body = new Newton.Body(Newton.Body.DYNAMIC, new Newton.vec2(
-			xx + i * (size * separation),
-			yy - length
-		));
+        var x = _x + i * (size * separation);
+        var y = _y - length;
+		body = new Newton.Body(Newton.Body.DYNAMIC, new Newton.vec2(x, y));
 		const shape = new Newton.ShapeCircle(0, 0, size);
 		shape.e = e;
 		shape.u = 1;
@@ -18,16 +17,13 @@ function newtonsCradle(Newton, world, staticBody, xx, yy, number, size, length, 
 
 
 		var joint = new Newton.RopeJoint(staticBody, body,
-			new Newton.vec2(xx + i * (size * separation), yy),
-			new Newton.vec2(xx + i * (size * separation), yy - length),
+			new Newton.vec2(x, _y),
+			new Newton.vec2(x, y),
 		);
 		joint.collideConnected = false;
 		world.addJoint(joint);
-
     }
     body.v.x = 3;
-
-    console.log(body);
 };
 
 
@@ -42,7 +38,7 @@ export default Newton => {
 		world.addBody(staticBody);
 
 		newtonsCradle(Newton, world, staticBody, -5, 10, 5, 0.3, 2);
-		newtonsCradle(Newton, world, staticBody, 0, 10, 8, 0.5, 5,  0.8);
+		newtonsCradle(Newton, world, staticBody,  0, 10, 8, 0.5, 5, 0.8);
 
 	}
 

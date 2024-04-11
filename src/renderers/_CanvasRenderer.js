@@ -362,6 +362,12 @@ CanvasRenderer.prototype.endStatic = function() {
 	this.bg.ctx.restore();
 };
 
+CanvasRenderer.prototype.addBody = function() {};
+CanvasRenderer.prototype.removeBody = function() {};
+CanvasRenderer.prototype.updateBody = function() {};
+CanvasRenderer.prototype.addJoint = function() {}
+CanvasRenderer.prototype.removeJoint = function() {}
+CanvasRenderer.prototype.updateJoint = function() {}
 
 CanvasRenderer.prototype.beginDynamic = function(camera) {
 	this.fg.ctx.save();
