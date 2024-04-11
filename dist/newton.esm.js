@@ -708,6 +708,7 @@ Shape.prototype.translateTo = function(pos) {
 Shape.prototype.translateWithDelta = function(delta) {
   switch (this.type) {
     case Shape.TYPE_CIRCLE:
+      console.log(this.body.a.toFixed(2), delta.x.toFixed(2), delta.y.toFixed(2));
       var wc = vec2.add(this.tc, delta);
       this.c.copy(this.body.getLocalPoint(wc));
       break;

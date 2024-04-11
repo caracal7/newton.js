@@ -66,11 +66,7 @@ export default Newton => {
 		shape.u = 1.0;
 		shape.density = 2;
 
-		var shape2 = new ShapePoly([new vec2(-0.96, 2.5), new vec2(-0.76, 1), new vec2(0.76, 0), new vec2(0.96, 0.7), new vec2(0, 1.48)]);
-		shape2.e = 0.4;
-		shape2.u = 1.0;
-		shape2.density = 2;
-		body.addShape(shape2);
+
 
 		body.addShape(shape);
 		body.resetMassData();

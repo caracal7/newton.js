@@ -6,6 +6,7 @@
 
 <!class>
     connected() {
+        /*
         const LINE_WIDTH = this.state.runner.PIXEL_UNIT * 3;
         const HOVER_COLOR = '#FFFF00';
         const SELECTED_COLOR = '#FF0000';
@@ -50,10 +51,13 @@
         this.interaction.on('mousemove', this.mousemove);
         this.interaction.on('mouseup', this.mouseup);
         this.state.runner.on('afterRenderFrame', this.afterRenderFrame);
+        */
     }
     disconnected() {
+        /*
         this.interaction.off('mousemove', this.mousemove);
         this.interaction.off('mouseup', this.mouseup);
         this.state.runner.off('afterRenderFrame', this.afterRenderFrame);
         this.state.runner.redraw();
+        */
     }

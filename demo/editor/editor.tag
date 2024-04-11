@@ -9,9 +9,9 @@
     <@buttons-group selected=state.selection_type @select{ state.selection_type = event.detail }>
         <button>Bodies</button>
         <button>Shapes</button>
-        <button>Edges</button>
-        <button>Vertices</button>
-        <button>Joints</button>
+        <button disabled>Edges</button>
+        <button disabled>Vertices</button>
+        <button disabled>Joints</button>
     </@buttons-group>
     <button class="play" @click=this.emit("play") text("Play")/>
 </header>
@@ -21,7 +21,7 @@
 <@edges  runner=state.runner if(state.selection_type == 'Edges')/>
 
 <!state>
-    selection_type: 'Bodies',
+    selection_type: 'Shapes',
     runner: undefined
 
 <!class>
