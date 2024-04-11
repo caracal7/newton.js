@@ -21,7 +21,7 @@ export default Newton => {
 
 	const { Body, ShapeCircle, ShapeTriangle, ShapeBox, ShapePoly, RevoluteJoint, WheelJoint, AngleJoint, WeldJoint, vec2, deg2rad } = Newton;
 
-	function init(world) {
+	function init(world, runner) {
 
 		var staticBody = new Body(Body.STATIC);
 		staticBody.addShape(new ShapeBox(-9.84, 5, 0.8, 2));
@@ -148,12 +148,11 @@ export default Newton => {
 				world.addJoint(joint);
 			}
 		}
+
+		runner.renderer.camera.moveCameraTo(0, 7);
 	}
 
 	return {
-		init: init,
-		camera: {
-			origin: new vec2(0, 400)
-		}
+		init: init
 	};
 };

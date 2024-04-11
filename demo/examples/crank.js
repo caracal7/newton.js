@@ -103,12 +103,11 @@ export default Newton => {
 		body.addShape(shape);
 		body.resetMassData();
 		world.addBody(body);
+		
+		runner.renderer.camera.moveCameraTo(0, 7);
 	}
 
 	return {
-		init: init,
-		camera: {
-			origin: new vec2(0, 400)
-		}
+		init: init
 	};
 };

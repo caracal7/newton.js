@@ -21,7 +21,7 @@ export default Newton => {
 
 	const { Body, ShapeBox, ShapeCircle, vec2 } = Newton;
 
-	function init(world) {
+	function init(world, runner) {
 		const staticBody = new Body(Body.STATIC);
 		staticBody.addShape(new ShapeBox(0, 0.2, 20.48, 0.4));
 		staticBody.addShape(new ShapeBox(0, 15.16, 20.48, 0.4));
@@ -40,12 +40,11 @@ export default Newton => {
 			body.resetMassData();
 			world.addBody(body);
 		}
+
+		runner.renderer.camera.moveCameraTo(0, 7);
 	}
 
 	return {
-		init: init,
-		camera: {
-			origin: new vec2(0, 400)
-		}
+		init: init
 	};
 };

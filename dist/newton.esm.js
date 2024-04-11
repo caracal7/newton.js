@@ -2521,18 +2521,18 @@ function Runner(renderer, app) {
     jointAnchorColor: "#11cf00"
   }, app.settings || {});
   const camera = this.camera = Object.assign({
-    origin: new vec2(0, 0),
-    scale: 1,
-    minScale: 0.1,
-    maxScale: 10,
-    minX: -Infinity,
-    maxX: Infinity,
-    minY: -Infinity,
-    maxY: Infinity,
-    fit: true,
-    bounds: new Bounds(),
-    scroll: new vec2(0, 0),
-    worldOrigin: {}
+    /*        origin: new vec2(0, 0),
+            scale: 1,
+            minScale: 0.1,
+            maxScale: 10,
+            minX: -Infinity,
+            maxX: Infinity,
+            minY: -Infinity,
+            maxY: Infinity,
+            fit: true,
+            bounds: new Bounds,
+            scroll: new vec2(0, 0),
+            worldOrigin: {}*/
   }, app.camera || {});
   const settings = {
     showJoints: true
@@ -2550,6 +2550,7 @@ function Runner(renderer, app) {
   this.resetScene();
   definePrivate(this, "app", App, (value) => {
     this[App] = value;
+    console.info(value);
     this.settings = Object.assign(this.settings, value.settings || {});
     this.camera = Object.assign(this.camera, value.camera || {});
     this.resetScene();
@@ -2588,7 +2589,7 @@ Runner.prototype.destroy = function() {
 Runner.prototype.resetScene = function() {
   this.world.clear();
   this.world.gravity.copy(this.settings.gravity);
-  this[App].init(this.world);
+  this[App].init(this.world, this);
   this.initFrame();
 };
 Runner.prototype.initFrame = function() {

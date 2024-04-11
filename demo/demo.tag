@@ -27,7 +27,7 @@
 <!import Rope           from examples/rope.js>
 <!import Web            from examples/web.js>
 <!import SeeSaw         from examples/seesaw.js>
-<!import NewtonsCradle  from examples/matter.newtonsCradle.js>
+<!import NewtonsCradle  from examples/newtonsCradle.js>
 
 <!tag @controls         controls>
 <!tag @editor           editor/editor>
@@ -67,13 +67,11 @@
 
         const firstApp      = Car(Newton);
 
-        // const renderer      = new CanvasRenderer(Newton, this.$('canvas'));
-
         const renderer      = new TwoRenderer(Newton, this.$('main'));
         const runner        = new Runner(renderer, firstApp);
         const interaction   = new Interaction(runner);
 
-        this.state.demos = { Car, Compound, Bounce, Circles, Crank, Pyramid, RagDoll, Rope, Web, SeeSaw, 'Matter - Newtons Cradle':NewtonsCradle };
+        this.state.demos = { Car, Compound, Bounce, Circles, Crank, Pyramid, RagDoll, Rope, Web, SeeSaw, NewtonsCradle };
         this.state.runner = runner;
         this.state.renderer = renderer;
         this.render();

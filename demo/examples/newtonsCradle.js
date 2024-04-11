@@ -31,7 +31,7 @@ export default Newton => {
 
 	const { Body, ShapeBox, RevoluteJoint, RopeJoint, vec2 } = Newton;
 
-	function init(world) {
+	function init(world, runners) {
 		var staticBody = new Body(Body.STATIC);
 		staticBody.addShape(new ShapeBox(0, 0.2, 20.48, 0.4));
 		staticBody.resetMassData();
@@ -40,14 +40,10 @@ export default Newton => {
 		newtonsCradle(Newton, world, staticBody, -5, 10, 5, 0.3, 2);
 		newtonsCradle(Newton, world, staticBody,  0, 10, 8, 0.5, 5, 0.8);
 
+        runner.renderer.camera.moveCameraTo(0, 7);
 	}
 
 	return {
-		init: init,
-		camera: {
-		//	scale: 0.01,
-			minScale: 0.01,
-			origin: new vec2(0, 400)
-		}
+		init: init
 	};
 };

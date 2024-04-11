@@ -51,7 +51,7 @@ function Runner(renderer, app) {
     }, app.settings || {});
 
     const camera = this.camera = Object.assign({
-        origin: new vec2(0, 0),
+/*        origin: new vec2(0, 0),
         scale: 1,
         minScale: 0.1,
         maxScale: 10,
@@ -62,7 +62,7 @@ function Runner(renderer, app) {
         fit: true,
         bounds: new Bounds,
         scroll: new vec2(0, 0),
-        worldOrigin: {}
+        worldOrigin: {}*/
     }, app.camera || {});
 
     const settings = {
@@ -89,6 +89,7 @@ function Runner(renderer, app) {
 
     definePrivate(this, 'app', App, value => {
         this[App] = value;
+        console.info(value)
         this.settings = Object.assign(this.settings, value.settings || {});
         this.camera = Object.assign(this.camera, value.camera || {});
         this.resetScene();
@@ -132,7 +133,7 @@ Runner.prototype.destroy = function() {
 Runner.prototype.resetScene = function() {
     this.world.clear();
     this.world.gravity.copy(this.settings.gravity);
-    this[App].init(this.world);
+    this[App].init(this.world, this);
     this.initFrame();
 }
 

@@ -21,7 +21,7 @@ export default Newton => {
 
 	const { Body, ShapeBox, RevoluteJoint, RopeJoint, vec2 } = Newton;
 
-	function init(world) {
+	function init(world, runner) {
 		var staticBody = new Body(Body.STATIC);
 		staticBody.addShape(new ShapeBox(0, 0.2, 20.48, 0.4));
 		staticBody.resetMassData();
@@ -70,12 +70,10 @@ export default Newton => {
 		var joint = new RopeJoint(staticBody, body[9], new vec2(0, 10), new vec2(9 * 0.8, 10));
 		joint.collideConnected = false;
 		world.addJoint(joint);
+		runner.renderer.camera.moveCameraTo(0, 7);
 	}
 
 	return {
-		init: init,
-		camera: {
-			origin: new vec2(0, 400)
-		}
+		init: init
 	};
 };

@@ -21,7 +21,7 @@ export default Newton => {
 
 	const { Body, ShapeBox, DistanceJoint, vec2 } = Newton;
 
-	function init(world) {
+	function init(world, runner) {
 		var staticBody = new Body(Body.STATIC);
 		staticBody.resetMassData();
 		world.addBody(staticBody);
@@ -101,12 +101,10 @@ export default Newton => {
 		joint8.setSpringFrequencyHz(2);
 		joint8.setSpringDampingRatio(0.1);
 		world.addJoint(joint8);
+		runner.renderer.camera.moveCameraTo(0, 7);
 	}
 
 	return {
-		init: init,
-		camera: {
-			origin: new vec2(0, 400)
-		}
+		init: init
 	};
 };
