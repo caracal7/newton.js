@@ -48,14 +48,12 @@
     }
 
     play() {
-        this.state.runner.pause = false;
-        this.state.edit = false;
+        this.state.runner.pause = this.state.edit = false;
         this.render();
     }
 
     edit() {
-        this.state.runner.pause = true;
-        this.state.edit = true;
+        this.state.runner.pause = this.state.edit = true;
         this.render();
     }
 

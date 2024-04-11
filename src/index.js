@@ -23,7 +23,7 @@ import { stats }            from "./utils/stats.js";
 
 import { Bounds, pixel2meter, meter2pixel, vec2, deg2rad } from './utils/math.js';
 
-import { CanvasRenderer }   from "./renderers/CanvasRenderer.js";
+//import { CanvasRenderer }   from "./renderers/CanvasRenderer.js";
 import { TwoRenderer }      from "./renderers/TwoRenderer.js";
 
 import { animate, animateBatch, easings } from "./utils/animate.js";
@@ -60,7 +60,7 @@ export {
     vec2,
     deg2rad,
 
-    CanvasRenderer,
+//    CanvasRenderer,
     TwoRenderer,
 
     animate,
@@ -100,7 +100,7 @@ export default {
     vec2,
     deg2rad,
 
-    CanvasRenderer,
+//    CanvasRenderer,
     TwoRenderer,
 
     animate,

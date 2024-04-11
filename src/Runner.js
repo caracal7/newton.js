@@ -8,8 +8,11 @@ import { stats }        from "./utils/stats.js";
 import { MouseJoint }   from "./joints/joint_mouse.js";
 import { Bounds, pixel2meter, meter2pixel, vec2, Clamp } from './utils/math.js';
 
+
+/*
 const HELPER_JOINT_ANCHOR_RADIUS = pixel2meter(2.5);
 const PIXEL_UNIT = pixel2meter(1);
+
 
 const randomColor = ["#BEB", "#48B", "#CAA", "#8D5", "#6BE", "#98D", "#E78", "#7BC", "#E9E", "#BCD", "#EB6", "#EE7"]; // Random colors for drawing bodies
 
@@ -17,7 +20,7 @@ function bodyColor(body) {
     if (!body.isDynamic())  return "#777";
     if (!body.isAwake())    return "#999";
     return randomColor[(body.id) % randomColor.length];
-}
+}*/
 
 //  Private variables
 const App       = Symbol("app");
@@ -33,7 +36,7 @@ function Runner(renderer, app) {
     this[App] = app;
     this[Events] = {};
 
-    this.PIXEL_UNIT = PIXEL_UNIT;
+//    this.PIXEL_UNIT = PIXEL_UNIT;
 
     this.settings = Object.assign({
         gravity: new vec2(0, -10),
@@ -42,8 +45,7 @@ function Runner(renderer, app) {
     	positionIterations: 4,
     	warmStarting: true,
     	allowSleep: true,
-    	enableDirtyBounds: true,
-    	showJoints: true,
+    //	enableDirtyBounds: true,
         backgroundColor: "rgb(95, 105, 118)",
     	jointAnchorColor: "#11cf00",
     }, app.settings || {});
@@ -63,10 +65,22 @@ function Runner(renderer, app) {
         worldOrigin: {}
     }, app.camera || {});
 
-    Object.defineProperty(this.camera.worldOrigin, 'x', { get() { return camera.origin.x / camera.scale / meter2pixel(1) } });
-    Object.defineProperty(this.camera.worldOrigin, 'y', { get() { return camera.origin.y / camera.scale / meter2pixel(1) } });
+    const settings = {
+    	showJoints: true,
+    }
 
-    this.dirtyBounds = new Bounds; // dirty bounds in world space
+    Object.defineProperty(this.settings, 'showJoints', {
+        get() { return settings.showJoints },
+        set(value) {
+            renderer.joints_group.visible = settings.showJoints = value;
+        }
+    });
+
+
+    //Object.defineProperty(this.camera.worldOrigin, 'x', { get() { return camera.origin.x / camera.scale / meter2pixel(1) } });
+    //Object.defineProperty(this.camera.worldOrigin, 'y', { get() { return camera.origin.y / camera.scale / meter2pixel(1) } });
+
+    //this.dirtyBounds = new Bounds; // dirty bounds in world space
 
     collision.init();
     this.world = new World(renderer);
