@@ -36,6 +36,10 @@
   "author": "Dmitrii Vasilev",
   "homepage": "newton.js.org",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/caracal7/newton.js"
+  },
   "devDependencies": {
     "browser-sync": "^3.0.2",
     "esbuild": "^0.20.1",
