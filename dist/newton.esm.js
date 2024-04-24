@@ -2550,7 +2550,6 @@ function Runner(renderer, app) {
   this.resetScene();
   definePrivate(this, "app", App, (value) => {
     this[App] = value;
-    console.info(value);
     this.settings = Object.assign(this.settings, value.settings || {});
     this.camera = Object.assign(this.camera, value.camera || {});
     this.resetScene();

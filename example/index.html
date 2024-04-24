@@ -1,41 +1,7 @@
-# newton.js
-
-Lightweight 2D rigid body physics engine based on [physicsRus](https://github.com/juhl/physicsRus/) by Lee Ju Hyung
-
-## Features
---------------
-
-- Iterative impulse based solver
-- Constraints/Joints
-- SAT collision detection
-- Supported shapes are circle, segment(thick rounded line segment), convex polygons
-- Build-in WebGL/SVG/Canvas renderer based on [Two.js](https://two.js.org)
-- Touch-friendly interactions manager
-- ES-modules / CommonJS / IIFE
-
-
-## Why?
---------------
-
-For educational purposes 🎓
-
-## Todo
---------------
-
-- Broad phase collision detection
-- CCD (Continuous Collision Detection)
-- World editor
-
-
-
-## Browser (IIFE)
-
-```javascript
-
 <!DOCTYPE html>
 <html>
 <head>
-    <script src="newton.js"></script>
+    <script src="../dist/newton.js"></script>
 </head>
 <body>
     <main style="width:800px;height:600px;"></main>
@@ -71,35 +37,7 @@ For educational purposes 🎓
         });
         const interaction   = new Interaction(runner);
 
-        runner.renderer.camera.moveCameraTo(0, 7);
+		runner.renderer.camera.moveCameraTo(0, 7);
     </script>
 </body>
 </html>
-
-
-```
-## Browser (ES modules)
-
-```
-import Newton from './newton.esm.js';
-
-//...
-
-```
-
-
-## Node.js
-
-### Installation
-
-```
-npm i newton.js
-```
-
-
-## License
---------------
-
-(The MIT License)
-
-Copyright (c) 2024 Dmitrii Vasilev

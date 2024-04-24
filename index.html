@@ -1,16 +1,120 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-  <link rel="icon" href="favicon.ico" type="image/x-icon"/>
-  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
   <title>Newton.js - JavaScript lightweight 2D rigid body physics engine</title>
-</head>
 
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Main CSS -->
+    <link rel="stylesheet" type="text/css" href="www/assets/style.css">
+
+    <!-- Magic -->
+    <script src="www/ui.js"></script>
+
+    <script type="module" src="src/iife.js"></script>
+    <style>
+        body {
+            background: #444;
+        }
+    </style>
+</head>
 <body>
-    <a href="demo/index.html">Demo</a>
+    <script type=ui index-header="www/tags/header"></script>
+    <script type=ui download-button="www/tags/download-button"></script>
+    <script type=ui site-footer="www/tags/footer"></script>
+    <script type=ui flex-cards=www/tags/flex-cards></script>
+    <script type=ui markdown-to-html=www/tags/markdown-it/markdown></script>
+    <script type=ui newton-demo=www/tags/newton-demo></script>
+
+
+    <!------------------------------------------------------------------------->
+
+    <index-header>
+        <b>newton</b><i>.js.org</i>
+        <p><strong>Lightweight</strong> JavaScript 2D rigid body physics engine</p>
+    </index-header>
+
+    <center>
+        <br>
+
+        <main>
+            <newton-demo></newton-demo>
+            <br>
+            <center>
+                <a href='/demo/index.html'>Other demos</a>
+            </center>
+        </main>
+
+        <hr>
+
+        <main>
+            <markdown-to-html url="README.md"></markdown-to-html>
+        </main>
+
+
+        <h2>Download</h2>
+
+        <h3>Core</h3>
+
+        <flex-cards>
+            <section>
+                <download-button href="dist/newton.core.js" color="rgb(99, 185, 113)">
+                    newton.core.js<br><i>IIFE</i> (142K)
+                </download-button><br>
+                <download-button href="dist/newton.core.min.js" color="rgb(99, 185, 113)">
+                    newton.core.min.js<br><i>IIFE minified</i> (79K)
+                </download-button>
+            </section>
+            <section>
+                <download-button href="dist/newton.core.cjs.js" color="rgb(113, 99, 185)">
+                    newton.core.cjs.js<br><i>CommonJS</i> (136K)
+                </download-button><br>
+                <download-button href="dist/newton.core.cjs.min.js" color="rgb(113, 99, 185)">
+                    newton.core.min.cjs.js<br><i>CommonJS minified</i> (80K)
+                </download-button>
+            </section>
+            <section>
+                <download-button href="dist/newton.core.esm.js" color="rgb(185, 99, 185)">
+                    newton.core.esm.js<br><i>ES module</i> (134K)
+                </download-button><br>
+                <download-button href="dist/newton.core.esm.min.js" color="rgb(185, 99, 185)">
+                    newton.core.esm.min.js<br><i>ES module minified</i> (79K)
+                </download-button>
+            </section>
+        </flex-cards>
+
+        <h3>Core + renderer</h3>
+
+        <flex-cards>
+            <section>
+                <download-button href="dist/newton.js" color="rgb(99, 185, 113)">
+                    newton.js<br><i>IIFE</i> (392K)
+                </download-button><br>
+                <download-button href="dist/newton.min.js" color="rgb(99, 185, 113)">
+                    newton.min.js<br><i>IIFE minified</i> (263K)
+                </download-button>
+            </section>
+            <section>
+                <download-button href="dist/newton.cjs.js" color="rgb(113, 99, 185)">
+                    newton.cjs.js<br><i>CommonJS</i> (377K)
+                </download-button><br>
+                <download-button href="dist/newton.cjs.min.js" color="rgb(113, 99, 185)">
+                    newton.cjs.js<br><i>CommonJS minified</i> (264K)
+                </download-button>
+            </section>
+            <section>
+                <download-button href="dist/newton.esm.js" color="rgb(185, 99, 185)">
+                    newton.esm.js<br><i>ES module</i> (376K)
+                </download-button><br>
+                <download-button href="dist/newton.esm.min.js" color="rgb(185, 99, 185)">
+                    newton.esm.min.js<br><i>ES module minified</i> (267K)
+                </download-button>
+            </section>
+        </flex-cards>
+
+    </center>
+
+    <site-footer></site-footer>
+
 </body>
 </html>

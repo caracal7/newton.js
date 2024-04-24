@@ -1,4 +1,3 @@
-import * as Physics     from './index.js';
 
 import { collision }    from "./utils/collision.js";
 import { World }        from "./World.js";
@@ -89,7 +88,7 @@ function Runner(renderer, app) {
 
     definePrivate(this, 'app', App, value => {
         this[App] = value;
-        console.info(value)
+        //console.info(value)
         this.settings = Object.assign(this.settings, value.settings || {});
         this.camera = Object.assign(this.camera, value.camera || {});
         this.resetScene();

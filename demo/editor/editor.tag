@@ -8,7 +8,7 @@
 <header if(!state.edit)>
     <@buttons-group selected=state.selection_type @select{ state.selection_type = event.detail }>
         <button>Bodies</button>
-        <button>Shapes</button>
+        <button disabled>Shapes</button>
         <button disabled>Edges</button>
         <button disabled>Vertices</button>
         <button disabled>Joints</button>
