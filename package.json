@@ -1,6 +1,6 @@
 {
   "name": "newton.js",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Javascript lightweight 2D rigid body physics engine",
   "main": "dist/newton.cjs.js",
   "browser": "dist/newton.esm.js",
@@ -34,7 +34,7 @@
     "box2d"
   ],
   "author": "Dmitrii Vasilev",
-  "homepage": "newton.js.org",
+  "homepage": "https://newton.js.org",
   "license": "MIT",
   "repository": {
     "type": "git",
