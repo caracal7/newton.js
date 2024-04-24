@@ -80,7 +80,8 @@ For educational purposes 🎓
 ```
 ## Browser (ES modules)
 
-```
+```javascript
+
 import Newton from './newton.esm.js';
 
 //...
