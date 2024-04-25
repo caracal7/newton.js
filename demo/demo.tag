@@ -65,7 +65,7 @@
     connected() {
         const { Runner, TwoRenderer, Interaction } = Newton;
 
-        const firstApp      = Compound(Newton);
+        const firstApp      = Car(Newton);
 
         const renderer      = new TwoRenderer(Newton, this.$('main'));
         const runner        = new Runner(renderer, firstApp);
