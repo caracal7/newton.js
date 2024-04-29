@@ -1,5 +1,5 @@
 
-<img @click{ window.location='https://github.com/caracal7/fast-ease' } src="/www/assets/github-corner-right.svg" alt="Fork me on GitHub">
+<img @click{ window.location='https://github.com/caracal7/newton.js' } src="/www/assets/github-corner-right.svg" alt="Fork me on GitHub">
 
 <!style>
     img {
